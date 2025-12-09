@@ -1,13 +1,13 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "Orchestrator",
-    "description": "Defines the request/response structures for the CabinCrew Orchestrator in draft version.",
     "version": "2025-02-01-draft",
+    "description": "Orchestrator request/response structures, including preflight, approval, workflow state and plan-token binding.",
     "type": "object",
     "properties": {
         "preflight_input": {
             "type": "object",
-            "description": "Input given to the policy engine before executing take-off or after computing flight-plan",
+            "description": "Input given to the preflight (policy) stage.",
             "properties": {
                 "workflow_id": {
                     "type": "string"
@@ -17,19 +17,16 @@
                 },
                 "mode": {
                     "type": "string",
-                    "enum": [
-                        "flight-plan",
-                        "take-off"
-                    ]
+                    "description": "flight-plan or take-off"
                 },
                 "engine_output": {
                     "type": "object",
-                    "description": "Raw EngineOutput object produced by the engine",
+                    "description": "Raw EngineOutput as emitted by the engine.",
                     "additionalProperties": true
                 },
                 "evidence": {
                     "type": "array",
-                    "description": "Subset of artifacts with role=evidence extracted from engine output",
+                    "description": "Subset of artifacts with role=evidence extracted from EngineOutput.",
                     "items": {
                         "type": "object",
                         "properties": {
@@ -52,7 +49,11 @@
                 },
                 "context": {
                     "type": "object",
-                    "description": "Opaque contextual information from prior workflow steps"
+                    "description": "Opaque contextual information from prior workflow steps."
+                },
+                "plan_token": {
+                    "$ref": "plan-token.schema.json#",
+                    "description": "Plan token object when evaluating take-off, or when validating a newly created plan."
                 }
             },
             "required": [
@@ -64,7 +65,7 @@
         },
         "preflight_output": {
             "type": "object",
-            "description": "The unified decision structure emitted by the Orchestrator after running OPA/ONNX policies.",
+            "description": "Unified decision structure emitted after OPA/ONNX evaluation.",
             "properties": {
                 "decision": {
                     "type": "string",
@@ -89,7 +90,7 @@
                 },
                 "requires": {
                     "type": "object",
-                    "description": "Human approval metadata when decision = REQUIRE_APPROVAL",
+                    "description": "Present when decision = REQUIRE_APPROVAL.",
                     "properties": {
                         "role": {
                             "type": "string"
@@ -106,7 +107,7 @@
         },
         "approval_request": {
             "type": "object",
-            "description": "Approval packet sent to a human approver UI or system.",
+            "description": "Approval packet sent to a human or approval system when decision = REQUIRE_APPROVAL.",
             "properties": {
                 "approval_id": {
                     "type": "string"
@@ -125,11 +126,12 @@
                 },
                 "engine_output": {
                     "type": "object",
-                    "description": "Full receipt from engine",
+                    "description": "EngineOutput receipt.",
                     "additionalProperties": true
                 },
                 "evidence": {
                     "type": "array",
+                    "description": "Evidence artifacts that influenced the decision.",
                     "items": {
                         "type": "object",
                         "properties": {
@@ -149,6 +151,10 @@
                             "hash"
                         ]
                     }
+                },
+                "plan_token_hash": {
+                    "type": "string",
+                    "description": "Hash of the plan-token object used to bind this approval to a specific plan (optional for flight-plan stage, required for take-off approvals)."
                 }
             },
             "required": [
@@ -161,7 +167,7 @@
         },
         "approval_response": {
             "type": "object",
-            "description": "Response from human approval system back to orchestrator.",
+            "description": "Response from the human approver or approval system.",
             "properties": {
                 "approval_id": {
                     "type": "string"
@@ -186,7 +192,7 @@
         },
         "workflow_state": {
             "type": "object",
-            "description": "Represents the orchestrator's state machine state.",
+            "description": "State machine snapshot for the orchestrator.",
             "properties": {
                 "state": {
                     "type": "string",
@@ -215,12 +221,17 @@
                         "REQUIRE_APPROVAL",
                         "DENY"
                     ],
-                    "description": "The last policy verdict applied"
+                    "description": "Last preflight policy decision."
+                },
+                "plan_token_hash": {
+                    "type": "string",
+                    "description": "If a flight-plan has been accepted, this stores the hash of its plan-token for later take-off validation."
                 }
             },
             "required": [
                 "state"
             ]
         }
-    }
+    },
+    "additionalProperties": false
 }

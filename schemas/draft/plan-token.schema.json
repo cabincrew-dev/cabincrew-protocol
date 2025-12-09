@@ -1,0 +1,59 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "PlanToken",
+    "version": "2025-02-01-draft",
+    "description": "Cryptographic binding between a flight-plan and its subsequent take-off.",
+    "type": "object",
+    "properties": {
+        "token": {
+            "type": "string",
+            "description": "Primary plan token identifier, e.g. SHA256 over all plan artifacts + context."
+        },
+        "artifacts": {
+            "type": "array",
+            "description": "Per-artifact hashes that contributed to this plan token.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "hash": {
+                        "type": "string"
+                    },
+                    "size": {
+                        "type": "number"
+                    }
+                },
+                "required": [
+                    "name",
+                    "hash"
+                ]
+            }
+        },
+        "engine_id": {
+            "type": "string",
+            "description": "Engine identity that produced this plan."
+        },
+        "protocol_version": {
+            "type": "string",
+            "description": "Engine protocol version used when this plan was produced."
+        },
+        "workspace_hash": {
+            "type": "string",
+            "description": "Hash of the workspace state when the plan was created."
+        },
+        "created_at": {
+            "type": "string",
+            "description": "Timestamp when the plan was created (RFC3339)."
+        }
+    },
+    "required": [
+        "token",
+        "artifacts",
+        "engine_id",
+        "protocol_version",
+        "workspace_hash"
+    ],
+    "additionalProperties": false
+}

@@ -1,0 +1,188 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Engine IO Specification",
+    "version": "2025-02-01-draft",
+    "description": "Defines EngineInput and EngineOutput for CabinCrew Engines. Engines emit only metadata; content is stored in artifact.json conforming to artifact.schema.json.",
+    "type": "object",
+    "properties": {
+        "EngineInput": {
+            "type": "object",
+            "description": "Input delivered via STDIN or CABINCREW_INPUT_FILE.",
+            "properties": {
+                "protocol_version": {
+                    "type": "string",
+                    "description": "Must match protocol version expected by orchestrator."
+                },
+                "mode": {
+                    "type": "string",
+                    "description": "Execution mode: 'flight-plan' (intent only) or 'take-off' (execute side effects)."
+                },
+                "meta": {
+                    "type": "object",
+                    "description": "Workflow metadata provided by orchestrator.",
+                    "properties": {
+                        "workflow_id": {
+                            "type": "string"
+                        },
+                        "step_id": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "workflow_id",
+                        "step_id"
+                    ]
+                },
+                "config": {
+                    "type": "object",
+                    "description": "User-specified configuration for this engine step."
+                },
+                "secrets": {
+                    "type": "object",
+                    "description": "Decrypted secrets explicitly allowed for this engine."
+                },
+                "allowed_secrets": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Whitelist of secrets engine is authorized to access."
+                },
+                "context": {
+                    "type": "object",
+                    "description": "Opaque state derived from prior workflow steps."
+                },
+                "orchestrator": {
+                    "type": "object",
+                    "description": "Execution metadata from orchestrator.",
+                    "properties": {
+                        "run_index": {
+                            "type": "number"
+                        },
+                        "workspace_hash": {
+                            "type": "string"
+                        },
+                        "artifacts_salt": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "expected_plan_token": {
+                    "type": "string",
+                    "description": "Used only during take-off. Must match the plan token generated during flight-plan. Omitted for flight-plan mode."
+                }
+            },
+            "required": [
+                "protocol_version",
+                "mode",
+                "meta",
+                "config"
+            ]
+        },
+        "EngineOutput": {
+            "type": "object",
+            "description": "Output delivered via STDOUT or CABINCREW_OUTPUT_FILE.",
+            "properties": {
+                "protocol_version": {
+                    "type": "string",
+                    "description": "Must equal EngineInput.protocol_version."
+                },
+                "engine_id": {
+                    "type": "string",
+                    "description": "Identity string of this engine (e.g. 'terraform-engine@1.0.0')."
+                },
+                "mode": {
+                    "type": "string",
+                    "description": "Echo of EngineInput.mode."
+                },
+                "receipt_id": {
+                    "type": "string",
+                    "description": "Unique identifier for this engine invocation."
+                },
+                "status": {
+                    "type": "string",
+                    "description": "Execution status: 'success' or 'failure'."
+                },
+                "error": {
+                    "type": "string",
+                    "description": "Error message when status = failure."
+                },
+                "warnings": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "diagnostics": {
+                    "type": "object",
+                    "description": "Optional debugging information produced by a deterministic engine."
+                },
+                "artifacts": {
+                    "type": "array",
+                    "description": "Metadata describing artifacts produced during this engine run.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "description": "Logical artifact identifier."
+                            },
+                            "role": {
+                                "type": "string",
+                                "description": "Artifact role, e.g. evidence, state, log. Free-form and engine-defined."
+                            },
+                            "path": {
+                                "type": "string",
+                                "description": "Relative path to artifact.json conforming to artifact.schema.json."
+                            },
+                            "hash": {
+                                "type": "string",
+                                "description": "SHA256 of artifact.json plus body.data if present."
+                            },
+                            "size": {
+                                "type": "number",
+                                "description": "Total byte size of artifact.json and body.data."
+                            }
+                        },
+                        "required": [
+                            "name",
+                            "role",
+                            "path",
+                            "hash"
+                        ]
+                    }
+                },
+                "metrics": {
+                    "type": "array",
+                    "description": "Key/value measurements produced by this engine run.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "value": {
+                                "type": "number"
+                            },
+                            "tags": {
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "plan_token": {
+                    "type": "string",
+                    "description": "A SHA256 hash referencing a plan-token.json file. Must be present in flight-plan mode; optional in take-off (take-off must validate expected_plan_token)."
+                }
+            },
+            "required": [
+                "protocol_version",
+                "engine_id",
+                "mode",
+                "receipt_id",
+                "status"
+            ]
+        }
+    },
+    "additionalProperties": false
+}

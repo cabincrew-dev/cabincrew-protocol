@@ -1,0 +1,57 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Artifact",
+    "version": "2025-02-01-draft",
+    "description": "Canonical artifact interface. Fully extensible: engines define their own artifact_type and action values.",
+    "type": "object",
+    "properties": {
+        "artifact_type": {
+            "type": "string",
+            "description": "Type of artifact (file, diff, patch, action, message, etc). Free-form and engine-defined."
+        },
+        "action": {
+            "type": "string",
+            "description": "Operation to perform with this artifact (create, update, delete, apply, execute, etc). Free-form and engine-defined."
+        },
+        "target": {
+            "type": "string",
+            "description": "Path, resource, or identifier this artifact applies to. Optional."
+        },
+        "mime": {
+            "type": "string",
+            "description": "MIME type describing content."
+        },
+        "body": {
+            "description": "Inline content for small artifacts.",
+            "oneOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "object"
+                },
+                {
+                    "type": "array"
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        },
+        "body_file": {
+            "type": "string",
+            "description": "Indicates an external data file within the artifact directory."
+        },
+        "metadata": {
+            "type": "object",
+            "description": "Arbitrary metadata. Optional.",
+            "additionalProperties": true
+        }
+    },
+    "required": [
+        "artifact_type",
+        "action",
+        "mime"
+    ],
+    "additionalProperties": false
+}
