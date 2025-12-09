@@ -1,0 +1,172 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "LLMGateway",
+    "version": "2025-02-01-draft",
+    "description": "Schema for the CabinCrew LLM Gateway. The gateway mediates LLM requests and responses, applies OPA/ONNX policies, performs model routing, and can require human approval. All audit logs must be emitted using audit-event.schema.json.",
+    "type": "object",
+    "properties": {
+        "GatewayRequest": {
+            "type": "object",
+            "description": "A request to an LLM intercepted by the gateway.",
+            "properties": {
+                "request_id": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string",
+                    "description": "Identity of the caller (engine, orchestrator, user-agent, etc)."
+                },
+                "model": {
+                    "type": "string",
+                    "description": "Requested model identifier (e.g., 'gpt-4.1', 'claude-3.5', 'github:code-llama')."
+                },
+                "provider": {
+                    "type": "string",
+                    "description": "Optional model provider (openai, anthropic, github, azure, local)."
+                },
+                "input": {
+                    "type": "object",
+                    "description": "LLM input payload (prompt, messages, tools, parameters).",
+                    "additionalProperties": true
+                },
+                "context": {
+                    "type": "object",
+                    "description": "Workflow or caller context. Free-form.",
+                    "additionalProperties": true
+                }
+            },
+            "required": [
+                "request_id",
+                "timestamp",
+                "model",
+                "input"
+            ]
+        },
+        "GatewayResponse": {
+            "type": "object",
+            "description": "Decision produced by the LLM gateway after policy evaluation, routing, rewriting, and/or require_approval.",
+            "properties": {
+                "request_id": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "decision": {
+                    "type": "string",
+                    "enum": [
+                        "allow",
+                        "warn",
+                        "deny",
+                        "require_approval"
+                    ]
+                },
+                "warnings": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "violations": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "approval": {
+                    "type": "object",
+                    "description": "Present only if decision = require_approval.",
+                    "properties": {
+                        "approval_id": {
+                            "type": "string"
+                        },
+                        "required_role": {
+                            "type": "string"
+                        },
+                        "reason": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "routed_model": {
+                    "type": "string",
+                    "description": "Optional new model that the request is routed to."
+                },
+                "rewritten_input": {
+                    "type": "object",
+                    "description": "If policies rewrite/redirect/change the prompt or model params.",
+                    "additionalProperties": true
+                },
+                "gateway_payload": {
+                    "type": "object",
+                    "description": "Optional diagnostic or operational metadata from the gateway.",
+                    "additionalProperties": true
+                }
+            },
+            "required": [
+                "request_id",
+                "timestamp",
+                "decision"
+            ]
+        },
+        "GatewayPolicyConfig": {
+            "type": "object",
+            "description": "OPA + ONNX policy configuration for the LLM Gateway.",
+            "properties": {
+                "opa_policies": {
+                    "type": "array",
+                    "description": "Paths or inline Rego policies applied to the LLM request or response.",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "onnx_models": {
+                    "type": "array",
+                    "description": "List of ONNX models used for classification, safety, bias detection, hallucination scoring, etc.",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "model_routing": {
+                    "type": "object",
+                    "description": "Rules for routing requests to specific models/providers.",
+                    "additionalProperties": {
+                        "type": "object",
+                        "description": "Each rule is free-form to allow custom routing logic."
+                    }
+                },
+                "rules": {
+                    "type": "array",
+                    "description": "High-level rule list. Free-form like in MCP gateway.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "match": {
+                                "type": "object",
+                                "description": "Pattern to match against model name, input content, metadata, etc.",
+                                "additionalProperties": true
+                            },
+                            "action": {
+                                "type": "string",
+                                "description": "allow, warn, deny, require_approval (free-form allowed)."
+                            },
+                            "metadata": {
+                                "type": "object",
+                                "additionalProperties": true
+                            }
+                        },
+                        "required": [
+                            "match",
+                            "action"
+                        ]
+                    }
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": false
+}
