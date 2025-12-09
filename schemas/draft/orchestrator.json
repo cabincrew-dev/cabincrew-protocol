@@ -1,0 +1,226 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Orchestrator",
+    "description": "Defines the request/response structures for the CabinCrew Orchestrator in draft version.",
+    "version": "2025-02-01-draft",
+    "type": "object",
+    "properties": {
+        "preflight_input": {
+            "type": "object",
+            "description": "Input given to the policy engine before executing take-off or after computing flight-plan",
+            "properties": {
+                "workflow_id": {
+                    "type": "string"
+                },
+                "step_id": {
+                    "type": "string"
+                },
+                "mode": {
+                    "type": "string",
+                    "enum": [
+                        "flight-plan",
+                        "take-off"
+                    ]
+                },
+                "engine_output": {
+                    "type": "object",
+                    "description": "Raw EngineOutput object produced by the engine",
+                    "additionalProperties": true
+                },
+                "evidence": {
+                    "type": "array",
+                    "description": "Subset of artifacts with role=evidence extracted from engine output",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "path": {
+                                "type": "string"
+                            },
+                            "hash": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "name",
+                            "path",
+                            "hash"
+                        ]
+                    }
+                },
+                "context": {
+                    "type": "object",
+                    "description": "Opaque contextual information from prior workflow steps"
+                }
+            },
+            "required": [
+                "workflow_id",
+                "step_id",
+                "mode",
+                "engine_output"
+            ]
+        },
+        "preflight_output": {
+            "type": "object",
+            "description": "The unified decision structure emitted by the Orchestrator after running OPA/ONNX policies.",
+            "properties": {
+                "decision": {
+                    "type": "string",
+                    "enum": [
+                        "ALLOW",
+                        "WARN",
+                        "REQUIRE_APPROVAL",
+                        "DENY"
+                    ]
+                },
+                "violations": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "warnings": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "requires": {
+                    "type": "object",
+                    "description": "Human approval metadata when decision = REQUIRE_APPROVAL",
+                    "properties": {
+                        "role": {
+                            "type": "string"
+                        },
+                        "reason": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "required": [
+                "decision"
+            ]
+        },
+        "approval_request": {
+            "type": "object",
+            "description": "Approval packet sent to a human approver UI or system.",
+            "properties": {
+                "approval_id": {
+                    "type": "string"
+                },
+                "workflow_id": {
+                    "type": "string"
+                },
+                "step_id": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "required_role": {
+                    "type": "string"
+                },
+                "engine_output": {
+                    "type": "object",
+                    "description": "Full receipt from engine",
+                    "additionalProperties": true
+                },
+                "evidence": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "path": {
+                                "type": "string"
+                            },
+                            "hash": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "name",
+                            "path",
+                            "hash"
+                        ]
+                    }
+                }
+            },
+            "required": [
+                "approval_id",
+                "workflow_id",
+                "step_id",
+                "reason",
+                "required_role"
+            ]
+        },
+        "approval_response": {
+            "type": "object",
+            "description": "Response from human approval system back to orchestrator.",
+            "properties": {
+                "approval_id": {
+                    "type": "string"
+                },
+                "approved": {
+                    "type": "boolean"
+                },
+                "approver": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "approval_id",
+                "approved"
+            ]
+        },
+        "workflow_state": {
+            "type": "object",
+            "description": "Represents the orchestrator's state machine state.",
+            "properties": {
+                "state": {
+                    "type": "string",
+                    "enum": [
+                        "INIT",
+                        "PLAN_RUNNING",
+                        "PRE_FLIGHT_RUNNING",
+                        "WAITING_APPROVAL",
+                        "APPROVED",
+                        "TAKEOFF_RUNNING",
+                        "COMPLETED",
+                        "FAILED"
+                    ]
+                },
+                "workflow_id": {
+                    "type": "string"
+                },
+                "step_id": {
+                    "type": "string"
+                },
+                "last_decision": {
+                    "type": "string",
+                    "enum": [
+                        "ALLOW",
+                        "WARN",
+                        "REQUIRE_APPROVAL",
+                        "DENY"
+                    ],
+                    "description": "The last policy verdict applied"
+                }
+            },
+            "required": [
+                "state"
+            ]
+        }
+    }
+}
