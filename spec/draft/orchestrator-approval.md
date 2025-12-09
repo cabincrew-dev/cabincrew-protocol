@@ -1,214 +1,176 @@
-# Orchestrator Approval Flow Specification (Draft)
+# CabinCrew Orchestrator Approval Specification
+Version: draft
 
-The **Approval Stage** is the human-in-the-loop checkpoint of the CabinCrew Protocol.
-It is triggered when Pre-Flight returns:
+This document defines the normative behavior of the human‑in‑the‑loop approval system within the CabinCrew Protocol. Approval is a critical governance mechanism that ensures high‑risk changes are reviewed by authorized humans before take-off is allowed.
 
-```
-REQUIRE_APPROVAL
-```
+Approval is part of the Orchestrator’s state machine and integrates with Preflight, Gateways, and the Audit subsystem.
 
-The Orchestrator must pause execution, gather the necessary artifacts,
-and request explicit human authorization before continuing to `take-off`.
+## 1. Purpose of Approval
 
-Approval is a **governance and safety requirement**, not an execution step.
+The approval mechanism ensures that automated intent does not translate into action without explicit human authorization when policies or ML models detect risk.
 
+Approval guarantees:
+- human oversight
+- traceability of decisions
+- prevention of unsafe automation
+- compliance with organizational requirements
+- binding authorization to a specific plan-token
 
----
-
-# 1. When Approval Is Required
-
-Approval is required when:
-
-- OPA rules set `require_approval = true`
-- ONNX model scores exceed a configured threshold
-- A rule detects a sensitive or high-impact operation
-- A workflow step is marked as requiring manual review
-- The organization’s policy mandates review (e.g., production deploys)
-
-Approval MUST NOT be skipped unless explicitly disabled by configuration.
-
+No take-off may occur if approval is required but not granted.
 
 ---
 
-# 2. Approval Request Packet
+## 2. When Approval Is Required
 
-When an approval is required, the Orchestrator constructs an `approval_request`
-object and sends it to a human-facing approval system or UI.
+Approval is triggered when:
+- OPA policies return require_approval  
+- ONNX model evaluation returns require_approval  
+- Gateway evaluation for MCP or LLM requests returns require_approval  
+- Workflow-specific rules demand human verification (e.g., production deploys)  
 
-### Structure
-
-```json
-{
-  "approval_id": "string",
-  "workflow_id": "string",
-  "step_id": "string",
-
-  "reason": "string",
-  "required_role": "string",
-
-  "engine_output": { ... },
-
-  "evidence": [
-    {
-      "name": "string",
-      "path": "string",
-      "hash": "sha256"
-    }
-  ]
-}
-```
-
-### Required Elements
-
-- **approval_id**  
-  Unique ID for correlating approval responses.
-
-- **reason**  
-  Textual explanation: why approval is needed.
-
-- **required_role**  
-  Security role required to authorize the action (e.g., `admin`, `security`, `lead`).
-
-- **engine_output**  
-  The full receipt of the engine execution.
-
-- **evidence artifacts**  
-  Only artifacts where `role = "evidence"`.
-
-### Forbidden Elements
-
-- Secrets  
-- State artifacts  
-- Log artifacts  
-- Workspace content
-
+The Orchestrator must aggregate all signals and decide whether approval is mandatory.
 
 ---
 
-# 3. Workflow State Transition
+## 3. ApprovalRequest Structure
 
-When an approval request is created, workflow state MUST transition to:
+When approval is required, the Orchestrator generates an ApprovalRequest containing:
 
-```
-WAITING_APPROVAL
-```
+- unique approval_id  
+- workflow_id and step_id  
+- plan-token hash  
+- summary of artifacts  
+- triggered policy names  
+- human-readable explanation for escalation  
+- timestamp  
+- requester identity (engine/orchestrator/user)  
 
-No further steps may execute until approval is resolved.
-
-
----
-
-# 4. Approval Response Packet
-
-A human (or human-facing system) sends an `approval_response`
-back to the Orchestrator:
-
-```json
-{
-  "approval_id": "string",
-  "approved": true,
-  "approver": "string",
-  "reason": "string",
-  "timestamp": "string"
-}
-```
-
-### Rules
-
-- `approved = true` → workflow resumes (`TAKEOFF_RUNNING`)
-- `approved = false` → workflow fails (`FAILED`)
-- `approver` should be the authenticated identity
-- `timestamp` must reflect when decision was made
-
-All approval responses MUST be logged as audit events.
-
+ApprovalRequests must be written to durable storage or transmitted to an external approval system.
 
 ---
 
-# 5. Required Orchestrator Behavior
+## 4. ApprovalResponse Structure
 
-### 5.1 Pause Execution
+A human reviewer provides an ApprovalResponse:
 
-Once approval is requested:
+- approval_id  
+- approved (true/false)  
+- approver identity  
+- approver role  
+- optional comments  
+- timestamp  
 
-- All workflow execution MUST pause
-- Engines MUST NOT run
-- No gateway calls may be made
+ApprovalResponse must reference the same approval_id.
 
-### 5.2 Store Evidence
+The Orchestrator must verify that:
+- approval_id matches  
+- the response corresponds to the latest plan-token  
+- the approver role satisfies governance rules  
 
-Approval inputs must be durable:
-
-- Evidence artifacts
-- Engine output
-- Reason for approval
-- Policy evaluation results
-
-These must be stored immutably.
-
-### 5.3 Reject Invalid Responses
-
-The Orchestrator MUST reject a response if:
-
-- `approval_id` does not match
-- timestamp is missing
-- unauthorized role approves the action
-- response is malformed
-
-### 5.4 Log Audit Events
-
-At minimum, the following MUST be logged:
-
-- approval_request event
-- approval_response event
-- decision (approved/rejected)
-- identity of approver
-- reason
-
+If verification fails → deny take-off.
 
 ---
 
-# 6. Approval Invariants
+## 5. Binding Approval to Plan-Token
 
-1. Only evidence artifacts may be shown to approvers.  
-2. Approval must be explicit—no auto-approval is allowed.  
-3. All approvals must be associated with a unique workflow/step.  
-4. Approved steps may not revert to unapproved state.  
-5. A rejected approval permanently fails the workflow.  
-6. Approval decisions must not modify artifacts.  
-7. Approvals must be reproducible from audit log context.  
+Approval MUST be bound to the plan-token produced during flight-plan.
 
+This prevents:
+- stale approval reuse  
+- approval replay attacks  
+- approvals for modified artifacts  
 
----
-
-# 7. Security Requirements
-
-- Approval requests must go through an authenticated system.
-- Approvers must meet the role requirements listed in the request.
-- Evidence hashes must match their stored artifacts.
-- Approval decisions must be immutable.
-- All communication between Orchestrator and approval system must be secured.
-
-The Orchestrator MUST NOT:
-
-- expose secrets  
-- expose logs  
-- leak workspace content  
-- include ONNX raw inputs in approval packets  
-
+Binding rules:
+- approval must include the exact plan-token hash  
+- orchestrator must recompute artifact hashes  
+- mismatch → workflow denied  
 
 ---
 
-# 8. Compatibility Requirements
+## 6. State Machine Behavior
 
-The Orchestrator embeds:
+The approval process defines the following states:
 
-```
-protocol_version = "2025-02-01-draft"
-```
+1. **preflight_requires_approval**  
+   The orchestrator halts workflow and emits an ApprovalRequest.
 
-Approval systems MUST reject mismatched versions.
+2. **waiting_for_approval**  
+   The workflow remains paused until an ApprovalResponse is received.
+
+3. **approved**  
+   The orchestrator resumes workflow at the take-off stage.
+
+4. **rejected**  
+   Workflow stops with failure.
+
+5. **expired (optional)**  
+   If configured, approvals may time out.
+
+The orchestrator must persist enough state to resume after restarts.
 
 ---
 
-# End of Approval Specification (Draft)
+## 7. Interaction with Gateways
+
+Gateways may independently require approval.
+
+Examples:
+- MCP Gateway detecting dangerous write operations  
+- LLM Gateway classifying a generated command as high-risk  
+
+The orchestrator must treat gateway-level approval requirements identically to preflight approvals.
+
+All gateway approval events must be stored in audit logs.
+
+---
+
+## 8. Audit Requirements
+
+Both ApprovalRequest and ApprovalResponse must generate audit events containing:
+
+- event_id  
+- workflow and step identifiers  
+- approval_id  
+- triggered rules  
+- approver identity  
+- authorization result  
+- reason for escalation  
+- timestamps  
+
+These events provide the chain of custody for governance.
+
+---
+
+## 9. Restart and Recovery
+
+The orchestrator must support restart-safe behavior:
+
+- If approval was requested but no response was received → remain in waiting state.  
+- If approved → resume take-off.  
+- If rejected → fail workflow.  
+- If plan-token mismatches after restart → fail workflow.  
+
+State must never be ambiguous.
+
+---
+
+## 10. Error Conditions
+
+Approval must fail when:
+
+- approval_id does not exist  
+- approval_id does not match request  
+- plan-token mismatch  
+- approval expired (if configured)  
+- approver lacks required role  
+- approvalResponse malformed  
+- external approval system unreachable (depending on policy)  
+
+Failures must generate audit events.
+
+---
+
+## 11. Summary
+
+The approval system ensures that human judgment is included in AI-assisted automation whenever risk is detected. By binding approval to plan-token integrity, enforcing strict verification, and capturing all events through the audit subsystem, CabinCrew maintains a safe, transparent, and compliant workflow model.
+

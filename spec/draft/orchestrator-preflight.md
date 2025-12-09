@@ -1,258 +1,190 @@
-# Pre-Flight Specification (Draft)
+# CabinCrew Orchestrator Preflight Specification
+Version: draft
 
-Pre-Flight is the **governance checkpoint** of the CabinCrew Protocol.  
-It validates whether a workflow is safe to continue from:
+This document defines the normative behavior of the CabinCrew Orchestrator during the Preflight phase. Preflight is the governance and validation stage that occurs after an Engine completes flight-plan but before take-off is permitted. It is the checkpoint where intent is verified, risks are assessed, and human approval may be required.
 
-- `flight-plan → take-off`, or  
-- direct → `take-off` (when no plan exists).
+## 1. Purpose of Preflight
 
-Pre-Flight combines **deterministic rule evaluation** (OPA) with **semantic inspection** (ONNX models) to produce a **unified decision**:
+Preflight ensures that:
 
-```
-ALLOW | WARN | REQUIRE_APPROVAL | DENY
-```
+- the Engine's flight-plan is valid  
+- artifacts are structurally correct  
+- changes are safe and governed  
+- risks are identified and mitigated  
+- human approval is requested when required  
+- take-off cannot proceed without explicit authorization  
 
-The Orchestrator MUST run Pre-Flight **after every flight-plan** and **before every take-off** unless explicitly disabled in configuration.
-
----
-
-# 1. Inputs to Pre-Flight
-
-The Orchestrator constructs a **PreflightInput** packet containing:
-
-### 1.1 Metadata
-- `workflow_id`
-- `step_id`
-- `mode` (`flight-plan` or `take-off`)
-- execution context (opaque, engine-dependent)
-
-### 1.2 Engine Output (Raw Receipt)
-The full `EngineOutput` object emitted to STDOUT.
-
-### 1.3 Evidence Artifacts
-A filtered subset of artifacts where:
-
-```
-artifact.role == "evidence"
-```
-
-Each must include:
-
-- `name`
-- `path`
-- `hash` (SHA256)
-- MIME type (optional)
-
-### 1.4 Context
-Derived from previous workflow steps.
-
-### 1.5 Policy Configuration
-Includes:
-- enabled OPA modules  
-- enabled ONNX models  
-- threshold values  
-- stage-specific rules (plan vs takeoff)
-
-**No secrets** may be included in Pre-Flight input.
+Preflight is mandatory for all workflows.
 
 ---
 
-# 2. Pre-Flight Processing Pipeline
+## 2. Inputs to Preflight
 
-Pre-Flight is split into three phases:
+Preflight operates on:
 
-```
-Normalize → Evaluate Policies → Merge Decisions
-```
+- the Engine's artifacts  
+- the Engine receipt  
+- the plan-token generated from artifacts  
+- workflow configuration  
+- OPA and ONNX policy definitions  
+- orchestrator context (workflow state, metadata)  
 
-## 2.1 Normalize Inputs
-
-The Orchestrator MUST validate:
-
-### A. Artifact violations
-- Evidence artifacts must not exceed size limits.
-- Evidence hashes must match files in `ARTIFACTS_DIR`.
-- Only evidence artifacts may be passed to policy engines.
-
-### B. Sandbox invariants
-- Engine must not modify workspace during `flight-plan`.
-- Engine may modify workspace during `take-off`, but only inside workspace root.
-- Engine must only write artifacts inside `ARTIFACTS_DIR`.
-
-### C. Structural validation
-- `EngineOutput` must conform to schema.
-- Artifact roles must be one of: `evidence | state | log`.
-
-If normalization fails → decision = `DENY`.
+Preflight has no side effects and must be deterministic.
 
 ---
 
-## 2.2 Evaluate OPA Policies
+## 3. Stages of Preflight
 
-OPA receives:
+Preflight consists of four major stages:
 
-- metadata  
-- evidence artifacts  
-- selected engine-output fields  
+### **3.1 Artifact Validation**
 
-OPA **must not** receive:
+The Orchestrator must verify:
 
-- secrets  
-- logs  
-- state artifacts  
+- correct directory structure  
+- valid artifact.json schema  
+- presence of body files when referenced  
+- correct artifact roles (evidence, state, log)  
+- consistent hashing and declared metadata  
 
-OPA outputs:
-
-```
-allow: bool
-warnings: [string]
-violations: [string]
-require_approval: bool
-```
-
-OPA is **deterministic** and must not depend on external network calls.
+Invalid artifacts must cause preflight failure.
 
 ---
 
-## 2.3 Evaluate ONNX Models
+### **3.2 Policy Evaluation (OPA)**
 
-ONNX models receive:
+OPA policies evaluate:
 
-- textual evidence  
-- structured evidence (JSON) when safe  
+- changes represented in artifacts  
+- workflow metadata  
+- repository or environment conditions  
+- security implications  
+- compliance requirements  
 
-ONNX MUST NOT receive:
+Each OPA rule may produce:
 
-- secrets  
-- binary state artifacts  
-- log files containing stack traces  
+- allow  
+- warn  
+- deny  
+- require_approval  
 
-ONNX outputs:
-
-```
-scores: {
-    "<model_name>": float
-}
-classes: {
-    "<model_name>": "<label>"
-}
-```
-
-The Orchestrator interprets scores according to configuration thresholds.
+OPA evaluations must be included in audit events.
 
 ---
 
-# 3. Policy Decision Merging
+### **3.3 Model Evaluation (ONNX)**
 
-The Orchestrator merges OPA and ONNX results into a single canonical structure:
+ONNX models are used for ML-based safety checks, such as:
 
-```
-decision: ALLOW | WARN | REQUIRE_APPROVAL | DENY
-warnings: [...]
-violations: [...]
-requires: { role, reason } (optional)
-```
+- detecting bias  
+- identifying toxic or disallowed content  
+- flagging insecure patterns  
+- identifying hallucinations or deviations  
+- detecting secrets or sensitive data  
 
-### Priority Rules
+Model outputs must be interpreted by the Orchestrator according to workflow policy.
 
-1. **DENY dominates everything**  
-2. **REQUIRE_APPROVAL dominates WARN/ALLOW**  
-3. **WARN dominates ALLOW**
+Possible outcomes:
 
-### Merging Algorithm (Simplified)
+- allow  
+- warn  
+- deny  
+- require_approval  
 
-```
-if violations.nonempty → DENY
-if require_approval == true → REQUIRE_APPROVAL
-if warnings.nonempty → WARN
-else → ALLOW
-```
-
-Custom merger logic MAY be defined in future versions.
+All decisions must be auditable.
 
 ---
 
-# 4. Pre-Flight Output
+### **3.4 Decision Aggregation**
 
-Pre-Flight produces a `PreflightOutput` containing:
+OPA and ONNX results must be combined. The aggregator must follow this precedence:
 
-- `decision`
-- `warnings`
-- `violations`
-- `requires` (if decision = REQUIRE_APPROVAL)
+1. **deny** — workflow stops immediately  
+2. **require_approval** — workflow pauses  
+3. **warn** — workflow continues but logs warning  
+4. **allow** — workflow continues  
 
-This is recorded in audit logs.
+If multiple rules trigger, the most severe outcome takes priority.
 
-Decision → workflow transitions:
-
-| Decision | Next State |
-|----------|------------|
-| ALLOW | TAKEOFF_RUNNING |
-| WARN | TAKEOFF_RUNNING |
-| REQUIRE_APPROVAL | WAITING_APPROVAL |
-| DENY | FAILED |
+The aggregated decision becomes the preflight result.
 
 ---
 
-# 5. Invariants
+## 4. Human Approval Trigger
 
-The Orchestrator MUST enforce:
+If the aggregated result is require_approval:
 
-### 5.1 Workspace Purity During Flight-Plan
-Engines MUST NOT mutate workspace during flight-plan.
+- Orchestrator generates an ApprovalRequest  
+- Request includes:  
+  - plan-token  
+  - artifacts summary  
+  - reason for escalation  
+  - list of triggered policies  
+- Workflow pauses  
+- ApprovalResponse must match the plan-token  
 
-### 5.2 Evidence-Only Governance
-Only artifacts with `role = evidence` may affect governance.
-
-### 5.3 No Hidden Inputs
-Pre-Flight must only consume inputs declared in schema.
-
-### 5.4 Model Safety Boundary
-ONNX models MUST operate without backchannels or embedded external calls.
-
-### 5.5 Reproducibility
-Given:
-- the same engine input  
-- the same evidence artifacts  
-
-Pre-Flight MUST produce the same decision (OPA only; ONNX scores may vary but must remain within acceptable bounds).
+If approved → continue to take-off  
+If rejected → fail workflow
 
 ---
 
-# 6. Failure Conditions
+## 5. Plan-Token Verification
 
-Pre-Flight MUST produce a `DENY` decision if:
+Before approving or continuing:
 
-- Evidence hashes mismatch.
-- Workspace mutation is detected during flight-plan.
-- Engine output fails schema validation.
-- Policy evaluation fails to execute.
-- ONNX scores exceed configured safety thresholds.
-- OPA violations are returned.
-- Artifact roles are invalid.
+- The Orchestrator must re-hash artifacts  
+- The computed token must match the stored token  
+- If mismatched → workflow is denied with a critical audit event
+
+This prevents modification or tampering between Flight-Plan and Preflight.
 
 ---
 
-# 7. Security Model
+## 6. Audit Logging Requirements
 
-- No secrets may enter Pre-Flight.
-- No logs may influence decisions.
-- Pre-Flight must not write to disk except temporary evaluation state.
-- All policy code is untrusted → must run in a secure sandbox.
-- All Pre-Flight results must be included in the audit log.
+Preflight must generate audit events for:
 
----
+- artifact validation results  
+- OPA evaluation results  
+- ONNX evaluation results  
+- aggregated decision  
+- approval escalation  
+- approval outcomes  
+- plan-token verification status  
 
-# 8. Compatibility Requirements
-
-The orchestrator MUST embed:
-
-```
-protocol_version = "2025-02-01-draft"
-```
-
-Pre-Flight MUST reject incompatible EngineOutput versions.
+These events must conform to audit-event.schema.json.
 
 ---
 
-# End of Pre-Flight Specification (Draft)
+## 7. Error Handling
+
+Preflight must fail when:
+
+- artifacts are invalid  
+- policies cannot be evaluated  
+- ML models fail to load  
+- risk classification fails  
+- plan-token verification fails  
+- approval is rejected  
+- any deny rule triggers  
+
+All failures must produce audit events and halt the workflow.
+
+---
+
+## 8. Preconditions for Take-Off
+
+Take-off may proceed only when:
+
+- artifacts are valid  
+- plan-token matches  
+- aggregated decision = allow or warn  
+- all approvals (if any) are completed successfully  
+
+If any condition is unmet, take-off is forbidden.
+
+---
+
+## 9. Summary
+
+Preflight is the governance checkpoint that protects users, systems, and data from unsafe or unintended automation. It validates intent, assesses risk using both policy rules and ML classifiers, ensures human oversight when needed, and enforces artifact integrity. The Orchestrator must implement all described behavior to ensure safe and deterministic workflows.
