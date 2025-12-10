@@ -1,57 +1,63 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Artifact",
-    "version": "2025-02-01-draft",
-    "description": "Canonical artifact interface. Fully extensible: engines define their own artifact_type and action values.",
+    "description": "Canonical artifact interface.\nDefined in schemas/draft/artifact.schema.json",
     "type": "object",
     "properties": {
         "artifact_type": {
-            "type": "string",
-            "description": "Type of artifact (file, diff, patch, action, message, etc). Free-form and engine-defined."
+            "description": "Type of artifact (file, diff, patch, action, message, etc). Free-form and engine-defined.",
+            "type": "string"
         },
         "action": {
-            "type": "string",
-            "description": "Operation to perform with this artifact (create, update, delete, apply, execute, etc). Free-form and engine-defined."
+            "description": "Operation to perform with this artifact (create, update, delete, apply, execute, etc). Free-form and engine-defined.",
+            "type": "string"
         },
         "target": {
-            "type": "string",
-            "description": "Path, resource, or identifier this artifact applies to. Optional."
+            "description": "Path, resource, or identifier this artifact applies to. Optional.",
+            "type": "string"
         },
         "mime": {
-            "type": "string",
-            "description": "MIME type describing content."
+            "description": "MIME type describing content.",
+            "type": "string"
         },
         "body": {
-            "description": "Inline content for small artifacts.",
-            "oneOf": [
+            "description": "Inline content for small artifacts.\nCan be string, object, array, or null.",
+            "anyOf": [
                 {
-                    "type": "string"
+                    "type": "object",
+                    "properties": {},
+                    "additionalProperties": true
                 },
                 {
-                    "type": "object"
+                    "type": "array",
+                    "items": {}
                 },
                 {
-                    "type": "array"
-                },
-                {
-                    "type": "null"
+                    "type": [
+                        "null",
+                        "string"
+                    ]
                 }
             ]
         },
         "body_file": {
-            "type": "string",
-            "description": "Indicates an external data file within the artifact directory."
+            "description": "Indicates an external data file within the artifact directory.",
+            "type": "string"
         },
         "metadata": {
-            "type": "object",
             "description": "Arbitrary metadata. Optional.",
-            "additionalProperties": true
+            "$ref": "#/definitions/Record<string,any>"
         }
     },
+    "additionalProperties": false,
     "required": [
-        "artifact_type",
         "action",
+        "artifact_type",
         "mime"
     ],
-    "additionalProperties": false
+    "definitions": {
+        "Record<string,any>": {
+            "type": "object",
+            "additionalProperties": false
+        }
+    },
+    "$schema": "http://json-schema.org/draft-07/schema#"
 }

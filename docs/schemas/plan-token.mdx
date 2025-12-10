@@ -1,0 +1,26 @@
+# plan-token
+
+Cryptographic binding between a flight-plan and its subsequent take-off.
+Defined in schemas/draft/plan-token.schema.json
+
+## Structures
+
+### plan-token
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `token` | `string` | Yes | Primary plan token identifier, e.g. SHA256 over all plan artifacts + context. |
+| `artifacts` | `array` | Yes | Per-artifact hashes that contributed to this plan token. |
+| `engine_id` | `string` | Yes | Engine identity that produced this plan. |
+| `protocol_version` | `string` | Yes | Engine protocol version used when this plan was produced. |
+| `workspace_hash` | `string` | Yes | Hash of the workspace state when the plan was created. |
+| `created_at` | `string` | Yes | Timestamp when the plan was created (RFC3339). |
+
+### PlanArtifactHash
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `name` | `string` | Yes |  |
+| `hash` | `string` | Yes |  |
+| `size` | `number` | No |  |
+

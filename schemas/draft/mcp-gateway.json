@@ -1,13 +1,25 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "MCPGateway",
-    "version": "2025-02-01-draft",
-    "description": "Request/response and policy configuration for the CabinCrew MCP Gateway. The gateway emits audit events using audit-event.schema.json; no audit schema is duplicated here.",
+    "title": "mcp-gateway",
     "type": "object",
     "properties": {
-        "GatewayRequest": {
+        "MCPGatewayRequest": {
+            "$ref": "#/definitions/MCPGatewayRequest"
+        },
+        "MCPGatewayResponse": {
+            "$ref": "#/definitions/MCPGatewayResponse"
+        },
+        "MCPGatewayPolicyConfig": {
+            "$ref": "#/definitions/MCPGatewayPolicyConfig"
+        }
+    },
+    "definitions": {
+        "Record<string,any>": {
             "type": "object",
-            "description": "An MCP request intercepted by the gateway before policy evaluation.",
+            "additionalProperties": false
+        },
+        "MCPGatewayRequest": {
+            "type": "object",
             "properties": {
                 "request_id": {
                     "type": "string"
@@ -16,36 +28,47 @@
                     "type": "string"
                 },
                 "source": {
-                    "type": "string",
-                    "description": "Caller identity (engine, orchestrator, agent, etc)."
+                    "type": "string"
                 },
                 "server_id": {
-                    "type": "string",
-                    "description": "MCP server being contacted (e.g., 'file-server', 'git-server')."
+                    "type": "string"
                 },
                 "method": {
-                    "type": "string",
-                    "description": "MCP method name (free-form)."
+                    "type": "string"
                 },
                 "params": {
-                    "type": "object",
-                    "description": "Opaque MCP parameters."
+                    "$ref": "#/definitions/Record<string,any>"
                 },
                 "context": {
-                    "type": "object",
-                    "description": "Optional workflow/caller context."
+                    "$ref": "#/definitions/Record<string,any>"
                 }
             },
+            "additionalProperties": false,
             "required": [
+                "method",
                 "request_id",
-                "timestamp",
                 "server_id",
-                "method"
-            ]
+                "timestamp"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#"
         },
-        "GatewayResponse": {
+        "GatewayApproval": {
             "type": "object",
-            "description": "Decision produced by the gateway after OPA/ONNX evaluation.",
+            "properties": {
+                "approval_id": {
+                    "type": "string"
+                },
+                "required_role": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "MCPGatewayResponse": {
+            "type": "object",
             "properties": {
                 "request_id": {
                     "type": "string"
@@ -54,13 +77,13 @@
                     "type": "string"
                 },
                 "decision": {
-                    "type": "string",
                     "enum": [
                         "allow",
-                        "warn",
                         "deny",
-                        "require_approval"
-                    ]
+                        "require_approval",
+                        "warn"
+                    ],
+                    "type": "string"
                 },
                 "warnings": {
                     "type": "array",
@@ -75,35 +98,41 @@
                     }
                 },
                 "approval": {
-                    "type": "object",
-                    "description": "Present only if decision = require_approval.",
-                    "properties": {
-                        "approval_id": {
-                            "type": "string"
-                        },
-                        "required_role": {
-                            "type": "string"
-                        },
-                        "reason": {
-                            "type": "string"
-                        }
-                    }
+                    "$ref": "#/definitions/GatewayApproval"
                 },
                 "rewritten_request": {
-                    "type": "object",
-                    "description": "If policies rewrite the MCP request before forwarding.",
-                    "additionalProperties": true
+                    "$ref": "#/definitions/Record<string,any>"
                 }
             },
+            "additionalProperties": false,
             "required": [
+                "decision",
                 "request_id",
-                "timestamp",
-                "decision"
+                "timestamp"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "MCPGatewayRule": {
+            "type": "object",
+            "properties": {
+                "match": {
+                    "$ref": "#/definitions/Record<string,any>"
+                },
+                "action": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "$ref": "#/definitions/Record<string,any>"
+                }
+            },
+            "additionalProperties": false,
+            "required": [
+                "action",
+                "match"
             ]
         },
-        "GatewayPolicyConfig": {
+        "MCPGatewayPolicyConfig": {
             "type": "object",
-            "description": "OPA/ONNX rule configuration for the MCP gateway.",
             "properties": {
                 "opa_policies": {
                     "type": "array",
@@ -119,33 +148,13 @@
                 },
                 "rules": {
                     "type": "array",
-                    "description": "High-level gateway rule definitions (free-form).",
                     "items": {
-                        "type": "object",
-                        "properties": {
-                            "match": {
-                                "type": "object",
-                                "description": "Pattern to match against server, method, or params.",
-                                "additionalProperties": true
-                            },
-                            "action": {
-                                "type": "string",
-                                "description": "Result: allow, warn, deny, require_approval (free-form allowed)."
-                            },
-                            "metadata": {
-                                "type": "object",
-                                "additionalProperties": true
-                            }
-                        },
-                        "required": [
-                            "match",
-                            "action"
-                        ]
+                        "$ref": "#/definitions/MCPGatewayRule"
                     }
                 }
             },
-            "additionalProperties": false
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
         }
-    },
-    "additionalProperties": false
+    }
 }

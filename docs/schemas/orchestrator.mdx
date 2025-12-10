@@ -1,0 +1,97 @@
+# orchestrator.schema
+
+## Structures
+
+### Record<string,any>
+
+### PreflightEvidence
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `name` | `string` | Yes |  |
+| `path` | `string` | Yes |  |
+| `hash` | `string` | Yes |  |
+
+### PlanToken
+
+Cryptographic binding between a flight-plan and its subsequent take-off.
+Defined in schemas/draft/plan-token.schema.json
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `token` | `string` | Yes | Primary plan token identifier, e.g. SHA256 over all plan artifacts + context. |
+| `artifacts` | `array` | Yes | Per-artifact hashes that contributed to this plan token. |
+| `engine_id` | `string` | Yes | Engine identity that produced this plan. |
+| `protocol_version` | `string` | Yes | Engine protocol version used when this plan was produced. |
+| `workspace_hash` | `string` | Yes | Hash of the workspace state when the plan was created. |
+| `created_at` | `string` | Yes | Timestamp when the plan was created (RFC3339). |
+
+### PlanArtifactHash
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `name` | `string` | Yes |  |
+| `hash` | `string` | Yes |  |
+| `size` | `number` | No |  |
+
+### PreflightInput
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `workflow_id` | `string` | Yes |  |
+| `step_id` | `string` | Yes |  |
+| `mode` | `string` | Yes |  |
+| `engine_output` | `[Record<string,any>]` | Yes |  |
+| `evidence` | `array` | No |  |
+| `context` | `[Record<string,any>]` | No |  |
+| `plan_token` | `[PlanToken]` | No | Cryptographic binding between a flight-plan and its subsequent take-off. Defined in schemas/draft/plan-token.schema.json |
+
+### PreflightRequires
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `role` | `string` | No |  |
+| `reason` | `string` | No |  |
+
+### PreflightOutput
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `decision` | `string` | Yes |  |
+| `violations` | `array` | No |  |
+| `warnings` | `array` | No |  |
+| `requires` | `[PreflightRequires]` | No |  |
+
+### ApprovalRequest
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `approval_id` | `string` | Yes |  |
+| `workflow_id` | `string` | Yes |  |
+| `step_id` | `string` | Yes |  |
+| `reason` | `string` | Yes |  |
+| `required_role` | `string` | Yes |  |
+| `engine_output` | `[Record<string,any>]` | No |  |
+| `evidence` | `array` | No |  |
+| `plan_token_hash` | `string` | No |  |
+
+### ApprovalResponse
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `approval_id` | `string` | Yes |  |
+| `approved` | `boolean` | Yes |  |
+| `approver` | `string` | No |  |
+| `reason` | `string` | No |  |
+| `timestamp` | `string` | No |  |
+
+### WorkflowState
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `state` | `string` | Yes |  |
+| `workflow_id` | `string` | No |  |
+| `step_id` | `string` | No |  |
+| `last_decision` | `string` | No |  |
+| `plan_token_hash` | `string` | No |  |
+

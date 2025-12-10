@@ -1,0 +1,54 @@
+# mcp-gateway
+
+## Structures
+
+### Record<string,any>
+
+### MCPGatewayRequest
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `request_id` | `string` | Yes |  |
+| `timestamp` | `string` | Yes |  |
+| `source` | `string` | No |  |
+| `server_id` | `string` | Yes |  |
+| `method` | `string` | Yes |  |
+| `params` | `[Record<string,any>]` | No |  |
+| `context` | `[Record<string,any>]` | No |  |
+
+### GatewayApproval
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `approval_id` | `string` | No |  |
+| `required_role` | `string` | No |  |
+| `reason` | `string` | No |  |
+
+### MCPGatewayResponse
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `request_id` | `string` | Yes |  |
+| `timestamp` | `string` | Yes |  |
+| `decision` | `string` | Yes |  |
+| `warnings` | `array` | No |  |
+| `violations` | `array` | No |  |
+| `approval` | `[GatewayApproval]` | No |  |
+| `rewritten_request` | `[Record<string,any>]` | No |  |
+
+### MCPGatewayRule
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `match` | `[Record<string,any>]` | Yes |  |
+| `action` | `string` | Yes |  |
+| `metadata` | `[Record<string,any>]` | No |  |
+
+### MCPGatewayPolicyConfig
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `opa_policies` | `array` | No |  |
+| `onnx_models` | `array` | No |  |
+| `rules` | `array` | No |  |
+

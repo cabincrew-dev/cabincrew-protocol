@@ -1,48 +1,54 @@
 package cabincrew
 
-// LLMGatewayRequest is a request to an LLM intercepted by the gateway.
-// Defined in schemas/draft/llm-gateway.json
-type LLMGatewayRequest struct {
-	RequestID string                 `json:"request_id"`
-	Timestamp string                 `json:"timestamp"`
-	Source    string                 `json:"source,omitempty"`
-	Model     string                 `json:"model"`
-	Provider  string                 `json:"provider,omitempty"`
-	Input     map[string]interface{} `json:"input"`
-	Context   map[string]interface{} `json:"context,omitempty"`
-}
-
-// LLMGatewayResponse is a decision produced by the LLM gateway.
-// Defined in schemas/draft/llm-gateway.json
-type LLMGatewayResponse struct {
-	RequestID      string                 `json:"request_id"`
-	Timestamp      string                 `json:"timestamp"`
-	Decision       string                 `json:"decision"` // allow, warn, deny, require_approval
-	Warnings       []string               `json:"warnings,omitempty"`
-	Violations     []string               `json:"violations,omitempty"`
-	Approval       *GatewayApproval       `json:"approval,omitempty"`
-	RoutedModel    string                 `json:"routed_model,omitempty"`
-	RewrittenInput map[string]interface{} `json:"rewritten_input,omitempty"`
-	GatewayPayload map[string]interface{} `json:"gateway_payload,omitempty"`
-}
-
-type GatewayApproval struct {
-	ApprovalID   string `json:"approval_id,omitempty"`
-	RequiredRole string `json:"required_role,omitempty"`
-	Reason       string `json:"reason,omitempty"`
-}
-
-// LLMGatewayPolicyConfig is the OPA + ONNX policy configuration for the LLM Gateway.
-// Defined in schemas/draft/llm-gateway.json
 type LLMGatewayPolicyConfig struct {
-	OpaPolicies  []string               `json:"opa_policies,omitempty"`
-	OnnxModels   []string               `json:"onnx_models,omitempty"`
-	ModelRouting map[string]interface{} `json:"model_routing,omitempty"`
-	Rules        []LLMGatewayRule       `json:"rules,omitempty"`
+	ModelRouting *ModelRoutingClass `json:"model_routing,omitempty"`
+	OnnxModels   []string           `json:"onnx_models,omitempty"`
+	OpaPolicies  []string           `json:"opa_policies,omitempty"`
+	Rules        []LLMGatewayRule   `json:"rules,omitempty"`
+}
+
+type ModelRoutingClass struct {
 }
 
 type LLMGatewayRule struct {
-	Match    map[string]interface{} `json:"match"`
-	Action   string                 `json:"action"`
-	Metadata map[string]interface{} `json:"metadata,omitempty"`
+	Action   string             `json:"action"`
+	Match    ModelRoutingClass  `json:"match"`
+	Metadata *ModelRoutingClass `json:"metadata,omitempty"`
 }
+
+type LLMGatewayRequest struct {
+	Context   *ModelRoutingClass `json:"context,omitempty"`
+	Input     ModelRoutingClass  `json:"input"`
+	Model     string             `json:"model"`
+	Provider  *string            `json:"provider,omitempty"`
+	RequestID string             `json:"request_id"`
+	Source    *string            `json:"source,omitempty"`
+	Timestamp string             `json:"timestamp"`
+}
+
+type LLMGatewayResponse struct {
+	Approval       *LLMGatewayResponseApproval `json:"approval,omitempty"`
+	Decision       LLMGatewayResponseDecision  `json:"decision"`
+	GatewayPayload *ModelRoutingClass          `json:"gateway_payload,omitempty"`
+	RequestID      string                      `json:"request_id"`
+	RewrittenInput *ModelRoutingClass          `json:"rewritten_input,omitempty"`
+	RoutedModel    *string                     `json:"routed_model,omitempty"`
+	Timestamp      string                      `json:"timestamp"`
+	Violations     []string                    `json:"violations,omitempty"`
+	Warnings       []string                    `json:"warnings,omitempty"`
+}
+
+type LLMGatewayResponseApproval struct {
+	ApprovalID   *string `json:"approval_id,omitempty"`
+	Reason       *string `json:"reason,omitempty"`
+	RequiredRole *string `json:"required_role,omitempty"`
+}
+
+type LLMGatewayResponseDecision string
+
+const (
+	Allow           LLMGatewayResponseDecision = "allow"
+	Deny            LLMGatewayResponseDecision = "deny"
+	RequireApproval LLMGatewayResponseDecision = "require_approval"
+	Warn            LLMGatewayResponseDecision = "warn"
+)

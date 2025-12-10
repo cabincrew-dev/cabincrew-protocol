@@ -1,0 +1,75 @@
+# engine.schema
+
+## Structures
+
+### EngineMeta
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `workflow_id` | `string` | Yes |  |
+| `step_id` | `string` | Yes |  |
+
+### AnyMap
+
+### EngineOrchestrator
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `run_index` | `number` | No |  |
+| `workspace_hash` | `string` | No |  |
+| `artifacts_salt` | `string` | No |  |
+
+### EngineInput
+
+Input delivered via STDIN or CABINCREW_INPUT_FILE.
+Defined in schemas/draft/engine.schema.json
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `protocol_version` | `string` | Yes |  |
+| `mode` | `string` | Yes | Execution mode: 'flight-plan' or 'take-off'. |
+| `meta` | `[EngineMeta]` | Yes |  |
+| `config` | `[AnyMap]` | No |  |
+| `secrets` | `[AnyMap]` | No |  |
+| `allowed_secrets` | `array` | No |  |
+| `context` | `[AnyMap]` | No |  |
+| `orchestrator` | `[EngineOrchestrator]` | No |  |
+| `expected_plan_token` | `string` | No |  |
+
+### EngineArtifact
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `name` | `string` | Yes |  |
+| `role` | `string` | Yes |  |
+| `path` | `string` | Yes |  |
+| `hash` | `string` | Yes |  |
+| `size` | `number` | No |  |
+
+### EngineMetric
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `name` | `string` | Yes |  |
+| `value` | `number` | Yes |  |
+| `tags` | `[AnyMap]` | No |  |
+
+### EngineOutput
+
+Output delivered via STDOUT or CABINCREW_OUTPUT_FILE.
+Defined in schemas/draft/engine.schema.json
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `protocol_version` | `string` | Yes |  |
+| `engine_id` | `string` | Yes |  |
+| `mode` | `string` | Yes |  |
+| `receipt_id` | `string` | Yes |  |
+| `status` | `string` | Yes | Execution status: 'success' or 'failure'. |
+| `error` | `string` | No |  |
+| `warnings` | `array` | No |  |
+| `diagnostics` | `any` | No |  |
+| `artifacts` | `array` | No |  |
+| `metrics` | `array` | No |  |
+| `plan_token` | `string` | No | SHA256 hash referencing a plan-token.json file. |
+

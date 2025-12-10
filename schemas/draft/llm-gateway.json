@@ -1,13 +1,25 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "LLMGateway",
-    "version": "2025-02-01-draft",
-    "description": "Schema for the CabinCrew LLM Gateway. The gateway mediates LLM requests and responses, applies OPA/ONNX policies, performs model routing, and can require human approval. All audit logs must be emitted using audit-event.schema.json.",
+    "title": "llm-gateway",
     "type": "object",
     "properties": {
-        "GatewayRequest": {
+        "LLMGatewayRequest": {
+            "$ref": "#/definitions/LLMGatewayRequest"
+        },
+        "LLMGatewayResponse": {
+            "$ref": "#/definitions/LLMGatewayResponse"
+        },
+        "LLMGatewayPolicyConfig": {
+            "$ref": "#/definitions/LLMGatewayPolicyConfig"
+        }
+    },
+    "definitions": {
+        "Record<string,any>": {
             "type": "object",
-            "description": "A request to an LLM intercepted by the gateway.",
+            "additionalProperties": false
+        },
+        "LLMGatewayRequest": {
+            "type": "object",
             "properties": {
                 "request_id": {
                     "type": "string"
@@ -16,38 +28,47 @@
                     "type": "string"
                 },
                 "source": {
-                    "type": "string",
-                    "description": "Identity of the caller (engine, orchestrator, user-agent, etc)."
+                    "type": "string"
                 },
                 "model": {
-                    "type": "string",
-                    "description": "Requested model identifier (e.g., 'gpt-4.1', 'claude-3.5', 'github:code-llama')."
+                    "type": "string"
                 },
                 "provider": {
-                    "type": "string",
-                    "description": "Optional model provider (openai, anthropic, github, azure, local)."
+                    "type": "string"
                 },
                 "input": {
-                    "type": "object",
-                    "description": "LLM input payload (prompt, messages, tools, parameters).",
-                    "additionalProperties": true
+                    "$ref": "#/definitions/Record<string,any>"
                 },
                 "context": {
-                    "type": "object",
-                    "description": "Workflow or caller context. Free-form.",
-                    "additionalProperties": true
+                    "$ref": "#/definitions/Record<string,any>"
                 }
             },
+            "additionalProperties": false,
             "required": [
-                "request_id",
-                "timestamp",
+                "input",
                 "model",
-                "input"
-            ]
+                "request_id",
+                "timestamp"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#"
         },
-        "GatewayResponse": {
+        "GatewayApproval": {
             "type": "object",
-            "description": "Decision produced by the LLM gateway after policy evaluation, routing, rewriting, and/or require_approval.",
+            "properties": {
+                "approval_id": {
+                    "type": "string"
+                },
+                "required_role": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "LLMGatewayResponse": {
+            "type": "object",
             "properties": {
                 "request_id": {
                     "type": "string"
@@ -56,13 +77,13 @@
                     "type": "string"
                 },
                 "decision": {
-                    "type": "string",
                     "enum": [
                         "allow",
-                        "warn",
                         "deny",
-                        "require_approval"
-                    ]
+                        "require_approval",
+                        "warn"
+                    ],
+                    "type": "string"
                 },
                 "warnings": {
                     "type": "array",
@@ -77,96 +98,72 @@
                     }
                 },
                 "approval": {
-                    "type": "object",
-                    "description": "Present only if decision = require_approval.",
-                    "properties": {
-                        "approval_id": {
-                            "type": "string"
-                        },
-                        "required_role": {
-                            "type": "string"
-                        },
-                        "reason": {
-                            "type": "string"
-                        }
-                    }
+                    "$ref": "#/definitions/GatewayApproval"
                 },
                 "routed_model": {
-                    "type": "string",
-                    "description": "Optional new model that the request is routed to."
+                    "type": "string"
                 },
                 "rewritten_input": {
-                    "type": "object",
-                    "description": "If policies rewrite/redirect/change the prompt or model params.",
-                    "additionalProperties": true
+                    "$ref": "#/definitions/Record<string,any>"
                 },
                 "gateway_payload": {
-                    "type": "object",
-                    "description": "Optional diagnostic or operational metadata from the gateway.",
-                    "additionalProperties": true
+                    "$ref": "#/definitions/Record<string,any>"
                 }
             },
+            "additionalProperties": false,
             "required": [
+                "decision",
                 "request_id",
-                "timestamp",
-                "decision"
+                "timestamp"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "LLMGatewayRule": {
+            "type": "object",
+            "properties": {
+                "match": {
+                    "$ref": "#/definitions/Record<string,any>"
+                },
+                "action": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "$ref": "#/definitions/Record<string,any>"
+                }
+            },
+            "additionalProperties": false,
+            "required": [
+                "action",
+                "match"
             ]
         },
-        "GatewayPolicyConfig": {
+        "LLMGatewayPolicyConfig": {
             "type": "object",
-            "description": "OPA + ONNX policy configuration for the LLM Gateway.",
             "properties": {
                 "opa_policies": {
                     "type": "array",
-                    "description": "Paths or inline Rego policies applied to the LLM request or response.",
                     "items": {
                         "type": "string"
                     }
                 },
                 "onnx_models": {
                     "type": "array",
-                    "description": "List of ONNX models used for classification, safety, bias detection, hallucination scoring, etc.",
                     "items": {
                         "type": "string"
                     }
                 },
                 "model_routing": {
-                    "type": "object",
-                    "description": "Rules for routing requests to specific models/providers.",
-                    "additionalProperties": {
-                        "type": "object",
-                        "description": "Each rule is free-form to allow custom routing logic."
-                    }
+                    "$ref": "#/definitions/Record<string,any>"
                 },
                 "rules": {
                     "type": "array",
-                    "description": "High-level rule list. Free-form like in MCP gateway.",
                     "items": {
-                        "type": "object",
-                        "properties": {
-                            "match": {
-                                "type": "object",
-                                "description": "Pattern to match against model name, input content, metadata, etc.",
-                                "additionalProperties": true
-                            },
-                            "action": {
-                                "type": "string",
-                                "description": "allow, warn, deny, require_approval (free-form allowed)."
-                            },
-                            "metadata": {
-                                "type": "object",
-                                "additionalProperties": true
-                            }
-                        },
-                        "required": [
-                            "match",
-                            "action"
-                        ]
+                        "$ref": "#/definitions/LLMGatewayRule"
                     }
                 }
             },
-            "additionalProperties": false
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
         }
-    },
-    "additionalProperties": false
+    }
 }

@@ -1,0 +1,113 @@
+# audit-event
+
+Canonical schema for all audit log events.
+Defined in schemas/draft/audit-event.schema.json
+
+## Structures
+
+### audit-event
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `event_id` | `string` | Yes | Unique identifier for this audit event. |
+| `timestamp` | `string` | Yes | RFC3339 timestamp of when the event occurred. |
+| `event_type` | `string` | Yes | Free-form event category. |
+| `workflow` | `[AuditWorkflow]` | No |  |
+| `engine` | `[AuditEngine]` | No |  |
+| `plan_token` | `[PlanToken]` | No | Cryptographic binding between a flight-plan and its subsequent take-off. Defined in schemas/draft/plan-token.schema.json |
+| `artifacts` | `array` | No |  |
+| `policy` | `[AuditPolicy]` | No |  |
+| `approval` | `[AuditApproval]` | No |  |
+| `integrity_check` | `[AuditIntegrity]` | No |  |
+| `gateway` | `[AuditGateway]` | No |  |
+| `message` | `string` | No |  |
+| `severity` | `string` | No |  |
+
+### AuditWorkflow
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `workflow_id` | `string` | No |  |
+| `step_id` | `string` | No |  |
+| `mode` | `string` | No |  |
+
+### AuditEngine
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `engine_id` | `string` | No |  |
+| `receipt_id` | `string` | No |  |
+| `status` | `string` | No |  |
+| `error` | `string` | No |  |
+
+### PlanToken
+
+Cryptographic binding between a flight-plan and its subsequent take-off.
+Defined in schemas/draft/plan-token.schema.json
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `token` | `string` | Yes | Primary plan token identifier, e.g. SHA256 over all plan artifacts + context. |
+| `artifacts` | `array` | Yes | Per-artifact hashes that contributed to this plan token. |
+| `engine_id` | `string` | Yes | Engine identity that produced this plan. |
+| `protocol_version` | `string` | Yes | Engine protocol version used when this plan was produced. |
+| `workspace_hash` | `string` | Yes | Hash of the workspace state when the plan was created. |
+| `created_at` | `string` | Yes | Timestamp when the plan was created (RFC3339). |
+
+### PlanArtifactHash
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `name` | `string` | Yes |  |
+| `hash` | `string` | Yes |  |
+| `size` | `number` | No |  |
+
+### AuditArtifact
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `name` | `string` | No |  |
+| `role` | `string` | No |  |
+| `path` | `string` | No |  |
+| `hash` | `string` | No |  |
+| `size` | `number` | No |  |
+
+### AuditPolicy
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `decision` | `string` | No |  |
+| `violations` | `array` | No |  |
+| `warnings` | `array` | No |  |
+| `engine` | `string` | No |  |
+
+### AuditApproval
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `approval_id` | `string` | No |  |
+| `required_role` | `string` | No |  |
+| `approved` | `boolean` | No |  |
+| `approver` | `string` | No |  |
+| `reason` | `string` | No |  |
+
+### AuditIntegrity
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `expected_plan_token` | `string` | No |  |
+| `actual_plan_token` | `string` | No |  |
+| `plan_token_match` | `boolean` | No |  |
+| `artifacts_match` | `boolean` | No |  |
+| `differences` | `array` | No |  |
+
+### AuditGateway
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `gateway_type` | `string` | No |  |
+| `request_id` | `string` | No |  |
+| `model` | `string` | No |  |
+| `tool` | `string` | No |  |
+| `policy_decision` | `string` | No |  |
+

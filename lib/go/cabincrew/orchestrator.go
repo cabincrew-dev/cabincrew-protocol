@@ -1,66 +1,87 @@
 package cabincrew
 
-// PreflightInput is input given to the preflight (policy) stage.
-// Defined in schemas/draft/orchestrator.schema.json
-type PreflightInput struct {
-	WorkflowID   string                 `json:"workflow_id"`
-	StepID       string                 `json:"step_id"`
-	Mode         string                 `json:"mode"`
-	EngineOutput map[string]interface{} `json:"engine_output"`
-	Evidence     []PreflightEvidence    `json:"evidence,omitempty"`
-	Context      map[string]interface{} `json:"context,omitempty"`
-	PlanToken    *PlanToken             `json:"plan_token,omitempty"`
+type ApprovalRequest struct {
+	ApprovalID    string              `json:"approval_id"`
+	EngineOutput  *EngineOutputClass  `json:"engine_output,omitempty"`
+	Evidence      []PreflightEvidence `json:"evidence,omitempty"`
+	PlanTokenHash *string             `json:"plan_token_hash,omitempty"`
+	Reason        string              `json:"reason"`
+	RequiredRole  string              `json:"required_role"`
+	StepID        string              `json:"step_id"`
+	WorkflowID    string              `json:"workflow_id"`
 }
 
 type PreflightEvidence struct {
+	Hash string `json:"hash"`
 	Name string `json:"name"`
 	Path string `json:"path"`
-	Hash string `json:"hash"`
 }
 
-// PreflightOutput is unified decision structure emitted after OPA/ONNX evaluation.
-// Defined in schemas/draft/orchestrator.schema.json
+type ApprovalResponse struct {
+	ApprovalID string  `json:"approval_id"`
+	Approved   bool    `json:"approved"`
+	Approver   *string `json:"approver,omitempty"`
+	Reason     *string `json:"reason,omitempty"`
+	Timestamp  *string `json:"timestamp,omitempty"`
+}
+
+type PreflightInput struct {
+	Context                                                                    *EngineOutputClass       `json:"context,omitempty"`
+	EngineOutput                                                               EngineOutputClass        `json:"engine_output"`
+	Evidence                                                                   []PreflightEvidence      `json:"evidence,omitempty"`
+	Mode                                                                       Mode                     `json:"mode"`
+	// Cryptographic binding between a flight-plan and its subsequent take-off.                         
+	// Defined in schemas/draft/plan-token.schema.json                                                  
+	PlanToken                                                                  *PlanToken `json:"plan_token,omitempty"`
+	StepID                                                                     string                   `json:"step_id"`
+	WorkflowID                                                                 string                   `json:"workflow_id"`
+}
+
+// Cryptographic binding between a flight-plan and its subsequent take-off.
+// Defined in schemas/draft/plan-token.schema.json
 type PreflightOutput struct {
-	Decision   string             `json:"decision"` // ALLOW, WARN, REQUIRE_APPROVAL, DENY
-	Violations []string           `json:"violations,omitempty"`
-	Warnings   []string           `json:"warnings,omitempty"`
-	Requires   *PreflightRequires `json:"requires,omitempty"`
+	Decision   PreflightOutputDecision `json:"decision"`
+	Requires   *PreflightRequires      `json:"requires,omitempty"`
+	Violations []string                `json:"violations,omitempty"`
+	Warnings   []string                `json:"warnings,omitempty"`
 }
 
 type PreflightRequires struct {
-	Role   string `json:"role,omitempty"`
-	Reason string `json:"reason,omitempty"`
+	Reason *string `json:"reason,omitempty"`
+	Role   *string `json:"role,omitempty"`
 }
 
-// ApprovalRequest is approval packet sent to a human or approval system.
-// Defined in schemas/draft/orchestrator.schema.json
-type ApprovalRequest struct {
-	ApprovalID    string                 `json:"approval_id"`
-	WorkflowID    string                 `json:"workflow_id"`
-	StepID        string                 `json:"step_id"`
-	Reason        string                 `json:"reason"`
-	RequiredRole  string                 `json:"required_role"`
-	EngineOutput  map[string]interface{} `json:"engine_output,omitempty"`
-	Evidence      []PreflightEvidence    `json:"evidence,omitempty"`
-	PlanTokenHash string                 `json:"plan_token_hash,omitempty"`
-}
-
-// ApprovalResponse is response from the human approver or approval system.
-// Defined in schemas/draft/orchestrator.schema.json
-type ApprovalResponse struct {
-	ApprovalID string `json:"approval_id"`
-	Approved   bool   `json:"approved"`
-	Approver   string `json:"approver,omitempty"`
-	Reason     string `json:"reason,omitempty"`
-	Timestamp  string `json:"timestamp,omitempty"`
-}
-
-// WorkflowState is state machine snapshot for the orchestrator.
-// Defined in schemas/draft/orchestrator.schema.json
 type WorkflowState struct {
-	State         string `json:"state"`
-	WorkflowID    string `json:"workflow_id,omitempty"`
-	StepID        string `json:"step_id,omitempty"`
-	LastDecision  string `json:"last_decision,omitempty"`
-	PlanTokenHash string `json:"plan_token_hash,omitempty"`
+	LastDecision  *string `json:"last_decision,omitempty"`
+	PlanTokenHash *string `json:"plan_token_hash,omitempty"`
+	State         State   `json:"state"`
+	StepID        *string `json:"step_id,omitempty"`
+	WorkflowID    *string `json:"workflow_id,omitempty"`
 }
+
+// Cryptographic binding between a flight-plan and its subsequent take-off.
+// Defined in schemas/draft/plan-token.schema.json
+type PreflightOutputDecision string
+
+const (
+	DecisionALLOW           PreflightOutputDecision = "ALLOW"
+	DecisionDENY            PreflightOutputDecision = "DENY"
+	DecisionREQUIREAPPROVAL PreflightOutputDecision = "REQUIRE_APPROVAL"
+	DecisionWARN            PreflightOutputDecision = "WARN"
+)
+
+type State string
+
+const (
+	Approved         State = "APPROVED"
+	Completed        State = "COMPLETED"
+	Failed           State = "FAILED"
+	Init             State = "INIT"
+	PlanRunning      State = "PLAN_RUNNING"
+	PreFlightRunning State = "PRE_FLIGHT_RUNNING"
+	TakeoffRunning   State = "TAKEOFF_RUNNING"
+	WaitingApproval  State = "WAITING_APPROVAL"
+)
+
+// Inline content for small artifacts.
+// Can be string, object, array, or null.

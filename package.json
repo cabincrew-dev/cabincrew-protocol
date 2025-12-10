@@ -1,0 +1,19 @@
+{
+    "name": "cabincrew-protocol-root",
+    "private": true,
+    "scripts": {
+        "generate": "ts-node src/generate-schemas.ts",
+        "generate:go": "ts-node src/generate-go.ts",
+        "generate:nodejs": "ts-node src/generate-nodejs.ts",
+        "generate:python": "ts-node src/generate-python.ts"
+    },
+    "devDependencies": {
+        "@types/node": "^20.0.0",
+        "ts-node": "^10.9.1",
+        "typescript": "^5.0.0",
+        "typescript-json-schema": "^0.62.0"
+    },
+    "dependencies": {
+        "quicktype-core": "^23.2.6"
+    }
+}

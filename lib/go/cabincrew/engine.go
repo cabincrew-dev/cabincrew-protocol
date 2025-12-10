@@ -1,56 +1,67 @@
 package cabincrew
 
-// EngineInput defines the Input delivered via STDIN or CABINCREW_INPUT_FILE.
-// Defined in schemas/draft/engine.schema.json
 type EngineInput struct {
-	ProtocolVersion   string                 `json:"protocol_version"`
-	Mode              string                 `json:"mode"` // flight-plan, take-off
-	Meta              EngineMeta             `json:"meta"`
-	Config            map[string]interface{} `json:"config,omitempty"`
-	Secrets           map[string]interface{} `json:"secrets,omitempty"`
-	AllowedSecrets    []string               `json:"allowed_secrets,omitempty"`
-	Context           map[string]interface{} `json:"context,omitempty"`
-	Orchestrator      *EngineOrchestrator    `json:"orchestrator,omitempty"`
-	ExpectedPlanToken string                 `json:"expected_plan_token,omitempty"`
+	AllowedSecrets                                 []string               `json:"allowed_secrets,omitempty"`
+	Config                                         map[string]interface{} `json:"config,omitempty"`
+	Context                                        map[string]interface{} `json:"context,omitempty"`
+	ExpectedPlanToken                              *string                `json:"expected_plan_token,omitempty"`
+	Meta                                           EngineMeta             `json:"meta"`
+	// Execution mode: 'flight-plan' or 'take-off'.                       
+	Mode                                           string                 `json:"mode"`
+	Orchestrator                                   *EngineOrchestrator    `json:"orchestrator,omitempty"`
+	ProtocolVersion                                string                 `json:"protocol_version"`
+	Secrets                                        map[string]interface{} `json:"secrets,omitempty"`
 }
 
 type EngineMeta struct {
-	WorkflowID string `json:"workflow_id"`
 	StepID     string `json:"step_id"`
+	WorkflowID string `json:"workflow_id"`
 }
 
 type EngineOrchestrator struct {
-	RunIndex      float64 `json:"run_index,omitempty"`
-	WorkspaceHash string  `json:"workspace_hash,omitempty"`
-	ArtifactsSalt string  `json:"artifacts_salt,omitempty"`
+	ArtifactsSalt *string  `json:"artifacts_salt,omitempty"`
+	RunIndex      *float64 `json:"run_index,omitempty"`
+	WorkspaceHash *string  `json:"workspace_hash,omitempty"`
 }
 
-// EngineOutput defines the Output delivered via STDOUT or CABINCREW_OUTPUT_FILE.
+// Output delivered via STDOUT or CABINCREW_OUTPUT_FILE.
 // Defined in schemas/draft/engine.schema.json
 type EngineOutput struct {
-	ProtocolVersion string           `json:"protocol_version"`
-	EngineID        string           `json:"engine_id"`
-	Mode            string           `json:"mode"`
-	ReceiptID       string           `json:"receipt_id"`
-	Status          string           `json:"status"` // success, failure
-	Error           string           `json:"error,omitempty"`
-	Warnings        []string         `json:"warnings,omitempty"`
-	Diagnostics     interface{}      `json:"diagnostics,omitempty"`
-	Artifacts       []EngineArtifact `json:"artifacts,omitempty"`
-	Metrics         []EngineMetric   `json:"metrics,omitempty"`
-	PlanToken       string           `json:"plan_token,omitempty"`
+	Artifacts                                         []EngineArtifact `json:"artifacts,omitempty"`
+	Diagnostics                                       interface{}      `json:"diagnostics"`
+	EngineID                                          string           `json:"engine_id"`
+	Error                                             *string          `json:"error,omitempty"`
+	Metrics                                           []EngineMetric   `json:"metrics,omitempty"`
+	Mode                                              string           `json:"mode"`
+	// SHA256 hash referencing a plan-token.json file.                 
+	PlanToken                                         *string          `json:"plan_token,omitempty"`
+	ProtocolVersion                                   string           `json:"protocol_version"`
+	ReceiptID                                         string           `json:"receipt_id"`
+	// Execution status: 'success' or 'failure'.                       
+	Status                                            string           `json:"status"`
+	Warnings                                          []string         `json:"warnings,omitempty"`
 }
 
 type EngineArtifact struct {
-	Name string  `json:"name"`
-	Role string  `json:"role"`
-	Path string  `json:"path"`
-	Hash string  `json:"hash"`
-	Size float64 `json:"size,omitempty"`
+	Hash string   `json:"hash"`
+	Name string   `json:"name"`
+	Path string   `json:"path"`
+	Role string   `json:"role"`
+	Size *float64 `json:"size,omitempty"`
 }
 
 type EngineMetric struct {
 	Name  string                 `json:"name"`
-	Value float64                `json:"value"`
 	Tags  map[string]interface{} `json:"tags,omitempty"`
+	Value float64                `json:"value"`
 }
+
+type EngineOutputClass struct {
+}
+
+type Mode string
+
+const (
+	FlightPlan Mode = "flight-plan"
+	TakeOff    Mode = "take-off"
+)

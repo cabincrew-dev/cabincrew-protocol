@@ -1,59 +1,64 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "PlanToken",
-    "version": "2025-02-01-draft",
-    "description": "Cryptographic binding between a flight-plan and its subsequent take-off.",
+    "description": "Cryptographic binding between a flight-plan and its subsequent take-off.\nDefined in schemas/draft/plan-token.schema.json",
     "type": "object",
     "properties": {
         "token": {
-            "type": "string",
-            "description": "Primary plan token identifier, e.g. SHA256 over all plan artifacts + context."
+            "description": "Primary plan token identifier, e.g. SHA256 over all plan artifacts + context.",
+            "type": "string"
         },
         "artifacts": {
-            "type": "array",
             "description": "Per-artifact hashes that contributed to this plan token.",
+            "type": "array",
             "items": {
-                "type": "object",
-                "properties": {
-                    "name": {
-                        "type": "string"
-                    },
-                    "hash": {
-                        "type": "string"
-                    },
-                    "size": {
-                        "type": "number"
-                    }
-                },
-                "required": [
-                    "name",
-                    "hash"
-                ]
+                "$ref": "#/definitions/PlanArtifactHash"
             }
         },
         "engine_id": {
-            "type": "string",
-            "description": "Engine identity that produced this plan."
+            "description": "Engine identity that produced this plan.",
+            "type": "string"
         },
         "protocol_version": {
-            "type": "string",
-            "description": "Engine protocol version used when this plan was produced."
+            "description": "Engine protocol version used when this plan was produced.",
+            "type": "string"
         },
         "workspace_hash": {
-            "type": "string",
-            "description": "Hash of the workspace state when the plan was created."
+            "description": "Hash of the workspace state when the plan was created.",
+            "type": "string"
         },
         "created_at": {
-            "type": "string",
-            "description": "Timestamp when the plan was created (RFC3339)."
+            "description": "Timestamp when the plan was created (RFC3339).",
+            "type": "string"
         }
     },
+    "additionalProperties": false,
     "required": [
-        "token",
         "artifacts",
+        "created_at",
         "engine_id",
         "protocol_version",
+        "token",
         "workspace_hash"
     ],
-    "additionalProperties": false
+    "definitions": {
+        "PlanArtifactHash": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "hash": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "number"
+                }
+            },
+            "additionalProperties": false,
+            "required": [
+                "hash",
+                "name"
+            ]
+        }
+    },
+    "$schema": "http://json-schema.org/draft-07/schema#"
 }

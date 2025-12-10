@@ -1,0 +1,57 @@
+# llm-gateway
+
+## Structures
+
+### Record<string,any>
+
+### LLMGatewayRequest
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `request_id` | `string` | Yes |  |
+| `timestamp` | `string` | Yes |  |
+| `source` | `string` | No |  |
+| `model` | `string` | Yes |  |
+| `provider` | `string` | No |  |
+| `input` | `[Record<string,any>]` | Yes |  |
+| `context` | `[Record<string,any>]` | No |  |
+
+### GatewayApproval
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `approval_id` | `string` | No |  |
+| `required_role` | `string` | No |  |
+| `reason` | `string` | No |  |
+
+### LLMGatewayResponse
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `request_id` | `string` | Yes |  |
+| `timestamp` | `string` | Yes |  |
+| `decision` | `string` | Yes |  |
+| `warnings` | `array` | No |  |
+| `violations` | `array` | No |  |
+| `approval` | `[GatewayApproval]` | No |  |
+| `routed_model` | `string` | No |  |
+| `rewritten_input` | `[Record<string,any>]` | No |  |
+| `gateway_payload` | `[Record<string,any>]` | No |  |
+
+### LLMGatewayRule
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `match` | `[Record<string,any>]` | Yes |  |
+| `action` | `string` | Yes |  |
+| `metadata` | `[Record<string,any>]` | No |  |
+
+### LLMGatewayPolicyConfig
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `opa_policies` | `array` | No |  |
+| `onnx_models` | `array` | No |  |
+| `model_routing` | `[Record<string,any>]` | No |  |
+| `rules` | `array` | No |  |
+
