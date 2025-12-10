@@ -13,6 +13,8 @@ export interface EngineOrchestrator {
     artifacts_salt?: string;
 }
 
+export type Mode = 'flight-plan' | 'take-off';
+
 /**
  * Input delivered via STDIN or CABINCREW_INPUT_FILE.
  * Defined in schemas/draft/engine.schema.json
@@ -22,7 +24,7 @@ export interface EngineInput {
     /**
      * Execution mode: 'flight-plan' or 'take-off'.
      */
-    mode: string;
+    mode: Mode;
     meta: EngineMeta;
     config?: AnyMap;
     secrets?: AnyMap;
@@ -58,7 +60,7 @@ export interface EngineMetric {
 export interface EngineOutput {
     protocol_version: string;
     engine_id: string;
-    mode: string;
+    mode: Mode;
     receipt_id: string;
     /**
      * Execution status: 'success' or 'failure'.

@@ -1,5 +1,7 @@
 import { PlanToken } from './plantoken';
 
+export type RecordStringAny = Record<string, any>;
+
 export interface PreflightEvidence {
     name: string;
     path: string;
@@ -21,8 +23,10 @@ export interface PreflightRequires {
     reason?: string;
 }
 
+export type Decision = 'allow' | 'warn' | 'require_approval' | 'deny';
+
 export interface PreflightOutput {
-    decision: 'ALLOW' | 'WARN' | 'REQUIRE_APPROVAL' | 'DENY';
+    decision: Decision;
     violations?: string[];
     warnings?: string[];
     requires?: PreflightRequires;
@@ -47,8 +51,10 @@ export interface ApprovalResponse {
     timestamp?: string;
 }
 
+export type State = 'INIT' | 'PLAN_RUNNING' | 'PLAN_GENERATED' | 'ARTIFACTS_VALIDATED' | 'TOKEN_CREATED' | 'PRE_FLIGHT_RUNNING' | 'PREFLIGHT_COMPLETE' | 'AWAITING_APPROVAL' | 'APPROVED' | 'READY_FOR_TAKEOFF' | 'TAKEOFF_RUNNING' | 'EXECUTION_COMPLETE' | 'COMPLETED' | 'FAILED';
+
 export interface WorkflowState {
-    state: 'INIT' | 'PLAN_RUNNING' | 'PLAN_GENERATED' | 'ARTIFACTS_VALIDATED' | 'TOKEN_CREATED' | 'PRE_FLIGHT_RUNNING' | 'PREFLIGHT_COMPLETE' | 'AWAITING_APPROVAL' | 'APPROVED' | 'READY_FOR_TAKEOFF' | 'TAKEOFF_RUNNING' | 'EXECUTION_COMPLETE' | 'COMPLETED' | 'FAILED';
+    state: State;
     workflow_id?: string;
     step_id?: string;
     last_decision?: string;

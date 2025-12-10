@@ -1,0 +1,1028 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "Artifact": {
+      "description": "Canonical artifact interface.\nDefined in schemas/draft/artifact.schema.json",
+      "type": "object",
+      "properties": {
+        "artifact_type": {
+          "description": "Type of artifact (file, diff, patch, action, message, etc). Free-form and engine-defined.",
+          "type": "string"
+        },
+        "action": {
+          "description": "Operation to perform with this artifact (create, update, delete, apply, execute, etc). Free-form and engine-defined.",
+          "type": "string"
+        },
+        "target": {
+          "description": "Path, resource, or identifier this artifact applies to. Optional.",
+          "type": "string"
+        },
+        "mime": {
+          "description": "MIME type describing content.",
+          "type": "string"
+        },
+        "body": {
+          "description": "Inline content for small artifacts.\nCan be string, object, array, or null.",
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            },
+            {
+              "type": "array",
+              "items": {}
+            },
+            {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          ]
+        },
+        "body_file": {
+          "description": "Indicates an external data file within the artifact directory.",
+          "type": "string"
+        },
+        "metadata": {
+          "description": "Arbitrary metadata. Optional.",
+          "$ref": "#/definitions/Record<string,any>"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "action",
+        "artifact_type",
+        "mime"
+      ]
+    },
+    "PlanArtifactHash": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "hash": {
+          "type": "string"
+        },
+        "size": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "hash",
+        "name"
+      ]
+    },
+    "PlanToken": {
+      "description": "Cryptographic binding between a flight-plan and its subsequent take-off.\nDefined in schemas/draft/plan-token.schema.json",
+      "type": "object",
+      "properties": {
+        "token": {
+          "description": "Primary plan token identifier, e.g. SHA256 over all plan artifacts + context.",
+          "type": "string"
+        },
+        "artifacts": {
+          "description": "Per-artifact hashes that contributed to this plan token.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PlanArtifactHash"
+          }
+        },
+        "model": {
+          "description": "AI Model identifier used to generate this plan (e.g. 'gpt-4', 'claude-3').\nRequired for provenance.",
+          "type": "string"
+        },
+        "engine_id": {
+          "description": "Engine identity that produced this plan.",
+          "type": "string"
+        },
+        "protocol_version": {
+          "description": "Engine protocol version used when this plan was produced.",
+          "type": "string"
+        },
+        "workspace_hash": {
+          "description": "Hash of the workspace state when the plan was created.",
+          "type": "string"
+        },
+        "created_at": {
+          "description": "Timestamp when the plan was created (RFC3339).",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "artifacts",
+        "created_at",
+        "engine_id",
+        "model",
+        "protocol_version",
+        "token",
+        "workspace_hash"
+      ]
+    },
+    "AuditWorkflow": {
+      "type": "object",
+      "properties": {
+        "workflow_id": {
+          "type": "string"
+        },
+        "step_id": {
+          "type": "string"
+        },
+        "mode": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "AuditEngine": {
+      "type": "object",
+      "properties": {
+        "engine_id": {
+          "type": "string"
+        },
+        "receipt_id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "AuditArtifact": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "hash": {
+          "type": "string"
+        },
+        "size": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false
+    },
+    "AuditPolicy": {
+      "type": "object",
+      "properties": {
+        "decision": {
+          "type": "string"
+        },
+        "violations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "engine": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "AuditApproval": {
+      "type": "object",
+      "properties": {
+        "approval_id": {
+          "type": "string"
+        },
+        "required_role": {
+          "type": "string"
+        },
+        "approved": {
+          "type": "boolean"
+        },
+        "approver": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "AuditIntegrity": {
+      "type": "object",
+      "properties": {
+        "expected_plan_token": {
+          "type": "string"
+        },
+        "actual_plan_token": {
+          "type": "string"
+        },
+        "plan_token_match": {
+          "type": "boolean"
+        },
+        "artifacts_match": {
+          "type": "boolean"
+        },
+        "differences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "AuditGateway": {
+      "type": "object",
+      "properties": {
+        "gateway_type": {
+          "type": "string"
+        },
+        "request_id": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "tool": {
+          "type": "string"
+        },
+        "policy_decision": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "AuditEvent": {
+      "description": "Canonical schema for all audit log events.\nDefined in schemas/draft/audit-event.schema.json",
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "description": "Unique identifier for this audit event.",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "RFC3339 timestamp of when the event occurred.",
+          "type": "string"
+        },
+        "event_type": {
+          "description": "Free-form event category.",
+          "type": "string"
+        },
+        "workflow": {
+          "$ref": "#/definitions/AuditWorkflow"
+        },
+        "engine": {
+          "$ref": "#/definitions/AuditEngine"
+        },
+        "plan_token": {
+          "description": "Cryptographic binding between a flight-plan and its subsequent take-off.\nDefined in schemas/draft/plan-token.schema.json",
+          "$ref": "#/definitions/PlanToken"
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AuditArtifact"
+          }
+        },
+        "policy": {
+          "$ref": "#/definitions/AuditPolicy"
+        },
+        "approval": {
+          "$ref": "#/definitions/AuditApproval"
+        },
+        "integrity_check": {
+          "$ref": "#/definitions/AuditIntegrity"
+        },
+        "gateway": {
+          "$ref": "#/definitions/AuditGateway"
+        },
+        "signature": {
+          "description": "Cryptographic signature of this event hash.",
+          "type": "string"
+        },
+        "signature_key_ref": {
+          "description": "Reference to the key used for signing (e.g. 'engine-key-1', 'orchestrator-key-prod').",
+          "type": "string"
+        },
+        "chain_hash": {
+          "description": "Hash of the previous event in the chain. Allows for ledger-style verification.",
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "critical",
+            "debug",
+            "error",
+            "info",
+            "warning"
+          ],
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "event_id",
+        "event_type",
+        "timestamp"
+      ]
+    },
+    "AnyMap": {
+      "type": "object",
+      "additionalProperties": {}
+    },
+    "EngineMeta": {
+      "type": "object",
+      "properties": {
+        "workflow_id": {
+          "type": "string"
+        },
+        "step_id": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "step_id",
+        "workflow_id"
+      ]
+    },
+    "EngineOrchestrator": {
+      "type": "object",
+      "properties": {
+        "run_index": {
+          "type": "number"
+        },
+        "workspace_hash": {
+          "type": "string"
+        },
+        "artifacts_salt": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "EngineInput": {
+      "description": "Input delivered via STDIN or CABINCREW_INPUT_FILE.\nDefined in schemas/draft/engine.schema.json",
+      "type": "object",
+      "properties": {
+        "protocol_version": {
+          "type": "string"
+        },
+        "mode": {
+          "$ref": "#/definitions/Mode",
+          "description": "Execution mode: 'flight-plan' or 'take-off'."
+        },
+        "meta": {
+          "$ref": "#/definitions/EngineMeta"
+        },
+        "config": {
+          "$ref": "#/definitions/AnyMap"
+        },
+        "secrets": {
+          "$ref": "#/definitions/AnyMap"
+        },
+        "allowed_secrets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "context": {
+          "$ref": "#/definitions/AnyMap"
+        },
+        "identity_token": {
+          "description": "Ephemeral identity token (e.g. OIDC, JWT) for the workload.\nPreferred over static secrets.",
+          "type": "string"
+        },
+        "orchestrator": {
+          "$ref": "#/definitions/EngineOrchestrator"
+        },
+        "expected_plan_token": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "meta",
+        "mode",
+        "protocol_version"
+      ]
+    },
+    "EngineArtifact": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "hash": {
+          "type": "string"
+        },
+        "size": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "hash",
+        "name",
+        "path",
+        "role"
+      ]
+    },
+    "EngineMetric": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "number"
+        },
+        "tags": {
+          "$ref": "#/definitions/AnyMap"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "value"
+      ]
+    },
+    "EngineOutput": {
+      "description": "Output delivered via STDOUT or CABINCREW_OUTPUT_FILE.\nDefined in schemas/draft/engine.schema.json",
+      "type": "object",
+      "properties": {
+        "protocol_version": {
+          "type": "string"
+        },
+        "engine_id": {
+          "type": "string"
+        },
+        "mode": {
+          "$ref": "#/definitions/Mode"
+        },
+        "receipt_id": {
+          "type": "string"
+        },
+        "status": {
+          "description": "Execution status: 'success' or 'failure'.",
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "diagnostics": {},
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EngineArtifact"
+          }
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EngineMetric"
+          }
+        },
+        "plan_token": {
+          "description": "SHA256 hash referencing a plan-token.json file.",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "engine_id",
+        "mode",
+        "protocol_version",
+        "receipt_id",
+        "status"
+      ]
+    },
+    "LLMGatewayRequest": {
+      "type": "object",
+      "properties": {
+        "request_id": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "input": {
+          "$ref": "#/definitions/Record<string,any>"
+        },
+        "context": {
+          "$ref": "#/definitions/Record<string,any>"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "input",
+        "model",
+        "request_id",
+        "timestamp"
+      ]
+    },
+    "GatewayApproval": {
+      "type": "object",
+      "properties": {
+        "approval_id": {
+          "type": "string"
+        },
+        "required_role": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "LLMGatewayResponse": {
+      "type": "object",
+      "properties": {
+        "request_id": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string"
+        },
+        "decision": {
+          "enum": [
+            "allow",
+            "deny",
+            "require_approval",
+            "warn"
+          ],
+          "type": "string"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "violations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "approval": {
+          "$ref": "#/definitions/GatewayApproval"
+        },
+        "routed_model": {
+          "type": "string"
+        },
+        "rewritten_input": {
+          "$ref": "#/definitions/Record<string,any>"
+        },
+        "gateway_payload": {
+          "$ref": "#/definitions/Record<string,any>"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "decision",
+        "request_id",
+        "timestamp"
+      ]
+    },
+    "LLMGatewayRule": {
+      "type": "object",
+      "properties": {
+        "match": {
+          "$ref": "#/definitions/Record<string,any>"
+        },
+        "action": {
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/Record<string,any>"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "action",
+        "match"
+      ]
+    },
+    "LLMGatewayPolicyConfig": {
+      "type": "object",
+      "properties": {
+        "opa_policies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "onnx_models": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "model_routing": {
+          "$ref": "#/definitions/Record<string,any>"
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LLMGatewayRule"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "MCPGatewayRequest": {
+      "type": "object",
+      "properties": {
+        "request_id": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "server_id": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/Record<string,any>"
+        },
+        "context": {
+          "$ref": "#/definitions/Record<string,any>"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "request_id",
+        "server_id",
+        "timestamp"
+      ]
+    },
+    "MCPGatewayResponse": {
+      "type": "object",
+      "properties": {
+        "request_id": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string"
+        },
+        "decision": {
+          "enum": [
+            "allow",
+            "deny",
+            "require_approval",
+            "warn"
+          ],
+          "type": "string"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "violations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "approval": {
+          "$ref": "#/definitions/GatewayApproval"
+        },
+        "rewritten_request": {
+          "$ref": "#/definitions/Record<string,any>"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "decision",
+        "request_id",
+        "timestamp"
+      ]
+    },
+    "MCPGatewayRule": {
+      "type": "object",
+      "properties": {
+        "match": {
+          "$ref": "#/definitions/Record<string,any>"
+        },
+        "action": {
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/Record<string,any>"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "action",
+        "match"
+      ]
+    },
+    "MCPGatewayPolicyConfig": {
+      "type": "object",
+      "properties": {
+        "opa_policies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "onnx_models": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MCPGatewayRule"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "RecordStringAny": {
+      "type": "object",
+      "additionalProperties": false
+    },
+    "PreflightEvidence": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "hash": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "hash",
+        "name",
+        "path"
+      ]
+    },
+    "PreflightInput": {
+      "type": "object",
+      "properties": {
+        "workflow_id": {
+          "type": "string"
+        },
+        "step_id": {
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "flight-plan",
+            "take-off"
+          ],
+          "type": "string"
+        },
+        "engine_output": {
+          "$ref": "#/definitions/Record<string,any>"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PreflightEvidence"
+          }
+        },
+        "context": {
+          "$ref": "#/definitions/Record<string,any>"
+        },
+        "plan_token": {
+          "description": "Cryptographic binding between a flight-plan and its subsequent take-off.\nDefined in schemas/draft/plan-token.schema.json",
+          "$ref": "#/definitions/PlanToken"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "engine_output",
+        "mode",
+        "step_id",
+        "workflow_id"
+      ]
+    },
+    "PreflightRequires": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Decision": {
+      "enum": [
+        "allow",
+        "deny",
+        "require_approval",
+        "warn"
+      ],
+      "type": "string"
+    },
+    "PreflightOutput": {
+      "type": "object",
+      "properties": {
+        "decision": {
+          "$ref": "#/definitions/Decision"
+        },
+        "violations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "requires": {
+          "$ref": "#/definitions/PreflightRequires"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "decision"
+      ]
+    },
+    "ApprovalRequest": {
+      "type": "object",
+      "properties": {
+        "approval_id": {
+          "type": "string"
+        },
+        "workflow_id": {
+          "type": "string"
+        },
+        "step_id": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "required_role": {
+          "type": "string"
+        },
+        "engine_output": {
+          "$ref": "#/definitions/Record<string,any>"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PreflightEvidence"
+          }
+        },
+        "plan_token_hash": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "approval_id",
+        "reason",
+        "required_role",
+        "step_id",
+        "workflow_id"
+      ]
+    },
+    "ApprovalResponse": {
+      "type": "object",
+      "properties": {
+        "approval_id": {
+          "type": "string"
+        },
+        "approved": {
+          "type": "boolean"
+        },
+        "approver": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "approval_id",
+        "approved"
+      ]
+    },
+    "State": {
+      "enum": [
+        "APPROVED",
+        "ARTIFACTS_VALIDATED",
+        "AWAITING_APPROVAL",
+        "COMPLETED",
+        "EXECUTION_COMPLETE",
+        "FAILED",
+        "INIT",
+        "PLAN_GENERATED",
+        "PLAN_RUNNING",
+        "PREFLIGHT_COMPLETE",
+        "PRE_FLIGHT_RUNNING",
+        "READY_FOR_TAKEOFF",
+        "TAKEOFF_RUNNING",
+        "TOKEN_CREATED"
+      ],
+      "type": "string"
+    },
+    "WorkflowState": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "$ref": "#/definitions/State"
+        },
+        "workflow_id": {
+          "type": "string"
+        },
+        "step_id": {
+          "type": "string"
+        },
+        "last_decision": {
+          "type": "string"
+        },
+        "plan_token_hash": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "state"
+      ]
+    },
+    "Record<string,any>": {
+      "type": "object",
+      "additionalProperties": false
+    },
+    "Mode": {
+      "enum": [
+        "flight-plan",
+        "take-off"
+      ],
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,391 @@
+# Schema Reference
+
+{/* @category JSON-RPC */}
+## JSON-RPC
+
+### EngineInput
+
+Input delivered via STDIN or CABINCREW_INPUT_FILE.
+Defined in schemas/draft/engine.schema.json
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `protocol_version` | `string` | Yes |  |
+| `mode` | `[Mode]` | Yes | Execution mode: 'flight-plan' or 'take-off'. |
+| `meta` | `[EngineMeta]` | Yes |  |
+| `config` | `[AnyMap]` | No |  |
+| `secrets` | `[AnyMap]` | No |  |
+| `allowed_secrets` | `array` | No |  |
+| `context` | `[AnyMap]` | No |  |
+| `identity_token` | `string` | No | Ephemeral identity token (e.g. OIDC, JWT) for the workload. Preferred over static secrets. |
+| `orchestrator` | `[EngineOrchestrator]` | No |  |
+| `expected_plan_token` | `string` | No |  |
+
+### EngineOutput
+
+Output delivered via STDOUT or CABINCREW_OUTPUT_FILE.
+Defined in schemas/draft/engine.schema.json
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `protocol_version` | `string` | Yes |  |
+| `engine_id` | `string` | Yes |  |
+| `mode` | `[Mode]` | Yes |  |
+| `receipt_id` | `string` | Yes |  |
+| `status` | `string` | Yes | Execution status: 'success' or 'failure'. |
+| `error` | `string` | No |  |
+| `warnings` | `array` | No |  |
+| `diagnostics` | `any` | No |  |
+| `artifacts` | `array` | No |  |
+| `metrics` | `array` | No |  |
+| `plan_token` | `string` | No | SHA256 hash referencing a plan-token.json file. |
+
+### EngineMeta
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `workflow_id` | `string` | Yes |  |
+| `step_id` | `string` | Yes |  |
+
+### EngineOrchestrator
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `run_index` | `number` | No |  |
+| `workspace_hash` | `string` | No |  |
+| `artifacts_salt` | `string` | No |  |
+
+### EngineArtifact
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `name` | `string` | Yes |  |
+| `role` | `string` | Yes |  |
+| `path` | `string` | Yes |  |
+| `hash` | `string` | Yes |  |
+| `size` | `number` | No |  |
+
+### EngineMetric
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `name` | `string` | Yes |  |
+| `value` | `number` | Yes |  |
+| `tags` | `[AnyMap]` | No |  |
+
+{/* @category Orchestration */}
+## Orchestration
+
+### PreflightInput
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `workflow_id` | `string` | Yes |  |
+| `step_id` | `string` | Yes |  |
+| `mode` | `string` | Yes |  |
+| `engine_output` | `[Record<string,any>]` | Yes |  |
+| `evidence` | `array` | No |  |
+| `context` | `[Record<string,any>]` | No |  |
+| `plan_token` | `[PlanToken]` | No | Cryptographic binding between a flight-plan and its subsequent take-off. Defined in schemas/draft/plan-token.schema.json |
+
+### PreflightOutput
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `decision` | `[Decision]` | Yes |  |
+| `violations` | `array` | No |  |
+| `warnings` | `array` | No |  |
+| `requires` | `[PreflightRequires]` | No |  |
+
+### ApprovalRequest
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `approval_id` | `string` | Yes |  |
+| `workflow_id` | `string` | Yes |  |
+| `step_id` | `string` | Yes |  |
+| `reason` | `string` | Yes |  |
+| `required_role` | `string` | Yes |  |
+| `engine_output` | `[Record<string,any>]` | No |  |
+| `evidence` | `array` | No |  |
+| `plan_token_hash` | `string` | No |  |
+
+### ApprovalResponse
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `approval_id` | `string` | Yes |  |
+| `approved` | `boolean` | Yes |  |
+| `approver` | `string` | No |  |
+| `reason` | `string` | No |  |
+| `timestamp` | `string` | No |  |
+
+### WorkflowState
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `state` | `[State]` | Yes |  |
+| `workflow_id` | `string` | No |  |
+| `step_id` | `string` | No |  |
+| `last_decision` | `string` | No |  |
+| `plan_token_hash` | `string` | No |  |
+
+### PreflightEvidence
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `name` | `string` | Yes |  |
+| `path` | `string` | Yes |  |
+| `hash` | `string` | Yes |  |
+
+### PreflightRequires
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `role` | `string` | No |  |
+| `reason` | `string` | No |  |
+
+{/* @category Security */}
+## Security
+
+### PlanToken
+
+Cryptographic binding between a flight-plan and its subsequent take-off.
+Defined in schemas/draft/plan-token.schema.json
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `token` | `string` | Yes | Primary plan token identifier, e.g. SHA256 over all plan artifacts + context. |
+| `artifacts` | `array` | Yes | Per-artifact hashes that contributed to this plan token. |
+| `model` | `string` | Yes | AI Model identifier used to generate this plan (e.g. 'gpt-4', 'claude-3'). Required for provenance. |
+| `engine_id` | `string` | Yes | Engine identity that produced this plan. |
+| `protocol_version` | `string` | Yes | Engine protocol version used when this plan was produced. |
+| `workspace_hash` | `string` | Yes | Hash of the workspace state when the plan was created. |
+| `created_at` | `string` | Yes | Timestamp when the plan was created (RFC3339). |
+
+### PlanArtifactHash
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `name` | `string` | Yes |  |
+| `hash` | `string` | Yes |  |
+| `size` | `number` | No |  |
+
+### AuditEvent
+
+Canonical schema for all audit log events.
+Defined in schemas/draft/audit-event.schema.json
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `event_id` | `string` | Yes | Unique identifier for this audit event. |
+| `timestamp` | `string` | Yes | RFC3339 timestamp of when the event occurred. |
+| `event_type` | `string` | Yes | Free-form event category. |
+| `workflow` | `[AuditWorkflow]` | No |  |
+| `engine` | `[AuditEngine]` | No |  |
+| `plan_token` | `[PlanToken]` | No | Cryptographic binding between a flight-plan and its subsequent take-off. Defined in schemas/draft/plan-token.schema.json |
+| `artifacts` | `array` | No |  |
+| `policy` | `[AuditPolicy]` | No |  |
+| `approval` | `[AuditApproval]` | No |  |
+| `integrity_check` | `[AuditIntegrity]` | No |  |
+| `gateway` | `[AuditGateway]` | No |  |
+| `signature` | `string` | No | Cryptographic signature of this event hash. |
+| `signature_key_ref` | `string` | No | Reference to the key used for signing (e.g. 'engine-key-1', 'orchestrator-key-prod'). |
+| `chain_hash` | `string` | No | Hash of the previous event in the chain. Allows for ledger-style verification. |
+| `message` | `string` | No |  |
+| `severity` | `string` | No |  |
+
+### AuditWorkflow
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `workflow_id` | `string` | No |  |
+| `step_id` | `string` | No |  |
+| `mode` | `string` | No |  |
+
+### AuditEngine
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `engine_id` | `string` | No |  |
+| `receipt_id` | `string` | No |  |
+| `status` | `string` | No |  |
+| `error` | `string` | No |  |
+
+### AuditArtifact
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `name` | `string` | No |  |
+| `role` | `string` | No |  |
+| `path` | `string` | No |  |
+| `hash` | `string` | No |  |
+| `size` | `number` | No |  |
+
+### AuditPolicy
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `decision` | `string` | No |  |
+| `violations` | `array` | No |  |
+| `warnings` | `array` | No |  |
+| `engine` | `string` | No |  |
+
+### AuditApproval
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `approval_id` | `string` | No |  |
+| `required_role` | `string` | No |  |
+| `approved` | `boolean` | No |  |
+| `approver` | `string` | No |  |
+| `reason` | `string` | No |  |
+
+### AuditIntegrity
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `expected_plan_token` | `string` | No |  |
+| `actual_plan_token` | `string` | No |  |
+| `plan_token_match` | `boolean` | No |  |
+| `artifacts_match` | `boolean` | No |  |
+| `differences` | `array` | No |  |
+
+### AuditGateway
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `gateway_type` | `string` | No |  |
+| `request_id` | `string` | No |  |
+| `model` | `string` | No |  |
+| `tool` | `string` | No |  |
+| `policy_decision` | `string` | No |  |
+
+{/* @category Gateways */}
+## Gateways
+
+### LLMGatewayRequest
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `request_id` | `string` | Yes |  |
+| `timestamp` | `string` | Yes |  |
+| `source` | `string` | No |  |
+| `model` | `string` | Yes |  |
+| `provider` | `string` | No |  |
+| `input` | `[Record<string,any>]` | Yes |  |
+| `context` | `[Record<string,any>]` | No |  |
+
+### LLMGatewayResponse
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `request_id` | `string` | Yes |  |
+| `timestamp` | `string` | Yes |  |
+| `decision` | `string` | Yes |  |
+| `warnings` | `array` | No |  |
+| `violations` | `array` | No |  |
+| `approval` | `[GatewayApproval]` | No |  |
+| `routed_model` | `string` | No |  |
+| `rewritten_input` | `[Record<string,any>]` | No |  |
+| `gateway_payload` | `[Record<string,any>]` | No |  |
+
+### LLMGatewayPolicyConfig
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `opa_policies` | `array` | No |  |
+| `onnx_models` | `array` | No |  |
+| `model_routing` | `[Record<string,any>]` | No |  |
+| `rules` | `array` | No |  |
+
+### LLMGatewayRule
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `match` | `[Record<string,any>]` | Yes |  |
+| `action` | `string` | Yes |  |
+| `metadata` | `[Record<string,any>]` | No |  |
+
+### GatewayApproval
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `approval_id` | `string` | No |  |
+| `required_role` | `string` | No |  |
+| `reason` | `string` | No |  |
+
+### MCPGatewayRequest
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `request_id` | `string` | Yes |  |
+| `timestamp` | `string` | Yes |  |
+| `source` | `string` | No |  |
+| `server_id` | `string` | Yes |  |
+| `method` | `string` | Yes |  |
+| `params` | `[Record<string,any>]` | No |  |
+| `context` | `[Record<string,any>]` | No |  |
+
+### MCPGatewayResponse
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `request_id` | `string` | Yes |  |
+| `timestamp` | `string` | Yes |  |
+| `decision` | `string` | Yes |  |
+| `warnings` | `array` | No |  |
+| `violations` | `array` | No |  |
+| `approval` | `[GatewayApproval]` | No |  |
+| `rewritten_request` | `[Record<string,any>]` | No |  |
+
+### MCPGatewayPolicyConfig
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `opa_policies` | `array` | No |  |
+| `onnx_models` | `array` | No |  |
+| `rules` | `array` | No |  |
+
+### MCPGatewayRule
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `match` | `[Record<string,any>]` | Yes |  |
+| `action` | `string` | Yes |  |
+| `metadata` | `[Record<string,any>]` | No |  |
+
+{/* @category Common Types */}
+## Common Types
+
+### Artifact
+
+Canonical artifact interface.
+Defined in schemas/draft/artifact.schema.json
+
+| Property | Type | Required | Description |
+|---|---|---|---|
+| `artifact_type` | `string` | Yes | Type of artifact (file, diff, patch, action, message, etc). Free-form and engine-defined. |
+| `action` | `string` | Yes | Operation to perform with this artifact (create, update, delete, apply, execute, etc). Free-form and engine-defined. |
+| `target` | `string` | No | Path, resource, or identifier this artifact applies to. Optional. |
+| `mime` | `string` | Yes | MIME type describing content. |
+| `body` | `complex` | No | Inline content for small artifacts. Can be string, object, array, or null. |
+| `body_file` | `string` | No | Indicates an external data file within the artifact directory. |
+| `metadata` | `[Record<string,any>]` | No | Arbitrary metadata. Optional. |
+
+### Mode
+
+**Enum values**: `flight-plan`, `take-off`
+
+### Decision
+
+**Enum values**: `allow`, `deny`, `require_approval`, `warn`
+
+### State
+
+**Enum values**: `APPROVED`, `ARTIFACTS_VALIDATED`, `AWAITING_APPROVAL`, `COMPLETED`, `EXECUTION_COMPLETE`, `FAILED`, `INIT`, `PLAN_GENERATED`, `PLAN_RUNNING`, `PREFLIGHT_COMPLETE`, `PRE_FLIGHT_RUNNING`, `READY_FOR_TAKEOFF`, `TAKEOFF_RUNNING`, `TOKEN_CREATED`
+
+### AnyMap
+
+### RecordStringAny
+
