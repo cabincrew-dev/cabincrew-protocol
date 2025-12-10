@@ -68,36 +68,67 @@ async function generate() {
 
     let pythonCode = lines.join("\n");
 
-    // Post-process: Remove = None defaults from required fields
-    // Quicktype generates all fields with = None, but required fields shouldn't have defaults
-    // This makes Python enforce required fields at instantiation time
+    // Post-process: Fix dataclass field ordering
+    // Python dataclasses require all fields without defaults to come before fields with defaults
+    // We need to:
+    // 1. Identify required fields from schema
+    // 2. Remove = None from required fields
+    // 3. Reorder fields within each class so required fields come first
 
-    // Load schema to get required field information
-    // (schemaContent and schema are already loaded above, but re-loading here for clarity as per instruction)
     const schemaContentForRequired = fs.readFileSync(SCHEMA_FILE, "utf8");
     const schemaForRequired = JSON.parse(schemaContentForRequired);
 
     if (schemaForRequired.definitions) {
         for (const [typeName, typeDef] of Object.entries(schemaForRequired.definitions)) {
-            if (typeof typeDef === 'object' && typeDef !== null && 'required' in typeDef) {
-                const requiredFields = (typeDef as any).required as string[];
-                if (requiredFields && requiredFields.length > 0) {
-                    // For each required field, remove the = None default
-                    for (const fieldName of requiredFields) {
-                        // Convert snake_case to match Python field names
-                        // Quicktype converts camelCase to snake_case for Python fields
-                        // Assuming fieldName from schema is camelCase or similar, and quicktype converts it.
-                        // For simplicity, using fieldName directly as per instruction,
-                        // but a more robust solution might involve a camelCase to snake_case conversion here.
-                        const pythonFieldName = fieldName;
+            if (typeof typeDef === 'object' && typeDef !== null && 'properties' in typeDef) {
+                const properties = (typeDef as any).properties || {};
+                const requiredFields = new Set((typeDef as any).required || []);
 
-                        // Match pattern: fieldname: Type = None
-                        // But NOT: fieldname: Optional[Type] = None (those should keep defaults)
-                        const pattern = new RegExp(
-                            `(\\s+${pythonFieldName}:\\s+(?!Optional)\\w+(?:\\[.*?\\])?)(\\s*=\\s*None)`,
-                            'g'
-                        );
-                        pythonCode = pythonCode.replace(pattern, '$1');
+                // Find the class definition in the generated code
+                const classRegex = new RegExp(`class ${typeName}[^:]*:\\s*(?:"""[^"]*"""\\s*)?([\\s\\S]*?)(?=\\n(?:class |def |\\Z))`, 'm');
+                const classMatch = pythonCode.match(classRegex);
+
+                if (classMatch && requiredFields.size > 0) {
+                    const classBody = classMatch[1];
+                    const fieldLines: Array<{ line: string, isRequired: boolean, fieldName: string }> = [];
+
+                    // Parse field lines
+                    const fieldRegex = /^    (\w+):\s*(.+?)(?:\s*=\s*None)?$/gm;
+                    let match;
+                    while ((match = fieldRegex.exec(classBody)) !== null) {
+                        const fieldName = match[1];
+                        const fieldType = match[2];
+                        const isRequired = requiredFields.has(fieldName);
+                        const hasDefault = classBody.includes(`${fieldName}:`) && classBody.includes(`= None`);
+
+                        // Reconstruct field line
+                        if (isRequired) {
+                            fieldLines.push({
+                                line: `    ${fieldName}: ${fieldType}`,
+                                isRequired: true,
+                                fieldName
+                            });
+                        } else {
+                            fieldLines.push({
+                                line: `    ${fieldName}: ${fieldType}${hasDefault ? ' = None' : ''}`,
+                                isRequired: false,
+                                fieldName
+                            });
+                        }
+                    }
+
+                    // Sort: required fields first, then optional
+                    fieldLines.sort((a, b) => {
+                        if (a.isRequired && !b.isRequired) return -1;
+                        if (!a.isRequired && b.isRequired) return 1;
+                        return 0;
+                    });
+
+                    // Rebuild class with reordered fields
+                    if (fieldLines.length > 0) {
+                        const newClassBody = fieldLines.map(f => f.line).join('\n');
+                        pythonCode = pythonCode.replace(classMatch[0],
+                            `class ${typeName}${classMatch[0].substring(classMatch[0].indexOf(':'), classMatch[0].indexOf(classBody))}${newClassBody}\n`);
                     }
                 }
             }
