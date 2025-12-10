@@ -255,6 +255,11 @@ class PlanToken:
     token: str = None
     """Primary plan token identifier, e.g. SHA256 over all plan artifacts + context."""
 
+    version: str = None
+    """Plan-token format version.
+    REQUIRED for forward-compatibility handshake in mixed-version deployments.
+    Format: "1", "2", etc. (semantic versioning for plan-token structure) = None
+    """
     workspace_hash: str = None
     """Hash of the workspace state when the plan was created."""
 

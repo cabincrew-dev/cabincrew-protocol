@@ -379,6 +379,12 @@ export interface PlanToken {
      */
     token: string;
     /**
+     * Plan-token format version.
+     * REQUIRED for forward-compatibility handshake in mixed-version deployments.
+     * Format: "1", "2", etc. (semantic versioning for plan-token structure)
+     */
+    version: string;
+    /**
      * Hash of the workspace state when the plan was created.
      */
     workspace_hash: string;

@@ -13,6 +13,13 @@ export interface PlanToken {
      * Primary plan token identifier, e.g. SHA256 over all plan artifacts + context.
      */
     token: string;
+
+    /**
+     * Plan-token format version.
+     * REQUIRED for forward-compatibility handshake in mixed-version deployments.
+     * Format: "1", "2", etc. (semantic versioning for plan-token structure)
+     */
+    version: string;
     /**
      * Per-artifact hashes that contributed to this plan token.
      */

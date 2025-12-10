@@ -279,6 +279,10 @@ type PlanToken struct {
 	ProtocolVersion                                                                 string             `json:"protocol_version"`
 	// Primary plan token identifier, e.g. SHA256 over all plan artifacts + context.                   
 	Token                                                                           string             `json:"token"`
+	// Plan-token format version.                                                                      
+	// REQUIRED for forward-compatibility handshake in mixed-version deployments.                      
+	// Format: "1", "2", etc. (semantic versioning for plan-token structure)                           
+	Version                                                                         string             `json:"version"`
 	// Hash of the workspace state when the plan was created.                                          
 	WorkspaceHash                                                                   string             `json:"workspace_hash"`
 }

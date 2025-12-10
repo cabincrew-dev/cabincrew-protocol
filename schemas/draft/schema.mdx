@@ -161,6 +161,7 @@ Extended with version and governance provenance for safe upgrades and auditabili
 | Property | Type | Required | Description |
 |---|---|---|---|
 | `token` | `string` | Yes | Primary plan token identifier, e.g. SHA256 over all plan artifacts + context. |
+| `version` | `string` | Yes | Plan-token format version. REQUIRED for forward-compatibility handshake in mixed-version deployments. Format: "1", "2", etc. (semantic versioning for plan-token structure) |
 | `artifacts` | `array` | Yes | Per-artifact hashes that contributed to this plan token. |
 | `model` | `string` | Yes | AI Model identifier used to generate this plan (e.g. 'gpt-4', 'claude-3'). Required for provenance. |
 | `engine_id` | `string` | Yes | Engine identity that produced this plan. |
