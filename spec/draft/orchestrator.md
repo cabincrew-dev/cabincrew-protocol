@@ -186,17 +186,48 @@ Audit events must conform to audit-event.schema.json.
 
 ## 11. Restart and Resume Behavior
 
-The Orchestrator must be designed to survive restarts.
+The Orchestrator must be designed to survive restarts using durable state persistence.
 
-Requirements:
+### 11.1 Persistence Requirements
 
-- workflow state must be recoverable  
-- plan-token must remain verifiable  
-- artifacts must remain immutable  
-- approvals must remain valid after restart  
-- no duplication of take-off may occur  
+The Orchestrator must persist:
 
-If state is inconsistent, workflow must halt.
+- **WorkflowStateRecord**: Complete workflow state including:
+  - Current state and plan-token hash
+  - Execution history (completed/pending steps)
+  - Approval records with plan-token binding
+  - Artifact records with SHA256 hashes
+  - Policy evaluation results
+  - ISO 8601 timestamps (created_at, updated_at)
+
+- **WAL (Write-Ahead Log)**: Append-only log of all state transitions:
+  - `workflow_started` - Initial state with plan-token hash
+  - `step_started` / `step_completed` - Step execution lifecycle
+  - `approval_requested` / `approval_received` - Approval workflow
+  - `artifact_created` - Artifact production
+  - `policy_evaluated` - Policy decision
+  - `workflow_completed` / `workflow_failed` - Terminal states
+
+Each WAL entry includes:
+- Monotonic sequence number
+- ISO 8601 timestamp
+- Workflow ID
+- Entry type and data
+- SHA256 checksum for integrity
+
+### 11.2 Recovery Semantics
+
+On restart, the Orchestrator must:
+
+1. **Load WAL entries** in sequence order
+2. **Rebuild WorkflowStateRecord** by replaying entries
+3. **Verify checksums** to detect corruption
+4. **Resume from last completed step**
+5. **Validate plan-token integrity**
+6. **Verify artifact hashes** match records
+7. **Restore approval state** (pending approvals remain paused)
+
+If state is inconsistent or corrupted, workflow must halt with audit event.
 
 ---
 

@@ -115,6 +115,24 @@ Fields include:
 - **approval_id** (optional)  
   Bound to approval requests and responses.
 
+- **workflow_state** (optional)  
+  Workflow state when this event was emitted.  
+  Required for temporal chain-of-custody reconstruction.
+
+- **policy_evaluations** (in policy field)  
+  Array of individual policy evaluation results.  
+  Each includes:
+  - **source**: Policy source type (opa, onnx, llm_gateway, mcp_gateway, custom)
+  - **policy_id**: Policy identifier (e.g., OPA policy name, ONNX model name)
+  - **decision**: Decision from this specific policy (allow, warn, require_approval, deny)
+  - **reason**: Reason for this decision
+  - **evidence**: Supporting data (e.g., rule matches, model scores)
+  - **evaluated_at**: ISO 8601 timestamp
+
+- **aggregation_method** (in policy field)  
+  Method used to combine individual policy decisions.  
+  Examples: most_restrictive, unanimous, majority
+
 ---
 
 ## 4. Immutability Requirements

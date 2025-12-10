@@ -1,148 +1,162 @@
-# CabinCrew Engine Specification
+# CabinCrew Protocol Design Principles
 Version: draft
 
-This document defines the normative behavior of Engines within the CabinCrew Protocol. Engines are deterministic execution units responsible for producing intent (flight-plan) and applying changes (take-off). They operate in controlled environments and communicate exclusively through structured inputs, outputs, and artifacts.
+This document defines the normative design principles that guide all CabinCrew Protocol implementations. These principles ensure security, auditability, and deterministic behavior across orchestrators, engines, and gateways.
 
-## 1. Engine Purpose
+## 1. Immutability
 
-Engines implement domain-specific logic for computing and applying changes. Examples include:
-- git operations
-- code modifications
-- infrastructure provisioning
-- configuration updates
-- analysis and transformation tools
+**Principle**: Once created, protocol artifacts (plan-tokens, audit events, artifacts) must never be modified.
 
-Engines must not embed policy, approval logic, gateway behavior, or governance rules.
+**Requirements**:
+- Plan-tokens are cryptographically bound to their artifacts
+- Audit events are append-only with chain hashes
+- Artifacts are identified by content-addressable SHA256 hashes
+- Approvals are bound to specific plan-token hashes
 
-## 2. Engine Execution Modes
+**Rationale**: Immutability enables cryptographic verification, prevents tampering, and supports deterministic replay.
 
-Engines support two mandatory execution modes:
+## 2. Determinism
 
-### 2.1 Flight-Plan Mode
-Purpose: compute intent without performing side effects.
+**Principle**: Given the same inputs, protocol operations must produce identical outputs.
 
-Requirements:
-- no workspace mutation
-- no external system mutation
-- operations must be deterministic
-- read-only network allowed if applicable
-- emits artifacts and optional state
-- produces a receipt on stdout
-- must exit non-zero on validation failure
+**Requirements**:
+- Engines must be deterministic in flight-plan mode
+- Timestamps must be normalized or externally provided
+- Random numbers require fixed seeds
+- Network responses must be cached or mocked
+- Artifact generation must be reproducible
 
-### 2.2 Take-Off Mode
-Purpose: apply validated side effects.
+**Rationale**: Determinism enables verification, testing, and multi-orchestrator consensus.
 
-Requirements:
-- may modify workspace
-- may perform external operations (e.g., git push)
-- must restore state from state artifacts if needed
-- must not regenerate artifacts
-- must rely on orchestrator for plan-token validation
-- must produce a receipt on stdout
+## 3. Least Privilege
 
-## 3. Engine Environment
+**Principle**: Components receive only the minimum permissions necessary for their function.
 
-Environment variables set by Orchestrator:
+**Requirements**:
+- Engines run in sandboxed environments
+- Engines cannot access gateways directly
+- Engines receive only explicitly mapped secrets
+- Gateways enforce policy before allowing LLM/MCP access
+- Orchestrators validate all engine outputs
 
-- CABINCREW_WORKSPACE  
-- CABINCREW_ARTIFACTS_DIR  
-- CABINCREW_TEMP_DIR  
-- CABINCREW_MODE  
+**Rationale**: Least privilege limits blast radius and prevents privilege escalation.
 
-Engines must not depend on any undocumented environment variable or implicit runtime state.
+## 4. Explicit Over Implicit
 
-## 4. Engine Input Format
+**Principle**: All behavior must be explicitly declared, not inferred.
 
-Engines accept input via:
-- STDIN (primary method)
-- or a file specified via CABINCREW_INPUT_FILE
+**Requirements**:
+- Engines declare artifacts in receipts
+- Workflows explicitly map secrets
+- Policy decisions are recorded with evidence
+- Approvals reference specific plan-token hashes
+- Gateways log all requests and decisions
 
-Input includes:
-- meta information (workflow step, mode)
-- config from workflow definition
-- explicitly mapped secrets
-- context passed from previous steps
+**Rationale**: Explicit behavior enables auditability and prevents hidden side effects.
 
-## 5. Engine Output Format
+## 5. Separation of Concerns
 
-Engine output is written to:
-- STDOUT (receipt)
-- CABINCREW_ARTIFACTS_DIR (artifacts and metadata)
+**Principle**: Policy, execution, and approval are strictly separated.
 
-The receipt contains:
-- status (success or failure)
-- error message (if any)
-- list of produced artifacts
-- diagnostic metrics
+**Requirements**:
+- Engines implement logic, not policy
+- Gateways enforce policy, not execution
+- Orchestrators coordinate, not decide
+- Humans approve, not implement
 
-## 6. Artifact Generation Rules
+**Rationale**: Separation enables independent verification and prevents conflation of responsibilities.
 
-Engines must generate artifacts in the following directory structure:
+## 6. Verifiability
 
-```
-CABINCREW_ARTIFACTS_DIR/<artifact_name>/
-    artifact.json
-    body.data (optional)
-```
+**Principle**: All protocol operations must be cryptographically verifiable.
 
-Artifacts represent:
-- what changed
-- how it changed
-- metadata for reproducing or applying the change
+**Requirements**:
+- Plan-tokens bind artifacts with SHA256 hashes
+- Audit events chain with cryptographic hashes
+- Approvals are signed and timestamped
+- Artifacts are content-addressable
+- Integrity checks detect tampering
 
-## 7. Determinism Requirements
+**Rationale**: Verifiability enables trust, compliance, and forensic analysis.
 
-Forbidden nondeterminism:
-- timestamps without normalization
-- random numbers without fixed seeds
-- unpredictable network responses
-- OS entropy leaks
+## 7. Auditability
 
-## 8. Security Requirements
+**Principle**: All protocol operations must produce immutable audit trails.
 
-The engine is not trusted. The orchestrator enforces:
-- sandboxing
-- workspace immutability
-- network restrictions
-- artifact validation
-- plan-token validation
+**Requirements**:
+- Every decision is logged with evidence
+- Policy evaluations record source and aggregation
+- Workflow state transitions are recorded in WAL
+- Approvals track who, what, when, and why
+- Audit events include workflow state context
 
-Engines must avoid:
-- unsafe shell execution
-- unvalidated external input
-- leaking secrets
+**Rationale**: Auditability enables compliance, debugging, and accountability.
 
-## 9. Exit Codes
+## 8. Fail-Safe Defaults
 
-0 — successful execution  
-1 — engine-level failure  
-2 — validation failure  
->2 — reserved for future protocol use  
+**Principle**: In the absence of explicit permission, deny.
 
-## 10. Logging
+**Requirements**:
+- Default gateway decision is `deny`
+- Missing approvals block execution
+- Invalid plan-tokens fail validation
+- Unsigned artifacts are rejected
+- Unknown policy sources are denied
 
-STDOUT: structured EngineOutput JSON only  
-STDERR: human-readable logs  
+**Rationale**: Fail-safe defaults prevent accidental authorization.
 
-## 11. Resume and Restart Semantics
+## 9. Defense in Depth
 
-Engines must not assume:
-- state persistence
-- temp dir persistence
-- workflow execution continuity
+**Principle**: Multiple independent security layers protect against failures.
 
-Take-off mode may rely on restored state artifacts.
+**Requirements**:
+- Pre-flight checks before execution
+- Gateway policies before LLM/MCP access
+- Plan-token validation before take-off
+- Approval binding to plan-token hashes
+- Integrity checks after execution
 
-## 12. Prohibited Behaviors
+**Rationale**: Defense in depth ensures no single point of failure.
 
-Engines must not:
-- talk to gateways directly
-- mutate workspace during flight-plan
-- produce undeclared side effects
-- embed approval logic
-- leak secrets
+## 10. Restart Safety
 
-## 13. Summary
+**Principle**: Workflows must resume deterministically after crashes.
 
-Engines are deterministic, stateless, verifiable executables that generate intent and apply validated changes. All behavior must be explicit, auditable, and artifact-driven.
+**Requirements**:
+- WorkflowStateRecord persists all critical state
+- WAL entries enable deterministic replay
+- Approvals survive orchestrator restarts
+- Artifacts are durable and verifiable
+- Policy evaluations are idempotent
+
+**Rationale**: Restart safety enables reliability and multi-orchestrator deployments.
+
+## 11. Capability Isolation
+
+**Principle**: Components cannot access capabilities they don't need.
+
+**Requirements**:
+- Engines cannot call LLMs directly
+- Engines cannot access MCP servers directly
+- Gateways mediate all external access
+- Orchestrators control all capabilities
+- Secrets are explicitly mapped, never ambient
+
+**Rationale**: Capability isolation prevents unauthorized access and lateral movement.
+
+## 12. Chain of Custody
+
+**Principle**: Every decision must be traceable to its source.
+
+**Requirements**:
+- Policy evaluations record source (OPA/ONNX/gateway)
+- Aggregation methods are documented
+- Workflow state is captured in audit events
+- Approvals reference specific evidence
+- Timestamps establish temporal ordering
+
+**Rationale**: Chain of custody enables forensic analysis and compliance verification.
+
+## Summary
+
+These principles form the foundation of the CabinCrew Protocol. Implementations that violate these principles compromise security, auditability, or determinism. When in doubt, favor explicitness, immutability, and verifiability.
