@@ -48,7 +48,7 @@ export interface ApprovalResponse {
 }
 
 export interface WorkflowState {
-    state: 'INIT' | 'PLAN_RUNNING' | 'PRE_FLIGHT_RUNNING' | 'WAITING_APPROVAL' | 'APPROVED' | 'TAKEOFF_RUNNING' | 'COMPLETED' | 'FAILED';
+    state: 'INIT' | 'PLAN_RUNNING' | 'PLAN_GENERATED' | 'ARTIFACTS_VALIDATED' | 'TOKEN_CREATED' | 'PRE_FLIGHT_RUNNING' | 'PREFLIGHT_COMPLETE' | 'AWAITING_APPROVAL' | 'APPROVED' | 'READY_FOR_TAKEOFF' | 'TAKEOFF_RUNNING' | 'EXECUTION_COMPLETE' | 'COMPLETED' | 'FAILED';
     workflow_id?: string;
     step_id?: string;
     last_decision?: string;

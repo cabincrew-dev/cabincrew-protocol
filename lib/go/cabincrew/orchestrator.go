@@ -73,14 +73,20 @@ const (
 type State string
 
 const (
-	Approved         State = "APPROVED"
-	Completed        State = "COMPLETED"
-	Failed           State = "FAILED"
-	Init             State = "INIT"
-	PlanRunning      State = "PLAN_RUNNING"
-	PreFlightRunning State = "PRE_FLIGHT_RUNNING"
-	TakeoffRunning   State = "TAKEOFF_RUNNING"
-	WaitingApproval  State = "WAITING_APPROVAL"
+	Approved           State = "APPROVED"
+	ArtifactsValidated State = "ARTIFACTS_VALIDATED"
+	AwaitingApproval   State = "AWAITING_APPROVAL"
+	Completed          State = "COMPLETED"
+	ExecutionComplete  State = "EXECUTION_COMPLETE"
+	Failed             State = "FAILED"
+	Init               State = "INIT"
+	PlanGenerated      State = "PLAN_GENERATED"
+	PlanRunning        State = "PLAN_RUNNING"
+	PreFlightRunning   State = "PRE_FLIGHT_RUNNING"
+	PreflightComplete  State = "PREFLIGHT_COMPLETE"
+	ReadyForTakeoff    State = "READY_FOR_TAKEOFF"
+	TakeoffRunning     State = "TAKEOFF_RUNNING"
+	TokenCreated       State = "TOKEN_CREATED"
 )
 
 // Inline content for small artifacts.

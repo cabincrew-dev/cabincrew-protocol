@@ -271,13 +271,19 @@
                 "state": {
                     "enum": [
                         "APPROVED",
+                        "ARTIFACTS_VALIDATED",
+                        "AWAITING_APPROVAL",
                         "COMPLETED",
+                        "EXECUTION_COMPLETE",
                         "FAILED",
                         "INIT",
+                        "PLAN_GENERATED",
                         "PLAN_RUNNING",
+                        "PREFLIGHT_COMPLETE",
                         "PRE_FLIGHT_RUNNING",
+                        "READY_FOR_TAKEOFF",
                         "TAKEOFF_RUNNING",
-                        "WAITING_APPROVAL"
+                        "TOKEN_CREATED"
                     ],
                     "type": "string"
                 },
