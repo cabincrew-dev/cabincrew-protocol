@@ -2,6 +2,7 @@ import { Decision } from './orchestrator';
 
 export interface LLMGatewayRequest {
     request_id: string;
+    /** @format date-time */
     timestamp: string;
     source?: string;
     model: string;
@@ -18,6 +19,7 @@ export interface GatewayApproval {
 
 export interface LLMGatewayResponse {
     request_id: string;
+    /** @format date-time */
     timestamp: string;
     decision: Decision;
     warnings?: string[];

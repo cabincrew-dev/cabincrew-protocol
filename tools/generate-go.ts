@@ -76,6 +76,22 @@ async function generate() {
         'type RecordStringAny map[string]interface{}'
     );
 
+    // Post-process: Move import statements to top of file
+    // Quicktype sometimes generates imports in the middle of the file when using date-time format
+    const importMatches = goCode.match(/^import\s+"[^"]+"\s*$/gm);
+    if (importMatches && importMatches.length > 0) {
+        // Remove imports from their current locations
+        goCode = goCode.replace(/^import\s+"[^"]+"\s*$/gm, '');
+        // Find package declaration
+        const packageMatch = goCode.match(/^package\s+\w+/m);
+        if (packageMatch) {
+            const packageEnd = packageMatch.index! + packageMatch[0].length;
+            // Insert all imports after package declaration
+            const imports = [...new Set(importMatches)].join('\n'); // Deduplicate
+            goCode = goCode.slice(0, packageEnd) + '\n\n' + imports + '\n' + goCode.slice(packageEnd);
+        }
+    }
+
     fs.writeFileSync(GO_OUT_FILE, goCode);
     console.log(`Generated ${GO_OUT_FILE}`);
 

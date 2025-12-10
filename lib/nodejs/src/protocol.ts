@@ -82,7 +82,7 @@ export interface ApprovalReceivedData {
 export interface ApprovalRecord {
     approval_id:      string;
     approved:         boolean;
-    approved_at:      string;
+    approved_at:      Date;
     approver:         string;
     evidence_hashes?: string[];
     plan_token_hash:  string;
@@ -184,7 +184,7 @@ export interface ArtifactRecord {
     artifact_hash: string;
     artifact_id:   string;
     artifact_type: string;
-    created_at:    string;
+    created_at:    Date;
     metadata?:     { [key: string]: any };
     step_id:       string;
 }
@@ -227,7 +227,7 @@ export interface AuditApproval {
      * ISO 8601 timestamp when approval was granted/denied.
      * REQUIRED for temporal ordering.
      */
-    timestamp: string;
+    timestamp: Date;
 }
 
 export interface AuditArtifact {
@@ -294,7 +294,7 @@ export interface AuditEvent {
     /**
      * RFC3339 timestamp of when the event occurred.
      */
-    timestamp: string;
+    timestamp: Date;
     workflow?: AuditWorkflow;
     /**
      * Workflow state when this event was emitted.
@@ -339,7 +339,7 @@ export interface PlanToken {
     /**
      * Timestamp when the plan was created (RFC3339).
      */
-    created_at: string;
+    created_at: Date;
     /**
      * Engine identity that produced this plan.
      */
@@ -439,7 +439,7 @@ export interface PolicyEvaluation {
     /**
      * Evaluation timestamp.
      */
-    evaluated_at: string;
+    evaluated_at: Date;
     /**
      * Evidence supporting this decision (e.g., rule matches, model scores).
      */
@@ -551,9 +551,14 @@ export interface EngineOutput {
     /**
      * Execution status: 'success' or 'failure'.
      */
-    status:    string;
+    status:    Status;
     warnings?: string[];
 }
+
+/**
+ * Execution status: 'success' or 'failure'.
+ */
+export type Status = "failure" | "success";
 
 export interface GatewayApproval {
     approval_id?:   string;
@@ -581,7 +586,7 @@ export interface LLMGatewayRequest {
     provider?:  string;
     request_id: string;
     source?:    string;
-    timestamp:  string;
+    timestamp:  Date;
 }
 
 export interface LLMGatewayResponse {
@@ -591,7 +596,7 @@ export interface LLMGatewayResponse {
     request_id:       string;
     rewritten_input?: { [key: string]: any };
     routed_model?:    string;
-    timestamp:        string;
+    timestamp:        Date;
     violations?:      string[];
     warnings?:        string[];
 }
@@ -615,7 +620,7 @@ export interface MCPGatewayRequest {
     request_id: string;
     server_id:  string;
     source?:    string;
-    timestamp:  string;
+    timestamp:  Date;
 }
 
 export interface MCPGatewayResponse {
@@ -623,7 +628,7 @@ export interface MCPGatewayResponse {
     decision:           Decision;
     request_id:         string;
     rewritten_request?: { [key: string]: any };
-    timestamp:          string;
+    timestamp:          Date;
     violations?:        string[];
     warnings?:          string[];
 }
@@ -640,7 +645,7 @@ export interface PolicyEvaluatedData {
  */
 export interface PolicyEvaluationRecord {
     decision:         Decision;
-    evaluated_at:     string;
+    evaluated_at:     Date;
     evaluation_id:    string;
     evidence_hashes?: string[];
     policy_name:      string;
@@ -695,7 +700,7 @@ export interface WALEntry {
     data:        WALEntryData;
     entry_type:  WALEntryType;
     sequence:    number;
-    timestamp:   string;
+    timestamp:   Date;
     workflow_id: string;
 }
 
@@ -752,13 +757,13 @@ export interface WorkflowState {
 export interface WorkflowStateRecord {
     approvals:          ApprovalRecord[];
     artifacts:          ArtifactRecord[];
-    created_at:         string;
+    created_at:         Date;
     current_state:      State;
     metadata?:          { [key: string]: any };
     plan_token_hash:    string;
     policy_evaluations: PolicyEvaluationRecord[];
     steps_completed:    string[];
     steps_pending:      string[];
-    updated_at:         string;
+    updated_at:         Date;
     workflow_id:        string;
 }

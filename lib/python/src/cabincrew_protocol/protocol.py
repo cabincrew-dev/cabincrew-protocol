@@ -1,5 +1,6 @@
 from enum import Enum
 from dataclasses import dataclass
+from datetime import datetime
 from typing import List, Optional, Dict, Any, Union
 
 
@@ -33,7 +34,7 @@ class ApprovalRecord:
     """
     approval_id: str = None
     approved: bool = None
-    approved_at: str = None
+    approved_at: datetime = None
     approver: str = None
     plan_token_hash: str = None
     step_id: str = None
@@ -130,7 +131,7 @@ class ArtifactRecord:
     artifact_hash: str = None
     artifact_id: str = None
     artifact_type: str = None
-    created_at: str = None
+    created_at: datetime = None
     step_id: str = None
     metadata: Optional[Dict[str, Any]] = None
 
@@ -160,7 +161,7 @@ class AuditApproval:
     """Required role for this approval.
     REQUIRED to verify authorization.
     """
-    timestamp: str = None
+    timestamp: datetime = None
     """ISO 8601 timestamp when approval was granted/denied.
     REQUIRED for temporal ordering.
     """
@@ -230,7 +231,7 @@ class PlanToken:
     artifacts: List[PlanArtifactHash] = None
     """Per-artifact hashes that contributed to this plan token."""
 
-    created_at: str = None
+    created_at: datetime = None
     """Timestamp when the plan was created (RFC3339)."""
 
     engine_id: str = None
@@ -284,7 +285,7 @@ class PolicyEvaluation:
     decision: Decision = None
     """Decision from this specific policy."""
 
-    evaluated_at: str = None
+    evaluated_at: datetime = None
     """Evaluation timestamp."""
 
     policy_id: str = None
@@ -363,7 +364,7 @@ class AuditEvent:
     event_type: str = None
     """Free-form event category."""
 
-    timestamp: str = None
+    timestamp: datetime = None
     """RFC3339 timestamp of when the event occurred."""
 
     workflow_state: str = None
@@ -458,6 +459,13 @@ class EngineMetric:
     tags: Optional[Dict[str, Any]] = None
 
 
+class Status(Enum):
+    """Execution status: 'success' or 'failure'."""
+
+    FAILURE = "failure"
+    SUCCESS = "success"
+
+
 @dataclass
 class EngineOutput:
     """Output delivered via STDOUT or CABINCREW_OUTPUT_FILE.
@@ -467,7 +475,7 @@ class EngineOutput:
     mode: Mode = None
     protocol_version: str = None
     receipt_id: str = None
-    status: str = None
+    status: Status = None
     """Execution status: 'success' or 'failure'."""
 
     artifacts: Optional[List[EngineArtifact]] = None
@@ -507,7 +515,7 @@ class LLMGatewayRequest:
     input: Dict[str, Any] = None
     model: str = None
     request_id: str = None
-    timestamp: str = None
+    timestamp: datetime = None
     context: Optional[Dict[str, Any]] = None
     provider: Optional[str] = None
     source: Optional[str] = None
@@ -517,7 +525,7 @@ class LLMGatewayRequest:
 class LLMGatewayResponse:
     decision: Decision = None
     request_id: str = None
-    timestamp: str = None
+    timestamp: datetime = None
     approval: Optional[GatewayApproval] = None
     gateway_payload: Optional[Dict[str, Any]] = None
     rewritten_input: Optional[Dict[str, Any]] = None
@@ -545,7 +553,7 @@ class MCPGatewayRequest:
     method: str = None
     request_id: str = None
     server_id: str = None
-    timestamp: str = None
+    timestamp: datetime = None
     context: Optional[Dict[str, Any]] = None
     params: Optional[Dict[str, Any]] = None
     source: Optional[str] = None
@@ -555,7 +563,7 @@ class MCPGatewayRequest:
 class MCPGatewayResponse:
     decision: Decision = None
     request_id: str = None
-    timestamp: str = None
+    timestamp: datetime = None
     approval: Optional[GatewayApproval] = None
     rewritten_request: Optional[Dict[str, Any]] = None
     violations: Optional[List[str]] = None
@@ -575,7 +583,7 @@ class PolicyEvaluationRecord:
     Tracks policy decisions with evidence for audit trail.
     """
     decision: Decision = None
-    evaluated_at: str = None
+    evaluated_at: datetime = None
     evaluation_id: str = None
     policy_name: str = None
     step_id: str = None
@@ -683,7 +691,7 @@ class WALEntry:
     data: WALEntryData = None
     entry_type: WALEntryType = None
     sequence: float = None
-    timestamp: str = None
+    timestamp: datetime = None
     workflow_id: str = None
 
 
@@ -721,13 +729,13 @@ class WorkflowStateRecord:
     """
     approvals: List[ApprovalRecord] = None
     artifacts: List[ArtifactRecord] = None
-    created_at: str = None
+    created_at: datetime = None
     current_state: State = None
     plan_token_hash: str = None
     policy_evaluations: List[PolicyEvaluationRecord] = None
     steps_completed: List[str] = None
     steps_pending: List[str] = None
-    updated_at: str = None
+    updated_at: datetime = None
     workflow_id: str = None
     metadata: Optional[Dict[str, Any]] = None
 

@@ -65,7 +65,7 @@ export interface EngineOutput {
     /**
      * Execution status: 'success' or 'failure'.
      */
-    status: string;
+    status: 'success' | 'failure';
 
     error?: string;
     warnings?: string[];

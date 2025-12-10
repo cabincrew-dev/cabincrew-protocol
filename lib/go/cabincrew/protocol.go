@@ -1,5 +1,9 @@
 package cabincrew
 
+import "time"
+
+
+
 type CabinCrewProtocol struct {
 	AggregationMethod      *AggregationMethod      `json:"AggregationMethod,omitempty"`
 	AnyMap                 map[string]interface{}  `json:"AnyMap,omitempty"`
@@ -66,17 +70,18 @@ type ApprovalReceivedData struct {
 	Approver   string `json:"approver"`
 }
 
+
 // Durable approval record.
 // Tracks who approved what, when, bound to specific plan-token hash.
 type ApprovalRecord struct {
-	ApprovalID     string   `json:"approval_id"`
-	Approved       bool     `json:"approved"`
-	ApprovedAt     string   `json:"approved_at"`
-	Approver       string   `json:"approver"`
-	EvidenceHashes []string `json:"evidence_hashes,omitempty"`
-	PlanTokenHash  string   `json:"plan_token_hash"`
-	Reason         *string  `json:"reason,omitempty"`
-	StepID         string   `json:"step_id"`
+	ApprovalID     string    `json:"approval_id"`
+	Approved       bool      `json:"approved"`
+	ApprovedAt     time.Time `json:"approved_at"`
+	Approver       string    `json:"approver"`
+	EvidenceHashes []string  `json:"evidence_hashes,omitempty"`
+	PlanTokenHash  string    `json:"plan_token_hash"`
+	Reason         *string   `json:"reason,omitempty"`
+	StepID         string    `json:"step_id"`
 }
 
 // Request for human approval before proceeding with execution.
@@ -151,7 +156,7 @@ type ArtifactRecord struct {
 	ArtifactHash string                 `json:"artifact_hash"`
 	ArtifactID   string                 `json:"artifact_id"`
 	ArtifactType string                 `json:"artifact_type"`
-	CreatedAt    string                 `json:"created_at"`
+	CreatedAt    time.Time              `json:"created_at"`
 	Metadata     map[string]interface{} `json:"metadata,omitempty"`
 	StepID       string                 `json:"step_id"`
 }
@@ -159,26 +164,26 @@ type ArtifactRecord struct {
 // Audit record for approval events.
 // Extended to ensure approval binding is auditable.
 type AuditApproval struct {
-	// Unique approval identifier.                                           
-	// REQUIRED to correlate request and response.                           
-	ApprovalID                                                       string  `json:"approval_id"`
-	// Whether approval was granted.                                         
-	// REQUIRED for audit trail.                                             
-	Approved                                                         bool    `json:"approved"`
-	// Identity of the approver.                                             
-	// REQUIRED for accountability.                                          
-	Approver                                                         string  `json:"approver"`
-	// SHA256 hash of the plan-token this approval is bound to.              
-	// REQUIRED to prove approval binding and prevent replay attacks.        
-	PlanTokenHash                                                    string  `json:"plan_token_hash"`
-	// Optional reason for approval/denial.                                  
-	Reason                                                           *string `json:"reason,omitempty"`
-	// Required role for this approval.                                      
-	// REQUIRED to verify authorization.                                     
-	RequiredRole                                                     string  `json:"required_role"`
-	// ISO 8601 timestamp when approval was granted/denied.                  
-	// REQUIRED for temporal ordering.                                       
-	Timestamp                                                        string  `json:"timestamp"`
+	// Unique approval identifier.                                             
+	// REQUIRED to correlate request and response.                             
+	ApprovalID                                                       string    `json:"approval_id"`
+	// Whether approval was granted.                                           
+	// REQUIRED for audit trail.                                               
+	Approved                                                         bool      `json:"approved"`
+	// Identity of the approver.                                               
+	// REQUIRED for accountability.                                            
+	Approver                                                         string    `json:"approver"`
+	// SHA256 hash of the plan-token this approval is bound to.                
+	// REQUIRED to prove approval binding and prevent replay attacks.          
+	PlanTokenHash                                                    string    `json:"plan_token_hash"`
+	// Optional reason for approval/denial.                                    
+	Reason                                                           *string   `json:"reason,omitempty"`
+	// Required role for this approval.                                        
+	// REQUIRED to verify authorization.                                       
+	RequiredRole                                                     string    `json:"required_role"`
+	// ISO 8601 timestamp when approval was granted/denied.                    
+	// REQUIRED for temporal ordering.                                         
+	Timestamp                                                        time.Time `json:"timestamp"`
 }
 
 type AuditArtifact struct {
@@ -225,7 +230,7 @@ type AuditEvent struct {
 	// Reference to the key used for signing (e.g. 'engine-key-1', 'orchestrator-key-prod').                
 	SignatureKeyRef                                                                         *string         `json:"signature_key_ref,omitempty"`
 	// RFC3339 timestamp of when the event occurred.                                                        
-	Timestamp                                                                               string          `json:"timestamp"`
+	Timestamp                                                                               time.Time       `json:"timestamp"`
 	Workflow                                                                                *AuditWorkflow  `json:"workflow,omitempty"`
 	// Workflow state when this event was emitted.                                                          
 	// REQUIRED for temporal chain-of-custody reconstruction.                                               
@@ -254,7 +259,7 @@ type PlanToken struct {
 	// Per-artifact hashes that contributed to this plan token.                                        
 	Artifacts                                                                       []PlanArtifactHash `json:"artifacts"`
 	// Timestamp when the plan was created (RFC3339).                                                  
-	CreatedAt                                                                       string             `json:"created_at"`
+	CreatedAt                                                                       time.Time          `json:"created_at"`
 	// Engine identity that produced this plan.                                                        
 	EngineID                                                                        string             `json:"engine_id"`
 	// SHA256 hash of governance context (OPA policies, ONNX models, gateway rules).                   
@@ -316,7 +321,7 @@ type PolicyEvaluation struct {
 	// Decision from this specific policy.                                                         
 	Decision                                                                Decision               `json:"decision"`
 	// Evaluation timestamp.                                                                       
-	EvaluatedAt                                                             string                 `json:"evaluated_at"`
+	EvaluatedAt                                                             time.Time              `json:"evaluated_at"`
 	// Evidence supporting this decision (e.g., rule matches, model scores).                       
 	Evidence                                                                map[string]interface{} `json:"evidence,omitempty"`
 	// Policy identifier (e.g., OPA policy name, ONNX model name).                                 
@@ -394,7 +399,7 @@ type EngineOutput struct {
 	ProtocolVersion                                   string           `json:"protocol_version"`
 	ReceiptID                                         string           `json:"receipt_id"`
 	// Execution status: 'success' or 'failure'.                       
-	Status                                            string           `json:"status"`
+	Status                                            Status           `json:"status"`
 	Warnings                                          []string         `json:"warnings,omitempty"`
 }
 
@@ -424,7 +429,7 @@ type LLMGatewayRequest struct {
 	Provider  *string                `json:"provider,omitempty"`
 	RequestID string                 `json:"request_id"`
 	Source    *string                `json:"source,omitempty"`
-	Timestamp string                 `json:"timestamp"`
+	Timestamp time.Time              `json:"timestamp"`
 }
 
 type LLMGatewayResponse struct {
@@ -434,7 +439,7 @@ type LLMGatewayResponse struct {
 	RequestID      string                 `json:"request_id"`
 	RewrittenInput map[string]interface{} `json:"rewritten_input,omitempty"`
 	RoutedModel    *string                `json:"routed_model,omitempty"`
-	Timestamp      string                 `json:"timestamp"`
+	Timestamp      time.Time              `json:"timestamp"`
 	Violations     []string               `json:"violations,omitempty"`
 	Warnings       []string               `json:"warnings,omitempty"`
 }
@@ -458,7 +463,7 @@ type MCPGatewayRequest struct {
 	RequestID string                 `json:"request_id"`
 	ServerID  string                 `json:"server_id"`
 	Source    *string                `json:"source,omitempty"`
-	Timestamp string                 `json:"timestamp"`
+	Timestamp time.Time              `json:"timestamp"`
 }
 
 type MCPGatewayResponse struct {
@@ -466,7 +471,7 @@ type MCPGatewayResponse struct {
 	Decision         Decision               `json:"decision"`
 	RequestID        string                 `json:"request_id"`
 	RewrittenRequest map[string]interface{} `json:"rewritten_request,omitempty"`
-	Timestamp        string                 `json:"timestamp"`
+	Timestamp        time.Time              `json:"timestamp"`
 	Violations       []string               `json:"violations,omitempty"`
 	Warnings         []string               `json:"warnings,omitempty"`
 }
@@ -480,13 +485,13 @@ type PolicyEvaluatedData struct {
 // Durable policy evaluation record.
 // Tracks policy decisions with evidence for audit trail.
 type PolicyEvaluationRecord struct {
-	Decision       Decision `json:"decision"`
-	EvaluatedAt    string   `json:"evaluated_at"`
-	EvaluationID   string   `json:"evaluation_id"`
-	EvidenceHashes []string `json:"evidence_hashes,omitempty"`
-	PolicyName     string   `json:"policy_name"`
-	Reason         *string  `json:"reason,omitempty"`
-	StepID         string   `json:"step_id"`
+	Decision       Decision  `json:"decision"`
+	EvaluatedAt    time.Time `json:"evaluated_at"`
+	EvaluationID   string    `json:"evaluation_id"`
+	EvidenceHashes []string  `json:"evidence_hashes,omitempty"`
+	PolicyName     string    `json:"policy_name"`
+	Reason         *string   `json:"reason,omitempty"`
+	StepID         string    `json:"step_id"`
 }
 
 type PreflightInput struct {
@@ -530,7 +535,7 @@ type WALEntry struct {
 	Data       WALEntryData `json:"data"`
 	EntryType  WALEntryType `json:"entry_type"`
 	Sequence   float64      `json:"sequence"`
-	Timestamp  string       `json:"timestamp"`
+	Timestamp  time.Time    `json:"timestamp"`
 	WorkflowID string       `json:"workflow_id"`
 }
 
@@ -583,14 +588,14 @@ type WorkflowState struct {
 type WorkflowStateRecord struct {
 	Approvals         []ApprovalRecord         `json:"approvals"`
 	Artifacts         []ArtifactRecord         `json:"artifacts"`
-	CreatedAt         string                   `json:"created_at"`
+	CreatedAt         time.Time                `json:"created_at"`
 	CurrentState      State                    `json:"current_state"`
 	Metadata          map[string]interface{}   `json:"metadata,omitempty"`
 	PlanTokenHash     string                   `json:"plan_token_hash"`
 	PolicyEvaluations []PolicyEvaluationRecord `json:"policy_evaluations"`
 	StepsCompleted    []string                 `json:"steps_completed"`
 	StepsPending      []string                 `json:"steps_pending"`
-	UpdatedAt         string                   `json:"updated_at"`
+	UpdatedAt         time.Time                `json:"updated_at"`
 	WorkflowID        string                   `json:"workflow_id"`
 }
 
@@ -651,6 +656,14 @@ type Mode string
 const (
 	FlightPlan Mode = "flight-plan"
 	TakeOff    Mode = "take-off"
+)
+
+// Execution status: 'success' or 'failure'.
+type Status string
+
+const (
+	Failure Status = "failure"
+	Success Status = "success"
 )
 
 type State string

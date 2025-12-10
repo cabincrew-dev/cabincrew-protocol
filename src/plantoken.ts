@@ -43,6 +43,7 @@ export interface PlanToken {
     workspace_hash: string;
     /**
      * Timestamp when the plan was created (RFC3339).
+     * @format date-time
      */
     created_at: string;
 

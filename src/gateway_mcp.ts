@@ -3,6 +3,7 @@ import { Decision } from './orchestrator';
 
 export interface MCPGatewayRequest {
     request_id: string;
+    /** @format date-time */
     timestamp: string;
     source?: string;
     server_id: string;
@@ -13,6 +14,7 @@ export interface MCPGatewayRequest {
 
 export interface MCPGatewayResponse {
     request_id: string;
+    /** @format date-time */
     timestamp: string;
     decision: Decision;
     warnings?: string[];

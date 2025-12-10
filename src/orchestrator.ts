@@ -91,7 +91,9 @@ export interface WorkflowStateRecord {
     workflow_id: string;
     current_state: State;
     plan_token_hash: string;
+    /** @format date-time */
     created_at: string; // ISO 8601
+    /** @format date-time */
     updated_at: string; // ISO 8601
 
     // Execution history
@@ -121,6 +123,7 @@ export interface ApprovalRecord {
     plan_token_hash: string; // Hash at time of approval
     approved: boolean;
     approver: string;
+    /** @format date-time */
     approved_at: string; // ISO 8601
     reason?: string;
     evidence_hashes?: string[]; // SHA256 of evidence artifacts
@@ -135,6 +138,7 @@ export interface ArtifactRecord {
     step_id: string;
     artifact_hash: string; // SHA256 of artifact content
     artifact_type: string;
+    /** @format date-time */
     created_at: string; // ISO 8601
     metadata?: Record<string, any>;
 }
@@ -148,6 +152,7 @@ export interface PolicyEvaluationRecord {
     step_id: string;
     policy_name: string;
     decision: Decision;
+    /** @format date-time */
     evaluated_at: string; // ISO 8601
     reason?: string;
     evidence_hashes?: string[];
@@ -159,6 +164,7 @@ export interface PolicyEvaluationRecord {
  */
 export interface WALEntry {
     sequence: number; // Monotonic sequence number
+    /** @format date-time */
     timestamp: string; // ISO 8601
     workflow_id: string;
     entry_type: WALEntryType;

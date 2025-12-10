@@ -126,6 +126,7 @@ export interface PolicyEvaluation {
 
     /**
      * Evaluation timestamp.
+     * @format date-time
      */
     evaluated_at: string; // ISO 8601
 }
@@ -168,6 +169,7 @@ export interface AuditApproval {
     /**
      * ISO 8601 timestamp when approval was granted/denied.
      * REQUIRED for temporal ordering.
+     * @format date-time
      */
     timestamp: string;
 
@@ -204,6 +206,7 @@ export interface AuditEvent {
     event_id: string;
     /**
      * RFC3339 timestamp of when the event occurred.
+     * @format date-time
      */
     timestamp: string;
     /**

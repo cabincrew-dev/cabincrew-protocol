@@ -113,6 +113,7 @@
         },
         "created_at": {
           "description": "Timestamp when the plan was created (RFC3339).",
+          "format": "date-time",
           "type": "string"
         },
         "policy_digest": {
@@ -381,9 +382,11 @@
           "type": "string"
         },
         "created_at": {
+          "format": "date-time",
           "type": "string"
         },
         "updated_at": {
+          "format": "date-time",
           "type": "string"
         },
         "steps_completed": {
@@ -454,6 +457,7 @@
           "type": "string"
         },
         "approved_at": {
+          "format": "date-time",
           "type": "string"
         },
         "reason": {
@@ -493,6 +497,7 @@
           "type": "string"
         },
         "created_at": {
+          "format": "date-time",
           "type": "string"
         },
         "metadata": {
@@ -525,6 +530,7 @@
           "$ref": "#/definitions/Decision"
         },
         "evaluated_at": {
+          "format": "date-time",
           "type": "string"
         },
         "reason": {
@@ -554,6 +560,7 @@
           "type": "number"
         },
         "timestamp": {
+          "format": "date-time",
           "type": "string"
         },
         "workflow_id": {
@@ -957,6 +964,7 @@
         },
         "evaluated_at": {
           "description": "Evaluation timestamp.",
+          "format": "date-time",
           "type": "string"
         }
       },
@@ -995,6 +1003,7 @@
         },
         "timestamp": {
           "description": "ISO 8601 timestamp when approval was granted/denied.\nREQUIRED for temporal ordering.",
+          "format": "date-time",
           "type": "string"
         },
         "reason": {
@@ -1073,6 +1082,7 @@
         },
         "timestamp": {
           "description": "RFC3339 timestamp of when the event occurred.",
+          "format": "date-time",
           "type": "string"
         },
         "event_type": {
@@ -1293,6 +1303,10 @@
         },
         "status": {
           "description": "Execution status: 'success' or 'failure'.",
+          "enum": [
+            "failure",
+            "success"
+          ],
           "type": "string"
         },
         "error": {
@@ -1338,6 +1352,7 @@
           "type": "string"
         },
         "timestamp": {
+          "format": "date-time",
           "type": "string"
         },
         "source": {
@@ -1386,6 +1401,7 @@
           "type": "string"
         },
         "timestamp": {
+          "format": "date-time",
           "type": "string"
         },
         "decision": {
@@ -1476,6 +1492,7 @@
           "type": "string"
         },
         "timestamp": {
+          "format": "date-time",
           "type": "string"
         },
         "source": {
@@ -1509,6 +1526,7 @@
           "type": "string"
         },
         "timestamp": {
+          "format": "date-time",
           "type": "string"
         },
         "decision": {
