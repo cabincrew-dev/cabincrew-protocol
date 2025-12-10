@@ -2,55 +2,6 @@
 
 This repository defines the core data structures and protocols for the Cabin Crew ecosystem.
 
-## 🚨 Source of Truth
-
-The contents of the `src/` directory are the **single source of truth** for all protocol definitions. All other libraries (`lib/`) and schemas (`schemas/`) are auto-generated from these TypeScript files.
-
-**DO NOT edit files in `lib/` or `schemas/` manually.** They will be overwritten.
-
-## Development
-
-This repository includes tools to generate language-specific libraries and documentation.
-
-### Prerequisites
-
-- Node.js 20+
-- Go 1.21+ (for verifying Go output)
-- Python 3.10+ (for verifying Python output)
-
-### Generating Code
-
-Run the following commands to update all generated artifacts:
-
-```bash
-# 1. Install dependencies
-npm install
-
-# 2. Generate everything
-npm run generate        # Generates JSON Schemas and MDX Docs
-npm run generate:go     # Generates Go Library
-npm run generate:nodejs # Generates Node.js Library
-npm run generate:python # Generates Python Library
-```
-
-### Tools
-
-Generation scripts are located in `tools/`.
-- `tools/generate-schemas.ts`: Uses `typescript-json-schema` to create JSON Schemas and MDX.
-- `tools/generate-*.ts`: Uses `quicktype` to create language bindings.
-
-## CI/CD
-
-The `.github/workflows/ci.yml` pipeline ensures that all generated code is up-to-date with `src/`. If you change `src/` but fail to run the generators and commit the results, the build will fail.
-Version: draft
-
-CabinCrew is an open, deterministic, and governable workflow protocol designed for AI-assisted automation.  
-It provides a safe and auditable framework for orchestrating engines, enforcing policy, routing LLM interactions, and recording chain-of-custody events.
-
-This repository contains the *formal specification*, *schemas*, and *examples* for implementers.
-
----
-
 ## 🚀 What Is CabinCrew?
 
 CabinCrew is a protocol for secure automation in both developer and production environments.  
@@ -184,6 +135,57 @@ If you want to help implement these, see **CONTRIBUTING.md**.
 - Multi-agent and LLM-native compatibility  
 
 CabinCrew is designed to be the *secure foundation* for AI-driven automation systems.
+
+---
+
+## 🚨 Source of Truth
+
+The contents of the `src/` directory are the **single source of truth** for all protocol definitions. All other libraries (`lib/`) and schemas (`schemas/`) are auto-generated from these TypeScript files.
+
+**DO NOT edit files in `lib/` or `schemas/` manually.** They will be overwritten.
+
+---
+
+## Development
+
+This repository includes tools to generate language-specific libraries and documentation.
+
+### Prerequisites
+
+- Node.js 20+
+- Go 1.21+ (for verifying Go output)
+- Python 3.10+ (for verifying Python output)
+
+### Generating Code
+
+Run the following commands to update all generated artifacts:
+
+```bash
+# 1. Install dependencies
+npm install
+
+# 2. Generate everything
+npm run generate        # Generates JSON Schemas and MDX Docs
+npm run generate:go     # Generates Go Library
+npm run generate:nodejs # Generates Node.js Library
+npm run generate:python # Generates Python Library
+```
+
+### Tools
+
+Generation scripts are located in `tools/`.
+- `tools/generate-schemas.ts`: Uses `typescript-json-schema` to create JSON Schemas and MDX.
+- `tools/generate-*.ts`: Uses `quicktype` to create language bindings.
+
+## CI/CD
+
+The `.github/workflows/ci.yml` pipeline ensures that all generated code is up-to-date with `src/`. If you change `src/` but fail to run the generators and commit the results, the build will fail.
+Version: draft
+
+CabinCrew is an open, deterministic, and governable workflow protocol designed for AI-assisted automation.  
+It provides a safe and auditable framework for orchestrating engines, enforcing policy, routing LLM interactions, and recording chain-of-custody events.
+
+This repository contains the *formal specification*, *schemas*, and *examples* for implementers.
 
 ---
 
