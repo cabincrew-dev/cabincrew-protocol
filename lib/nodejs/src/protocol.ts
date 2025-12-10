@@ -521,6 +521,9 @@ export type Mode = "flight-plan" | "take-off";
 
 export interface EngineOrchestrator {
     artifacts_salt?: string;
+    /**
+     * Orchestrator run index for this execution.
+     */
     run_index?:      number;
     workspace_hash?: string;
 }
@@ -696,9 +699,12 @@ export interface StepStartedData {
  * Enables crash recovery and multi-orchestrator consistency.
  */
 export interface WALEntry {
-    checksum:    string;
-    data:        WALEntryData;
-    entry_type:  WALEntryType;
+    checksum:   string;
+    data:       WALEntryData;
+    entry_type: WALEntryType;
+    /**
+     * Monotonic sequence number.
+     */
     sequence:    number;
     timestamp:   Date;
     workflow_id: string;

@@ -6,7 +6,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any, Optional, Union
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, RootModel
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, RootModel
 
 
 class Model(RootModel[Any]):
@@ -579,7 +579,10 @@ class EngineOrchestrator(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
-    run_index: Optional[float] = None
+    run_index: Optional[int] = Field(None, ge=0)
+    """
+    Orchestrator run index for this execution.
+    """
     workspace_hash: Optional[str] = None
     artifacts_salt: Optional[str] = None
 
@@ -946,7 +949,10 @@ class WALEntry(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
-    sequence: float
+    sequence: int = Field(..., ge=0)
+    """
+    Monotonic sequence number.
+    """
     timestamp: AwareDatetime
     workflow_id: str
     entry_type: WALEntryType

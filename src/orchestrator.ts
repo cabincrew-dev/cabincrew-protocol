@@ -163,7 +163,12 @@ export interface PolicyEvaluationRecord {
  * Enables crash recovery and multi-orchestrator consistency.
  */
 export interface WALEntry {
-    sequence: number; // Monotonic sequence number
+    /**
+     * Monotonic sequence number.
+     * @type integer
+     * @minimum 0
+     */
+    sequence: number;
     /** @format date-time */
     timestamp: string; // ISO 8601
     workflow_id: string;

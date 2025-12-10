@@ -8,6 +8,11 @@ export interface EngineMeta {
 }
 
 export interface EngineOrchestrator {
+    /**
+     * Orchestrator run index for this execution.
+     * @type integer
+     * @minimum 0
+     */
     run_index?: number;
     workspace_hash?: string;
     artifacts_salt?: string;

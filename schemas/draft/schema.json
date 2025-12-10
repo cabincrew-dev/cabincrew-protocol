@@ -557,7 +557,9 @@
       "type": "object",
       "properties": {
         "sequence": {
-          "type": "number"
+          "description": "Monotonic sequence number.",
+          "type": "integer",
+          "minimum": 0
         },
         "timestamp": {
           "format": "date-time",
@@ -1181,7 +1183,9 @@
       "type": "object",
       "properties": {
         "run_index": {
-          "type": "number"
+          "description": "Orchestrator run index for this execution.",
+          "type": "integer",
+          "minimum": 0
         },
         "workspace_hash": {
           "type": "string"

@@ -374,9 +374,10 @@ type EngineMeta struct {
 }
 
 type EngineOrchestrator struct {
-	ArtifactsSalt *string  `json:"artifacts_salt,omitempty"`
-	RunIndex      *float64 `json:"run_index,omitempty"`
-	WorkspaceHash *string  `json:"workspace_hash,omitempty"`
+	ArtifactsSalt                                *string `json:"artifacts_salt,omitempty"`
+	// Orchestrator run index for this execution.        
+	RunIndex                                     *int64  `json:"run_index,omitempty"`
+	WorkspaceHash                                *string `json:"workspace_hash,omitempty"`
 }
 
 type EngineMetric struct {
@@ -531,12 +532,13 @@ type StepStartedData struct {
 // Write-Ahead Log entry for deterministic replay.
 // Enables crash recovery and multi-orchestrator consistency.
 type WALEntry struct {
-	Checksum   string       `json:"checksum"`
-	Data       WALEntryData `json:"data"`
-	EntryType  WALEntryType `json:"entry_type"`
-	Sequence   float64      `json:"sequence"`
-	Timestamp  time.Time    `json:"timestamp"`
-	WorkflowID string       `json:"workflow_id"`
+	Checksum                     string       `json:"checksum"`
+	Data                         WALEntryData `json:"data"`
+	EntryType                    WALEntryType `json:"entry_type"`
+	// Monotonic sequence number.             
+	Sequence                     int64        `json:"sequence"`
+	Timestamp                    time.Time    `json:"timestamp"`
+	WorkflowID                   string       `json:"workflow_id"`
 }
 
 type WALEntryData struct {
