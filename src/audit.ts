@@ -21,11 +21,86 @@ export interface AuditArtifact {
     size?: number;
 }
 
+/**
+ * Policy evaluation audit record.
+ * Extended to support chain-of-custody reconstruction.
+ */
 export interface AuditPolicy {
-    decision?: string;
+    /**
+     * Final aggregated decision after all policy evaluations.
+     * REQUIRED for chain-of-custody.
+     */
+    decision: 'allow' | 'warn' | 'require_approval' | 'deny';
+
+    /**
+     * Individual policy evaluation results.
+     * Captures which specific policies (OPA/ONNX/gateway) produced which decisions.
+     */
+    policy_evaluations?: PolicyEvaluation[];
+
+    /**
+     * Aggregation method used to combine individual policy decisions.
+     * Examples: 'most_restrictive', 'unanimous', 'majority'
+     */
+    aggregation_method?: string;
+
+    /**
+     * Workflow state when this policy evaluation occurred.
+     * REQUIRED for temporal chain-of-custody.
+     */
+    workflow_state: string;
+
+    /**
+     * Policy violations detected.
+     */
     violations?: string[];
+
+    /**
+     * Policy warnings (non-blocking).
+     */
     warnings?: string[];
+
+    /**
+     * Legacy field for backward compatibility.
+     * @deprecated Use policy_evaluations instead.
+     */
     engine?: string;
+}
+
+/**
+ * Individual policy evaluation result.
+ * Captures decision source and evidence.
+ */
+export interface PolicyEvaluation {
+    /**
+     * Policy source type.
+     */
+    source: 'opa' | 'onnx' | 'llm_gateway' | 'mcp_gateway' | 'custom';
+
+    /**
+     * Policy identifier (e.g., OPA policy name, ONNX model name).
+     */
+    policy_id: string;
+
+    /**
+     * Decision from this specific policy.
+     */
+    decision: 'allow' | 'warn' | 'require_approval' | 'deny';
+
+    /**
+     * Reason for this decision.
+     */
+    reason?: string;
+
+    /**
+     * Evidence supporting this decision (e.g., rule matches, model scores).
+     */
+    evidence?: Record<string, any>;
+
+    /**
+     * Evaluation timestamp.
+     */
+    evaluated_at: string; // ISO 8601
 }
 
 export interface AuditApproval {
@@ -71,6 +146,13 @@ export interface AuditEvent {
     event_type: string;
 
     workflow?: AuditWorkflow;
+
+    /**
+     * Workflow state when this event was emitted.
+     * REQUIRED for temporal chain-of-custody reconstruction.
+     */
+    workflow_state?: string;
+
     engine?: AuditEngine;
     plan_token?: PlanToken;
     artifacts?: AuditArtifact[];

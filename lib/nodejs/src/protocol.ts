@@ -36,6 +36,7 @@ export interface CabinCrewProtocol {
     PlanArtifactHash?:       PlanArtifactHash;
     PlanToken?:              PlanToken;
     PolicyEvaluatedData?:    PolicyEvaluatedData;
+    PolicyEvaluation?:       PolicyEvaluation;
     PolicyEvaluationRecord?: PolicyEvaluationRecord;
     PreflightEvidence?:      PreflightEvidence;
     PreflightInput?:         PreflightInput;
@@ -103,6 +104,8 @@ export interface ApprovalRequest {
 
 /**
  * Arbitrary metadata. Optional.
+ *
+ * Evidence supporting this decision (e.g., rule matches, model scores).
  */
 export interface RecordStringAny {
 }
@@ -234,8 +237,12 @@ export interface AuditEvent {
      * Defined in schemas/draft/plan-token.schema.json
      */
     plan_token?: PlanToken;
-    policy?:     AuditPolicy;
-    severity?:   Severity;
+    /**
+     * Policy evaluation audit record.
+     * Extended to support chain-of-custody reconstruction.
+     */
+    policy?:   AuditPolicy;
+    severity?: Severity;
     /**
      * Cryptographic signature of this event hash.
      */
@@ -249,6 +256,11 @@ export interface AuditEvent {
      */
     timestamp: string;
     workflow?: AuditWorkflow;
+    /**
+     * Workflow state when this event was emitted.
+     * REQUIRED for temporal chain-of-custody reconstruction.
+     */
+    workflow_state?: string;
 }
 
 export interface AuditGateway {
@@ -309,12 +321,88 @@ export interface PlanArtifactHash {
     size?: number;
 }
 
+/**
+ * Policy evaluation audit record.
+ * Extended to support chain-of-custody reconstruction.
+ */
 export interface AuditPolicy {
-    decision?:   string;
-    engine?:     string;
+    /**
+     * Aggregation method used to combine individual policy decisions.
+     * Examples: 'most_restrictive', 'unanimous', 'majority'
+     */
+    aggregation_method?: string;
+    /**
+     * Final aggregated decision after all policy evaluations.
+     * REQUIRED for chain-of-custody.
+     */
+    decision: Decision;
+    /**
+     * Legacy field for backward compatibility.
+     */
+    engine?: string;
+    /**
+     * Individual policy evaluation results.
+     * Captures which specific policies (OPA/ONNX/gateway) produced which decisions.
+     */
+    policy_evaluations?: PolicyEvaluation[];
+    /**
+     * Policy violations detected.
+     */
     violations?: string[];
-    warnings?:   string[];
+    /**
+     * Policy warnings (non-blocking).
+     */
+    warnings?: string[];
+    /**
+     * Workflow state when this policy evaluation occurred.
+     * REQUIRED for temporal chain-of-custody.
+     */
+    workflow_state: string;
 }
+
+/**
+ * Final aggregated decision after all policy evaluations.
+ * REQUIRED for chain-of-custody.
+ *
+ * Decision from this specific policy.
+ */
+export type Decision = "allow" | "deny" | "require_approval" | "warn";
+
+/**
+ * Individual policy evaluation result.
+ * Captures decision source and evidence.
+ */
+export interface PolicyEvaluation {
+    /**
+     * Decision from this specific policy.
+     */
+    decision: Decision;
+    /**
+     * Evaluation timestamp.
+     */
+    evaluated_at: string;
+    /**
+     * Evidence supporting this decision (e.g., rule matches, model scores).
+     */
+    evidence?: RecordStringAny;
+    /**
+     * Policy identifier (e.g., OPA policy name, ONNX model name).
+     */
+    policy_id: string;
+    /**
+     * Reason for this decision.
+     */
+    reason?: string;
+    /**
+     * Policy source type.
+     */
+    source: Source;
+}
+
+/**
+ * Policy source type.
+ */
+export type Source = "custom" | "llm_gateway" | "mcp_gateway" | "onnx" | "opa";
 
 export type Severity = "critical" | "debug" | "error" | "info" | "warning";
 
@@ -323,8 +411,6 @@ export interface AuditWorkflow {
     step_id?:     string;
     workflow_id?: string;
 }
-
-export type Decision = "allow" | "deny" | "require_approval" | "warn";
 
 export interface EngineArtifact {
     hash:  string;

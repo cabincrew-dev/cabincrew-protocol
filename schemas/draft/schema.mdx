@@ -187,10 +187,11 @@ Defined in schemas/draft/audit-event.schema.json
 | `timestamp` | `string` | Yes | RFC3339 timestamp of when the event occurred. |
 | `event_type` | `string` | Yes | Free-form event category. |
 | `workflow` | `[AuditWorkflow]` | No |  |
+| `workflow_state` | `string` | No | Workflow state when this event was emitted. REQUIRED for temporal chain-of-custody reconstruction. |
 | `engine` | `[AuditEngine]` | No |  |
 | `plan_token` | `[PlanToken]` | No | Cryptographic binding between a flight-plan and its subsequent take-off. Defined in schemas/draft/plan-token.schema.json |
 | `artifacts` | `array` | No |  |
-| `policy` | `[AuditPolicy]` | No |  |
+| `policy` | `[AuditPolicy]` | No | Policy evaluation audit record. Extended to support chain-of-custody reconstruction. |
 | `approval` | `[AuditApproval]` | No |  |
 | `integrity_check` | `[AuditIntegrity]` | No |  |
 | `gateway` | `[AuditGateway]` | No |  |
@@ -229,12 +230,18 @@ Defined in schemas/draft/audit-event.schema.json
 
 ### AuditPolicy
 
+Policy evaluation audit record.
+Extended to support chain-of-custody reconstruction.
+
 | Property | Type | Required | Description |
 |---|---|---|---|
-| `decision` | `string` | No |  |
-| `violations` | `array` | No |  |
-| `warnings` | `array` | No |  |
-| `engine` | `string` | No |  |
+| `decision` | `string` | Yes | Final aggregated decision after all policy evaluations. REQUIRED for chain-of-custody. |
+| `policy_evaluations` | `array` | No | Individual policy evaluation results. Captures which specific policies (OPA/ONNX/gateway) produced which decisions. |
+| `aggregation_method` | `string` | No | Aggregation method used to combine individual policy decisions. Examples: 'most_restrictive', 'unanimous', 'majority' |
+| `workflow_state` | `string` | Yes | Workflow state when this policy evaluation occurred. REQUIRED for temporal chain-of-custody. |
+| `violations` | `array` | No | Policy violations detected. |
+| `warnings` | `array` | No | Policy warnings (non-blocking). |
+| `engine` | `string` | No | Legacy field for backward compatibility. |
 
 ### AuditApproval
 

@@ -38,6 +38,7 @@ type CabinCrewProtocol struct {
 	PlanArtifactHash                 *PlanArtifactHash       `json:"PlanArtifactHash,omitempty"`
 	PlanToken                        *PlanToken              `json:"PlanToken,omitempty"`
 	PolicyEvaluatedData              *PolicyEvaluatedData    `json:"PolicyEvaluatedData,omitempty"`
+	PolicyEvaluation                 *PolicyEvaluation       `json:"PolicyEvaluation,omitempty"`
 	PolicyEvaluationRecord           *PolicyEvaluationRecord `json:"PolicyEvaluationRecord,omitempty"`
 	PreflightEvidence                *PreflightEvidence      `json:"PreflightEvidence,omitempty"`
 	PreflightInput                   *PreflightInput         `json:"PreflightInput,omitempty"`
@@ -97,6 +98,8 @@ type ApprovalRequest struct {
 }
 
 // Arbitrary metadata. Optional.
+//
+// Evidence supporting this decision (e.g., rule matches, model scores).
 type RecordStringAny struct {
 }
 
@@ -199,6 +202,8 @@ type AuditEvent struct {
 	// Cryptographic binding between a flight-plan and its subsequent take-off.                             
 	// Defined in schemas/draft/plan-token.schema.json                                                      
 	PlanToken                                                                               *PlanToken      `json:"plan_token,omitempty"`
+	// Policy evaluation audit record.                                                                      
+	// Extended to support chain-of-custody reconstruction.                                                 
 	Policy                                                                                  *AuditPolicy    `json:"policy,omitempty"`
 	Severity                                                                                *Severity       `json:"severity,omitempty"`
 	// Cryptographic signature of this event hash.                                                          
@@ -208,6 +213,9 @@ type AuditEvent struct {
 	// RFC3339 timestamp of when the event occurred.                                                        
 	Timestamp                                                                               string          `json:"timestamp"`
 	Workflow                                                                                *AuditWorkflow  `json:"workflow,omitempty"`
+	// Workflow state when this event was emitted.                                                          
+	// REQUIRED for temporal chain-of-custody reconstruction.                                               
+	WorkflowState                                                                           *string         `json:"workflow_state,omitempty"`
 }
 
 type AuditGateway struct {
@@ -252,11 +260,44 @@ type PlanArtifactHash struct {
 	Size *float64 `json:"size,omitempty"`
 }
 
+// Policy evaluation audit record.
+// Extended to support chain-of-custody reconstruction.
 type AuditPolicy struct {
-	Decision   *string  `json:"decision,omitempty"`
-	Engine     *string  `json:"engine,omitempty"`
-	Violations []string `json:"violations,omitempty"`
-	Warnings   []string `json:"warnings,omitempty"`
+	// Aggregation method used to combine individual policy decisions.                                 
+	// Examples: 'most_restrictive', 'unanimous', 'majority'                                           
+	AggregationMethod                                                               *string            `json:"aggregation_method,omitempty"`
+	// Final aggregated decision after all policy evaluations.                                         
+	// REQUIRED for chain-of-custody.                                                                  
+	Decision                                                                        Decision           `json:"decision"`
+	// Legacy field for backward compatibility.                                                        
+	Engine                                                                          *string            `json:"engine,omitempty"`
+	// Individual policy evaluation results.                                                           
+	// Captures which specific policies (OPA/ONNX/gateway) produced which decisions.                   
+	PolicyEvaluations                                                               []PolicyEvaluation `json:"policy_evaluations,omitempty"`
+	// Policy violations detected.                                                                     
+	Violations                                                                      []string           `json:"violations,omitempty"`
+	// Policy warnings (non-blocking).                                                                 
+	Warnings                                                                        []string           `json:"warnings,omitempty"`
+	// Workflow state when this policy evaluation occurred.                                            
+	// REQUIRED for temporal chain-of-custody.                                                         
+	WorkflowState                                                                   string             `json:"workflow_state"`
+}
+
+// Individual policy evaluation result.
+// Captures decision source and evidence.
+type PolicyEvaluation struct {
+	// Decision from this specific policy.                                                   
+	Decision                                                                Decision         `json:"decision"`
+	// Evaluation timestamp.                                                                 
+	EvaluatedAt                                                             string           `json:"evaluated_at"`
+	// Evidence supporting this decision (e.g., rule matches, model scores).                 
+	Evidence                                                                *RecordStringAny `json:"evidence,omitempty"`
+	// Policy identifier (e.g., OPA policy name, ONNX model name).                           
+	PolicyID                                                                string           `json:"policy_id"`
+	// Reason for this decision.                                                             
+	Reason                                                                  *string          `json:"reason,omitempty"`
+	// Policy source type.                                                                   
+	Source                                                                  Source           `json:"source"`
 }
 
 type AuditWorkflow struct {
@@ -525,6 +566,30 @@ type WorkflowStateRecord struct {
 	WorkflowID        string                   `json:"workflow_id"`
 }
 
+// Final aggregated decision after all policy evaluations.
+// REQUIRED for chain-of-custody.
+//
+// Decision from this specific policy.
+type Decision string
+
+const (
+	Allow           Decision = "allow"
+	Deny            Decision = "deny"
+	RequireApproval Decision = "require_approval"
+	Warn            Decision = "warn"
+)
+
+// Policy source type.
+type Source string
+
+const (
+	Custom     Source = "custom"
+	LlmGateway Source = "llm_gateway"
+	MCPGateway Source = "mcp_gateway"
+	Onnx       Source = "onnx"
+	Opa        Source = "opa"
+)
+
 type Severity string
 
 const (
@@ -533,15 +598,6 @@ const (
 	Error    Severity = "error"
 	Info     Severity = "info"
 	Warning  Severity = "warning"
-)
-
-type Decision string
-
-const (
-	Allow           Decision = "allow"
-	Deny            Decision = "deny"
-	RequireApproval Decision = "require_approval"
-	Warn            Decision = "warn"
 )
 
 // Execution mode: 'flight-plan' or 'take-off'.

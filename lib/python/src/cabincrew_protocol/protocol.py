@@ -27,8 +27,10 @@ class ApprovalRecord:
 
 @dataclass
 class RecordStringAny:
-    """Arbitrary metadata. Optional."""
-
+    """Arbitrary metadata. Optional.
+    
+    Evidence supporting this decision (e.g., rule matches, model scores).
+    """
     pass
 
 
@@ -205,12 +207,81 @@ class PlanToken:
     """Hash of the workspace state when the plan was created."""
 
 
+class Decision(Enum):
+    """Final aggregated decision after all policy evaluations.
+    REQUIRED for chain-of-custody.
+    
+    Decision from this specific policy.
+    """
+    ALLOW = "allow"
+    DENY = "deny"
+    REQUIRE_APPROVAL = "require_approval"
+    WARN = "warn"
+
+
+class Source(Enum):
+    """Policy source type."""
+
+    CUSTOM = "custom"
+    LLM_GATEWAY = "llm_gateway"
+    MCP_GATEWAY = "mcp_gateway"
+    ONNX = "onnx"
+    OPA = "opa"
+
+
+@dataclass
+class PolicyEvaluation:
+    """Individual policy evaluation result.
+    Captures decision source and evidence.
+    """
+    decision: Decision = None
+    """Decision from this specific policy."""
+
+    evaluated_at: str = None
+    """Evaluation timestamp."""
+
+    policy_id: str = None
+    """Policy identifier (e.g., OPA policy name, ONNX model name)."""
+
+    source: Source = None
+    """Policy source type."""
+
+    evidence: Optional[RecordStringAny] = None
+    """Evidence supporting this decision (e.g., rule matches, model scores)."""
+
+    reason: Optional[str] = None
+    """Reason for this decision."""
+
+
 @dataclass
 class AuditPolicy:
-    decision: Optional[str] = None
+    """Policy evaluation audit record.
+    Extended to support chain-of-custody reconstruction.
+    """
+    decision: Decision = None
+    """Final aggregated decision after all policy evaluations.
+    REQUIRED for chain-of-custody.
+    """
+    workflow_state: str = None
+    """Workflow state when this policy evaluation occurred.
+    REQUIRED for temporal chain-of-custody.
+    """
+    aggregation_method: Optional[str] = None
+    """Aggregation method used to combine individual policy decisions.
+    Examples: 'most_restrictive', 'unanimous', 'majority' = None
+    """
     engine: Optional[str] = None
+    """Legacy field for backward compatibility."""
+
+    policy_evaluations: Optional[List[PolicyEvaluation]] = None
+    """Individual policy evaluation results.
+    Captures which specific policies (OPA/ONNX/gateway) produced which decisions.
+    """
     violations: Optional[List[str]] = None
+    """Policy violations detected."""
+
     warnings: Optional[List[str]] = None
+    """Policy warnings (non-blocking)."""
 
 
 class Severity(Enum):
@@ -256,6 +327,9 @@ class AuditEvent:
     Defined in schemas/draft/plan-token.schema.json
     """
     policy: Optional[AuditPolicy] = None
+    """Policy evaluation audit record.
+    Extended to support chain-of-custody reconstruction.
+    """
     severity: Optional[Severity] = None
     signature: Optional[str] = None
     """Cryptographic signature of this event hash."""
@@ -264,18 +338,15 @@ class AuditEvent:
     """Reference to the key used for signing (e.g. 'engine-key-1', 'orchestrator-key-prod')."""
 
     workflow: Optional[AuditWorkflow] = None
+    workflow_state: Optional[str] = None
+    """Workflow state when this event was emitted.
+    REQUIRED for temporal chain-of-custody reconstruction.
+    """
 
 
 @dataclass
 class RecordStringAnyClass:
     pass
-
-
-class Decision(Enum):
-    ALLOW = "allow"
-    DENY = "deny"
-    REQUIRE_APPROVAL = "require_approval"
-    WARN = "warn"
 
 
 @dataclass
@@ -649,6 +720,7 @@ class CabinCrewProtocol:
     plan_artifact_hash: Optional[PlanArtifactHash] = None
     plan_token: Optional[PlanToken] = None
     policy_evaluated_data: Optional[PolicyEvaluatedData] = None
+    policy_evaluation: Optional[PolicyEvaluation] = None
     policy_evaluation_record: Optional[PolicyEvaluationRecord] = None
     preflight_evidence: Optional[PreflightEvidence] = None
     preflight_input: Optional[PreflightInput] = None

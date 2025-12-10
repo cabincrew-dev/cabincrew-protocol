@@ -178,28 +178,108 @@
       "additionalProperties": false
     },
     "AuditPolicy": {
+      "description": "Policy evaluation audit record.\nExtended to support chain-of-custody reconstruction.",
       "type": "object",
       "properties": {
         "decision": {
+          "description": "Final aggregated decision after all policy evaluations.\nREQUIRED for chain-of-custody.",
+          "enum": [
+            "allow",
+            "deny",
+            "require_approval",
+            "warn"
+          ],
+          "type": "string"
+        },
+        "policy_evaluations": {
+          "description": "Individual policy evaluation results.\nCaptures which specific policies (OPA/ONNX/gateway) produced which decisions.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PolicyEvaluation"
+          }
+        },
+        "aggregation_method": {
+          "description": "Aggregation method used to combine individual policy decisions.\nExamples: 'most_restrictive', 'unanimous', 'majority'",
+          "type": "string"
+        },
+        "workflow_state": {
+          "description": "Workflow state when this policy evaluation occurred.\nREQUIRED for temporal chain-of-custody.",
           "type": "string"
         },
         "violations": {
+          "description": "Policy violations detected.",
           "type": "array",
           "items": {
             "type": "string"
           }
         },
         "warnings": {
+          "description": "Policy warnings (non-blocking).",
           "type": "array",
           "items": {
             "type": "string"
           }
         },
         "engine": {
+          "description": "Legacy field for backward compatibility.",
           "type": "string"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "required": [
+        "decision",
+        "workflow_state"
+      ]
+    },
+    "PolicyEvaluation": {
+      "description": "Individual policy evaluation result.\nCaptures decision source and evidence.",
+      "type": "object",
+      "properties": {
+        "source": {
+          "description": "Policy source type.",
+          "enum": [
+            "custom",
+            "llm_gateway",
+            "mcp_gateway",
+            "onnx",
+            "opa"
+          ],
+          "type": "string"
+        },
+        "policy_id": {
+          "description": "Policy identifier (e.g., OPA policy name, ONNX model name).",
+          "type": "string"
+        },
+        "decision": {
+          "description": "Decision from this specific policy.",
+          "enum": [
+            "allow",
+            "deny",
+            "require_approval",
+            "warn"
+          ],
+          "type": "string"
+        },
+        "reason": {
+          "description": "Reason for this decision.",
+          "type": "string"
+        },
+        "evidence": {
+          "description": "Evidence supporting this decision (e.g., rule matches, model scores).",
+          "$ref": "#/definitions/Record<string,any>"
+        },
+        "evaluated_at": {
+          "description": "Evaluation timestamp.",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "decision",
+        "evaluated_at",
+        "policy_id",
+        "source"
+      ]
     },
     "AuditApproval": {
       "type": "object",
@@ -286,6 +366,10 @@
         "workflow": {
           "$ref": "#/definitions/AuditWorkflow"
         },
+        "workflow_state": {
+          "description": "Workflow state when this event was emitted.\nREQUIRED for temporal chain-of-custody reconstruction.",
+          "type": "string"
+        },
         "engine": {
           "$ref": "#/definitions/AuditEngine"
         },
@@ -300,6 +384,7 @@
           }
         },
         "policy": {
+          "description": "Policy evaluation audit record.\nExtended to support chain-of-custody reconstruction.",
           "$ref": "#/definitions/AuditPolicy"
         },
         "approval": {
