@@ -36,7 +36,7 @@ function generate() {
     };
 
     const program = TJS.getProgramFromFiles([SRC_FILE], compilerOptions);
-    const schema = TJS.generateSchema(program, "*", settings);
+    let schema = TJS.generateSchema(program, "*", settings);
 
     if (!schema) {
         throw new Error("Failed to generate schema");
@@ -51,6 +51,15 @@ function generate() {
         // Remove the empty properties object if it exists
         delete recordDef.properties;
     }
+
+    // Post-process schema to remove duplicate Record<string,any> type
+    // typescript-json-schema creates both RecordStringAny and Record<string,any>
+    // We need to redirect all references to RecordStringAny and remove the duplicate
+    const schemaStr = JSON.stringify(schema);
+    const fixedSchemaStr = schemaStr
+        .replace(/#\/definitions\/Record<string,any>/g, '#/definitions/RecordStringAny')
+        .replace(/"Record<string,any>":\s*\{[^}]*\},?/g, ''); // Remove the duplicate definition
+    schema = JSON.parse(fixedSchemaStr);
 
     // Write schema file
     fs.writeFileSync(SCHEMA_FILE, JSON.stringify(schema, null, 2));

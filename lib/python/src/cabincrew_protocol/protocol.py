@@ -42,15 +42,6 @@ class ApprovalRecord:
 
 
 @dataclass
-class RecordStringAny:
-    """Arbitrary metadata. Optional.
-    
-    Evidence supporting this decision (e.g., rule matches, model scores).
-    """
-    pass
-
-
-@dataclass
 class PreflightEvidence:
     hash: str = None
     name: str = None
@@ -75,7 +66,7 @@ class ApprovalRequest:
     required_role: str = None
     step_id: str = None
     workflow_id: str = None
-    engine_output: Optional[RecordStringAny] = None
+    engine_output: Optional[Dict[str, Any]] = None
     evidence: Optional[List[PreflightEvidence]] = None
 
 
@@ -117,7 +108,7 @@ class Artifact:
     body_file: Optional[str] = None
     """Indicates an external data file within the artifact directory."""
 
-    metadata: Optional[RecordStringAny] = None
+    metadata: Optional[Dict[str, Any]] = None
     """Arbitrary metadata. Optional."""
 
     target: Optional[str] = None
@@ -141,7 +132,7 @@ class ArtifactRecord:
     artifact_type: str = None
     created_at: str = None
     step_id: str = None
-    metadata: Optional[RecordStringAny] = None
+    metadata: Optional[Dict[str, Any]] = None
 
 
 @dataclass
@@ -307,7 +298,7 @@ class PolicyEvaluation:
     source: Source = None
     """Policy source type."""
 
-    evidence: Optional[RecordStringAny] = None
+    evidence: Optional[Dict[str, Any]] = None
     """Evidence supporting this decision (e.g., rule matches, model scores)."""
 
     reason: Optional[str] = None
@@ -499,13 +490,13 @@ class GatewayApproval:
 @dataclass
 class LLMGatewayRule:
     action: str = None
-    match: RecordStringAny = None
-    metadata: Optional[RecordStringAny] = None
+    match: Dict[str, Any] = None
+    metadata: Optional[Dict[str, Any]] = None
 
 
 @dataclass
 class LLMGatewayPolicyConfig:
-    model_routing: Optional[RecordStringAny] = None
+    model_routing: Optional[Dict[str, Any]] = None
     onnx_models: Optional[List[str]] = None
     opa_policies: Optional[List[str]] = None
     rules: Optional[List[LLMGatewayRule]] = None
@@ -513,11 +504,11 @@ class LLMGatewayPolicyConfig:
 
 @dataclass
 class LLMGatewayRequest:
-    input: RecordStringAny = None
+    input: Dict[str, Any] = None
     model: str = None
     request_id: str = None
     timestamp: str = None
-    context: Optional[RecordStringAny] = None
+    context: Optional[Dict[str, Any]] = None
     provider: Optional[str] = None
     source: Optional[str] = None
 
@@ -528,8 +519,8 @@ class LLMGatewayResponse:
     request_id: str = None
     timestamp: str = None
     approval: Optional[GatewayApproval] = None
-    gateway_payload: Optional[RecordStringAny] = None
-    rewritten_input: Optional[RecordStringAny] = None
+    gateway_payload: Optional[Dict[str, Any]] = None
+    rewritten_input: Optional[Dict[str, Any]] = None
     routed_model: Optional[str] = None
     violations: Optional[List[str]] = None
     warnings: Optional[List[str]] = None
@@ -538,8 +529,8 @@ class LLMGatewayResponse:
 @dataclass
 class MCPGatewayRule:
     action: str = None
-    match: RecordStringAny = None
-    metadata: Optional[RecordStringAny] = None
+    match: Dict[str, Any] = None
+    metadata: Optional[Dict[str, Any]] = None
 
 
 @dataclass
@@ -555,8 +546,8 @@ class MCPGatewayRequest:
     request_id: str = None
     server_id: str = None
     timestamp: str = None
-    context: Optional[RecordStringAny] = None
-    params: Optional[RecordStringAny] = None
+    context: Optional[Dict[str, Any]] = None
+    params: Optional[Dict[str, Any]] = None
     source: Optional[str] = None
 
 
@@ -566,7 +557,7 @@ class MCPGatewayResponse:
     request_id: str = None
     timestamp: str = None
     approval: Optional[GatewayApproval] = None
-    rewritten_request: Optional[RecordStringAny] = None
+    rewritten_request: Optional[Dict[str, Any]] = None
     violations: Optional[List[str]] = None
     warnings: Optional[List[str]] = None
 
@@ -594,11 +585,11 @@ class PolicyEvaluationRecord:
 
 @dataclass
 class PreflightInput:
-    engine_output: RecordStringAny = None
+    engine_output: Dict[str, Any] = None
     mode: Mode = None
     step_id: str = None
     workflow_id: str = None
-    context: Optional[RecordStringAny] = None
+    context: Optional[Dict[str, Any]] = None
     evidence: Optional[List[PreflightEvidence]] = None
     plan_token: Optional[PlanToken] = None
     """Plan-token binds artifacts to subsequent take-off.
@@ -738,7 +729,7 @@ class WorkflowStateRecord:
     steps_pending: List[str] = None
     updated_at: str = None
     workflow_id: str = None
-    metadata: Optional[RecordStringAny] = None
+    metadata: Optional[Dict[str, Any]] = None
 
 
 @dataclass
@@ -788,8 +779,7 @@ class CabinCrewProtocol:
     preflight_input: Optional[PreflightInput] = None
     preflight_output: Optional[PreflightOutput] = None
     preflight_requires: Optional[PreflightRequires] = None
-    record_string_any: Optional[RecordStringAny] = None
-    cabin_crew_protocol_record_string_any: Optional[Dict[str, Any]] = None
+    record_string_any: Optional[Dict[str, Any]] = None
     state: Optional[State] = None
     step_completed_data: Optional[StepCompletedData] = None
     step_started_data: Optional[StepStartedData] = None

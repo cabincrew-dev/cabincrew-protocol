@@ -44,7 +44,6 @@ export interface CabinCrewProtocol {
     PreflightInput?:         PreflightInput;
     PreflightOutput?:        PreflightOutput;
     PreflightRequires?:      PreflightRequires;
-    "Record<string,any>"?:   RecordStringAny;
     RecordStringAny?:        { [key: string]: any };
     State?:                  State;
     StepCompletedData?:      StepCompletedData;
@@ -99,7 +98,7 @@ export interface ApprovalRecord {
  */
 export interface ApprovalRequest {
     approval_id:    string;
-    engine_output?: RecordStringAny;
+    engine_output?: { [key: string]: any };
     evidence?:      PreflightEvidence[];
     /**
      * SHA256 hash of the plan-token that this approval is bound to.
@@ -112,14 +111,6 @@ export interface ApprovalRequest {
     required_role:   string;
     step_id:         string;
     workflow_id:     string;
-}
-
-/**
- * Arbitrary metadata. Optional.
- *
- * Evidence supporting this decision (e.g., rule matches, model scores).
- */
-export interface RecordStringAny {
 }
 
 export interface PreflightEvidence {
@@ -168,7 +159,7 @@ export interface Artifact {
     /**
      * Arbitrary metadata. Optional.
      */
-    metadata?: RecordStringAny;
+    metadata?: { [key: string]: any };
     /**
      * MIME type describing content.
      */
@@ -194,7 +185,7 @@ export interface ArtifactRecord {
     artifact_id:   string;
     artifact_type: string;
     created_at:    string;
-    metadata?:     RecordStringAny;
+    metadata?:     { [key: string]: any };
     step_id:       string;
 }
 
@@ -452,7 +443,7 @@ export interface PolicyEvaluation {
     /**
      * Evidence supporting this decision (e.g., rule matches, model scores).
      */
-    evidence?: RecordStringAny;
+    evidence?: { [key: string]: any };
     /**
      * Policy identifier (e.g., OPA policy name, ONNX model name).
      */
@@ -571,7 +562,7 @@ export interface GatewayApproval {
 }
 
 export interface LLMGatewayPolicyConfig {
-    model_routing?: RecordStringAny;
+    model_routing?: { [key: string]: any };
     onnx_models?:   string[];
     opa_policies?:  string[];
     rules?:         LLMGatewayRule[];
@@ -579,13 +570,13 @@ export interface LLMGatewayPolicyConfig {
 
 export interface LLMGatewayRule {
     action:    string;
-    match:     RecordStringAny;
-    metadata?: RecordStringAny;
+    match:     { [key: string]: any };
+    metadata?: { [key: string]: any };
 }
 
 export interface LLMGatewayRequest {
-    context?:   RecordStringAny;
-    input:      RecordStringAny;
+    context?:   { [key: string]: any };
+    input:      { [key: string]: any };
     model:      string;
     provider?:  string;
     request_id: string;
@@ -596,9 +587,9 @@ export interface LLMGatewayRequest {
 export interface LLMGatewayResponse {
     approval?:        GatewayApproval;
     decision:         Decision;
-    gateway_payload?: RecordStringAny;
+    gateway_payload?: { [key: string]: any };
     request_id:       string;
-    rewritten_input?: RecordStringAny;
+    rewritten_input?: { [key: string]: any };
     routed_model?:    string;
     timestamp:        string;
     violations?:      string[];
@@ -613,14 +604,14 @@ export interface MCPGatewayPolicyConfig {
 
 export interface MCPGatewayRule {
     action:    string;
-    match:     RecordStringAny;
-    metadata?: RecordStringAny;
+    match:     { [key: string]: any };
+    metadata?: { [key: string]: any };
 }
 
 export interface MCPGatewayRequest {
-    context?:   RecordStringAny;
+    context?:   { [key: string]: any };
     method:     string;
-    params?:    RecordStringAny;
+    params?:    { [key: string]: any };
     request_id: string;
     server_id:  string;
     source?:    string;
@@ -631,7 +622,7 @@ export interface MCPGatewayResponse {
     approval?:          GatewayApproval;
     decision:           Decision;
     request_id:         string;
-    rewritten_request?: RecordStringAny;
+    rewritten_request?: { [key: string]: any };
     timestamp:          string;
     violations?:        string[];
     warnings?:          string[];
@@ -658,8 +649,8 @@ export interface PolicyEvaluationRecord {
 }
 
 export interface PreflightInput {
-    context?:      RecordStringAny;
-    engine_output: RecordStringAny;
+    context?:      { [key: string]: any };
+    engine_output: { [key: string]: any };
     evidence?:     PreflightEvidence[];
     mode:          Mode;
     /**
@@ -763,7 +754,7 @@ export interface WorkflowStateRecord {
     artifacts:          ArtifactRecord[];
     created_at:         string;
     current_state:      State;
-    metadata?:          RecordStringAny;
+    metadata?:          { [key: string]: any };
     plan_token_hash:    string;
     policy_evaluations: PolicyEvaluationRecord[];
     steps_completed:    string[];

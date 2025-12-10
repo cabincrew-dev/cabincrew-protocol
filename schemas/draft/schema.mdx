@@ -83,9 +83,9 @@ Defined in schemas/draft/engine.schema.json
 | `workflow_id` | `string` | Yes |  |
 | `step_id` | `string` | Yes |  |
 | `mode` | `string` | Yes |  |
-| `engine_output` | `[Record<string,any>]` | Yes |  |
+| `engine_output` | `[RecordStringAny]` | Yes |  |
 | `evidence` | `array` | No |  |
-| `context` | `[Record<string,any>]` | No |  |
+| `context` | `[RecordStringAny]` | No |  |
 | `plan_token` | `[PlanToken]` | No | Plan-token binds artifacts to subsequent take-off. Extended with version and governance provenance for safe upgrades and auditability. |
 
 ### PreflightOutput
@@ -111,7 +111,7 @@ to prevent approval replay attacks against mutated plans.
 | `step_id` | `string` | Yes |  |
 | `reason` | `string` | Yes |  |
 | `required_role` | `string` | Yes |  |
-| `engine_output` | `[Record<string,any>]` | No |  |
+| `engine_output` | `[RecordStringAny]` | No |  |
 | `evidence` | `array` | No |  |
 | `plan_token_hash` | `string` | Yes | SHA256 hash of the plan-token that this approval is bound to. REQUIRED to prevent approval replay attacks. The orchestrator MUST verify this matches the current plan-token before accepting approval. |
 
@@ -293,8 +293,8 @@ Extended to ensure approval binding is auditable.
 | `source` | `string` | No |  |
 | `model` | `string` | Yes |  |
 | `provider` | `string` | No |  |
-| `input` | `[Record<string,any>]` | Yes |  |
-| `context` | `[Record<string,any>]` | No |  |
+| `input` | `[RecordStringAny]` | Yes |  |
+| `context` | `[RecordStringAny]` | No |  |
 
 ### LLMGatewayResponse
 
@@ -307,8 +307,8 @@ Extended to ensure approval binding is auditable.
 | `violations` | `array` | No |  |
 | `approval` | `[GatewayApproval]` | No |  |
 | `routed_model` | `string` | No |  |
-| `rewritten_input` | `[Record<string,any>]` | No |  |
-| `gateway_payload` | `[Record<string,any>]` | No |  |
+| `rewritten_input` | `[RecordStringAny]` | No |  |
+| `gateway_payload` | `[RecordStringAny]` | No |  |
 
 ### LLMGatewayPolicyConfig
 
@@ -316,16 +316,16 @@ Extended to ensure approval binding is auditable.
 |---|---|---|---|
 | `opa_policies` | `array` | No |  |
 | `onnx_models` | `array` | No |  |
-| `model_routing` | `[Record<string,any>]` | No |  |
+| `model_routing` | `[RecordStringAny]` | No |  |
 | `rules` | `array` | No |  |
 
 ### LLMGatewayRule
 
 | Property | Type | Required | Description |
 |---|---|---|---|
-| `match` | `[Record<string,any>]` | Yes |  |
+| `match` | `[RecordStringAny]` | Yes |  |
 | `action` | `string` | Yes |  |
-| `metadata` | `[Record<string,any>]` | No |  |
+| `metadata` | `[RecordStringAny]` | No |  |
 
 ### GatewayApproval
 
@@ -344,8 +344,8 @@ Extended to ensure approval binding is auditable.
 | `source` | `string` | No |  |
 | `server_id` | `string` | Yes |  |
 | `method` | `string` | Yes |  |
-| `params` | `[Record<string,any>]` | No |  |
-| `context` | `[Record<string,any>]` | No |  |
+| `params` | `[RecordStringAny]` | No |  |
+| `context` | `[RecordStringAny]` | No |  |
 
 ### MCPGatewayResponse
 
@@ -357,7 +357,7 @@ Extended to ensure approval binding is auditable.
 | `warnings` | `array` | No |  |
 | `violations` | `array` | No |  |
 | `approval` | `[GatewayApproval]` | No |  |
-| `rewritten_request` | `[Record<string,any>]` | No |  |
+| `rewritten_request` | `[RecordStringAny]` | No |  |
 
 ### MCPGatewayPolicyConfig
 
@@ -371,9 +371,9 @@ Extended to ensure approval binding is auditable.
 
 | Property | Type | Required | Description |
 |---|---|---|---|
-| `match` | `[Record<string,any>]` | Yes |  |
+| `match` | `[RecordStringAny]` | Yes |  |
 | `action` | `string` | Yes |  |
-| `metadata` | `[Record<string,any>]` | No |  |
+| `metadata` | `[RecordStringAny]` | No |  |
 
 {/* @category Common Types */}
 ## Common Types
@@ -391,7 +391,7 @@ Defined in schemas/draft/artifact.schema.json
 | `mime` | `string` | Yes | MIME type describing content. |
 | `body` | `complex` | No | Inline content for small artifacts. Can be string, object, array, or null. |
 | `body_file` | `string` | No | Indicates an external data file within the artifact directory. |
-| `metadata` | `[Record<string,any>]` | No | Arbitrary metadata. Optional. |
+| `metadata` | `[RecordStringAny]` | No | Arbitrary metadata. Optional. |
 
 ### Mode
 

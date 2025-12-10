@@ -1,64 +1,63 @@
 package cabincrew
 
 type CabinCrewProtocol struct {
-	AggregationMethod                *AggregationMethod      `json:"AggregationMethod,omitempty"`
-	AnyMap                           map[string]interface{}  `json:"AnyMap,omitempty"`
-	ApprovalReceivedData             *ApprovalReceivedData   `json:"ApprovalReceivedData,omitempty"`
-	ApprovalRecord                   *ApprovalRecord         `json:"ApprovalRecord,omitempty"`
-	ApprovalRequest                  *ApprovalRequest        `json:"ApprovalRequest,omitempty"`
-	ApprovalRequestedData            *ApprovalRequestedData  `json:"ApprovalRequestedData,omitempty"`
-	ApprovalResponse                 *ApprovalResponse       `json:"ApprovalResponse,omitempty"`
-	Artifact                         *Artifact               `json:"Artifact,omitempty"`
-	ArtifactCreatedData              *ArtifactCreatedData    `json:"ArtifactCreatedData,omitempty"`
-	ArtifactRecord                   *ArtifactRecord         `json:"ArtifactRecord,omitempty"`
-	AuditApproval                    *AuditApproval          `json:"AuditApproval,omitempty"`
-	AuditArtifact                    *AuditArtifact          `json:"AuditArtifact,omitempty"`
-	AuditEngine                      *AuditEngine            `json:"AuditEngine,omitempty"`
-	AuditEvent                       *AuditEvent             `json:"AuditEvent,omitempty"`
-	AuditGateway                     *AuditGateway           `json:"AuditGateway,omitempty"`
-	AuditIntegrity                   *AuditIntegrity         `json:"AuditIntegrity,omitempty"`
-	AuditPolicy                      *AuditPolicy            `json:"AuditPolicy,omitempty"`
-	AuditWorkflow                    *AuditWorkflow          `json:"AuditWorkflow,omitempty"`
-	Decision                         *Decision               `json:"Decision,omitempty"`
-	DecisionSeverity                 *float64                `json:"DecisionSeverity,omitempty"`
-	EngineArtifact                   *EngineArtifact         `json:"EngineArtifact,omitempty"`
-	EngineInput                      *EngineInput            `json:"EngineInput,omitempty"`
-	EngineMeta                       *EngineMeta             `json:"EngineMeta,omitempty"`
-	EngineMetric                     *EngineMetric           `json:"EngineMetric,omitempty"`
-	EngineOrchestrator               *EngineOrchestrator     `json:"EngineOrchestrator,omitempty"`
-	EngineOutput                     *EngineOutput           `json:"EngineOutput,omitempty"`
-	GatewayApproval                  *GatewayApproval        `json:"GatewayApproval,omitempty"`
-	LLMGatewayPolicyConfig           *LLMGatewayPolicyConfig `json:"LLMGatewayPolicyConfig,omitempty"`
-	LLMGatewayRequest                *LLMGatewayRequest      `json:"LLMGatewayRequest,omitempty"`
-	LLMGatewayResponse               *LLMGatewayResponse     `json:"LLMGatewayResponse,omitempty"`
-	LLMGatewayRule                   *LLMGatewayRule         `json:"LLMGatewayRule,omitempty"`
-	MCPGatewayPolicyConfig           *MCPGatewayPolicyConfig `json:"MCPGatewayPolicyConfig,omitempty"`
-	MCPGatewayRequest                *MCPGatewayRequest      `json:"MCPGatewayRequest,omitempty"`
-	MCPGatewayResponse               *MCPGatewayResponse     `json:"MCPGatewayResponse,omitempty"`
-	MCPGatewayRule                   *MCPGatewayRule         `json:"MCPGatewayRule,omitempty"`
-	Mode                             *Mode                   `json:"Mode,omitempty"`
-	PlanArtifactHash                 *PlanArtifactHash       `json:"PlanArtifactHash,omitempty"`
-	PlanToken                        *PlanToken              `json:"PlanToken,omitempty"`
-	PolicyEvaluatedData              *PolicyEvaluatedData    `json:"PolicyEvaluatedData,omitempty"`
-	PolicyEvaluation                 *PolicyEvaluation       `json:"PolicyEvaluation,omitempty"`
-	PolicyEvaluationRecord           *PolicyEvaluationRecord `json:"PolicyEvaluationRecord,omitempty"`
-	PreflightEvidence                *PreflightEvidence      `json:"PreflightEvidence,omitempty"`
-	PreflightInput                   *PreflightInput         `json:"PreflightInput,omitempty"`
-	PreflightOutput                  *PreflightOutput        `json:"PreflightOutput,omitempty"`
-	PreflightRequires                *PreflightRequires      `json:"PreflightRequires,omitempty"`
-	RecordStringAny                  *RecordStringAny        `json:"Record<string,any>,omitempty"`
-	CabinCrewProtocolRecordStringAny map[string]interface{}  `json:"RecordStringAny,omitempty"`
-	State                            *State                  `json:"State,omitempty"`
-	StepCompletedData                *StepCompletedData      `json:"StepCompletedData,omitempty"`
-	StepStartedData                  *StepStartedData        `json:"StepStartedData,omitempty"`
-	WALEntry                         *WALEntry               `json:"WALEntry,omitempty"`
-	WALEntryData                     *WALEntryData           `json:"WALEntryData,omitempty"`
-	WALEntryType                     *WALEntryType           `json:"WALEntryType,omitempty"`
-	WorkflowCompletedData            *WorkflowCompletedData  `json:"WorkflowCompletedData,omitempty"`
-	WorkflowFailedData               *WorkflowFailedData     `json:"WorkflowFailedData,omitempty"`
-	WorkflowStartedData              *WorkflowStartedData    `json:"WorkflowStartedData,omitempty"`
-	WorkflowState                    *WorkflowState          `json:"WorkflowState,omitempty"`
-	WorkflowStateRecord              *WorkflowStateRecord    `json:"WorkflowStateRecord,omitempty"`
+	AggregationMethod      *AggregationMethod      `json:"AggregationMethod,omitempty"`
+	AnyMap                 map[string]interface{}  `json:"AnyMap,omitempty"`
+	ApprovalReceivedData   *ApprovalReceivedData   `json:"ApprovalReceivedData,omitempty"`
+	ApprovalRecord         *ApprovalRecord         `json:"ApprovalRecord,omitempty"`
+	ApprovalRequest        *ApprovalRequest        `json:"ApprovalRequest,omitempty"`
+	ApprovalRequestedData  *ApprovalRequestedData  `json:"ApprovalRequestedData,omitempty"`
+	ApprovalResponse       *ApprovalResponse       `json:"ApprovalResponse,omitempty"`
+	Artifact               *Artifact               `json:"Artifact,omitempty"`
+	ArtifactCreatedData    *ArtifactCreatedData    `json:"ArtifactCreatedData,omitempty"`
+	ArtifactRecord         *ArtifactRecord         `json:"ArtifactRecord,omitempty"`
+	AuditApproval          *AuditApproval          `json:"AuditApproval,omitempty"`
+	AuditArtifact          *AuditArtifact          `json:"AuditArtifact,omitempty"`
+	AuditEngine            *AuditEngine            `json:"AuditEngine,omitempty"`
+	AuditEvent             *AuditEvent             `json:"AuditEvent,omitempty"`
+	AuditGateway           *AuditGateway           `json:"AuditGateway,omitempty"`
+	AuditIntegrity         *AuditIntegrity         `json:"AuditIntegrity,omitempty"`
+	AuditPolicy            *AuditPolicy            `json:"AuditPolicy,omitempty"`
+	AuditWorkflow          *AuditWorkflow          `json:"AuditWorkflow,omitempty"`
+	Decision               *Decision               `json:"Decision,omitempty"`
+	DecisionSeverity       *float64                `json:"DecisionSeverity,omitempty"`
+	EngineArtifact         *EngineArtifact         `json:"EngineArtifact,omitempty"`
+	EngineInput            *EngineInput            `json:"EngineInput,omitempty"`
+	EngineMeta             *EngineMeta             `json:"EngineMeta,omitempty"`
+	EngineMetric           *EngineMetric           `json:"EngineMetric,omitempty"`
+	EngineOrchestrator     *EngineOrchestrator     `json:"EngineOrchestrator,omitempty"`
+	EngineOutput           *EngineOutput           `json:"EngineOutput,omitempty"`
+	GatewayApproval        *GatewayApproval        `json:"GatewayApproval,omitempty"`
+	LLMGatewayPolicyConfig *LLMGatewayPolicyConfig `json:"LLMGatewayPolicyConfig,omitempty"`
+	LLMGatewayRequest      *LLMGatewayRequest      `json:"LLMGatewayRequest,omitempty"`
+	LLMGatewayResponse     *LLMGatewayResponse     `json:"LLMGatewayResponse,omitempty"`
+	LLMGatewayRule         *LLMGatewayRule         `json:"LLMGatewayRule,omitempty"`
+	MCPGatewayPolicyConfig *MCPGatewayPolicyConfig `json:"MCPGatewayPolicyConfig,omitempty"`
+	MCPGatewayRequest      *MCPGatewayRequest      `json:"MCPGatewayRequest,omitempty"`
+	MCPGatewayResponse     *MCPGatewayResponse     `json:"MCPGatewayResponse,omitempty"`
+	MCPGatewayRule         *MCPGatewayRule         `json:"MCPGatewayRule,omitempty"`
+	Mode                   *Mode                   `json:"Mode,omitempty"`
+	PlanArtifactHash       *PlanArtifactHash       `json:"PlanArtifactHash,omitempty"`
+	PlanToken              *PlanToken              `json:"PlanToken,omitempty"`
+	PolicyEvaluatedData    *PolicyEvaluatedData    `json:"PolicyEvaluatedData,omitempty"`
+	PolicyEvaluation       *PolicyEvaluation       `json:"PolicyEvaluation,omitempty"`
+	PolicyEvaluationRecord *PolicyEvaluationRecord `json:"PolicyEvaluationRecord,omitempty"`
+	PreflightEvidence      *PreflightEvidence      `json:"PreflightEvidence,omitempty"`
+	PreflightInput         *PreflightInput         `json:"PreflightInput,omitempty"`
+	PreflightOutput        *PreflightOutput        `json:"PreflightOutput,omitempty"`
+	PreflightRequires      *PreflightRequires      `json:"PreflightRequires,omitempty"`
+	RecordStringAny        map[string]interface{}  `json:"RecordStringAny,omitempty"`
+	State                  *State                  `json:"State,omitempty"`
+	StepCompletedData      *StepCompletedData      `json:"StepCompletedData,omitempty"`
+	StepStartedData        *StepStartedData        `json:"StepStartedData,omitempty"`
+	WALEntry               *WALEntry               `json:"WALEntry,omitempty"`
+	WALEntryData           *WALEntryData           `json:"WALEntryData,omitempty"`
+	WALEntryType           *WALEntryType           `json:"WALEntryType,omitempty"`
+	WorkflowCompletedData  *WorkflowCompletedData  `json:"WorkflowCompletedData,omitempty"`
+	WorkflowFailedData     *WorkflowFailedData     `json:"WorkflowFailedData,omitempty"`
+	WorkflowStartedData    *WorkflowStartedData    `json:"WorkflowStartedData,omitempty"`
+	WorkflowState          *WorkflowState          `json:"WorkflowState,omitempty"`
+	WorkflowStateRecord    *WorkflowStateRecord    `json:"WorkflowStateRecord,omitempty"`
 }
 
 type ApprovalReceivedData struct {
@@ -85,24 +84,19 @@ type ApprovalRecord struct {
 // Security: The plan_token_hash MUST be verified to match the current plan-token
 // to prevent approval replay attacks against mutated plans.
 type ApprovalRequest struct {
-	ApprovalID                                                                          string              `json:"approval_id"`
-	EngineOutput                                                                        *RecordStringAny    `json:"engine_output,omitempty"`
-	Evidence                                                                            []PreflightEvidence `json:"evidence,omitempty"`
-	// SHA256 hash of the plan-token that this approval is bound to.                                        
-	// REQUIRED to prevent approval replay attacks.                                                         
-	// The orchestrator MUST verify this matches the current plan-token before accepting                    
-	// approval.                                                                                            
-	PlanTokenHash                                                                       string              `json:"plan_token_hash"`
-	Reason                                                                              string              `json:"reason"`
-	RequiredRole                                                                        string              `json:"required_role"`
-	StepID                                                                              string              `json:"step_id"`
-	WorkflowID                                                                          string              `json:"workflow_id"`
+	ApprovalID                                                                          string                 `json:"approval_id"`
+	EngineOutput                                                                        map[string]interface{} `json:"engine_output,omitempty"`
+	Evidence                                                                            []PreflightEvidence    `json:"evidence,omitempty"`
+	// SHA256 hash of the plan-token that this approval is bound to.                                           
+	// REQUIRED to prevent approval replay attacks.                                                            
+	// The orchestrator MUST verify this matches the current plan-token before accepting                       
+	// approval.                                                                                               
+	PlanTokenHash                                                                       string                 `json:"plan_token_hash"`
+	Reason                                                                              string                 `json:"reason"`
+	RequiredRole                                                                        string                 `json:"required_role"`
+	StepID                                                                              string                 `json:"step_id"`
+	WorkflowID                                                                          string                 `json:"workflow_id"`
 }
-
-// Arbitrary metadata. Optional.
-//
-// Evidence supporting this decision (e.g., rule matches, model scores).
-type RecordStringAny map[string]interface{}
 
 type PreflightEvidence struct {
 	Hash string `json:"hash"`
@@ -127,22 +121,22 @@ type ApprovalResponse struct {
 // Canonical artifact interface.
 // Defined in schemas/draft/artifact.schema.json
 type Artifact struct {
-	// Operation to perform with this artifact (create, update, delete, apply, execute, etc).                    
-	// Free-form and engine-defined.                                                                             
-	Action                                                                                      string           `json:"action"`
-	// Type of artifact (file, diff, patch, action, message, etc). Free-form and engine-defined.                 
-	ArtifactType                                                                                string           `json:"artifact_type"`
-	// Inline content for small artifacts.                                                                       
-	// Can be string, object, array, or null.                                                                    
-	Body                                                                                        *Body            `json:"body"`
-	// Indicates an external data file within the artifact directory.                                            
-	BodyFile                                                                                    *string          `json:"body_file,omitempty"`
-	// Arbitrary metadata. Optional.                                                                             
-	Metadata                                                                                    *RecordStringAny `json:"metadata,omitempty"`
-	// MIME type describing content.                                                                             
-	MIME                                                                                        string           `json:"mime"`
-	// Path, resource, or identifier this artifact applies to. Optional.                                         
-	Target                                                                                      *string          `json:"target,omitempty"`
+	// Operation to perform with this artifact (create, update, delete, apply, execute, etc).                          
+	// Free-form and engine-defined.                                                                                   
+	Action                                                                                      string                 `json:"action"`
+	// Type of artifact (file, diff, patch, action, message, etc). Free-form and engine-defined.                       
+	ArtifactType                                                                                string                 `json:"artifact_type"`
+	// Inline content for small artifacts.                                                                             
+	// Can be string, object, array, or null.                                                                          
+	Body                                                                                        *Body                  `json:"body"`
+	// Indicates an external data file within the artifact directory.                                                  
+	BodyFile                                                                                    *string                `json:"body_file,omitempty"`
+	// Arbitrary metadata. Optional.                                                                                   
+	Metadata                                                                                    map[string]interface{} `json:"metadata,omitempty"`
+	// MIME type describing content.                                                                                   
+	MIME                                                                                        string                 `json:"mime"`
+	// Path, resource, or identifier this artifact applies to. Optional.                                               
+	Target                                                                                      *string                `json:"target,omitempty"`
 }
 
 type ArtifactCreatedData struct {
@@ -154,12 +148,12 @@ type ArtifactCreatedData struct {
 // Durable artifact record.
 // Tracks artifacts with SHA256 hashes for integrity verification.
 type ArtifactRecord struct {
-	ArtifactHash string           `json:"artifact_hash"`
-	ArtifactID   string           `json:"artifact_id"`
-	ArtifactType string           `json:"artifact_type"`
-	CreatedAt    string           `json:"created_at"`
-	Metadata     *RecordStringAny `json:"metadata,omitempty"`
-	StepID       string           `json:"step_id"`
+	ArtifactHash string                 `json:"artifact_hash"`
+	ArtifactID   string                 `json:"artifact_id"`
+	ArtifactType string                 `json:"artifact_type"`
+	CreatedAt    string                 `json:"created_at"`
+	Metadata     map[string]interface{} `json:"metadata,omitempty"`
+	StepID       string                 `json:"step_id"`
 }
 
 // Audit record for approval events.
@@ -319,22 +313,22 @@ type AuditPolicy struct {
 // Individual policy evaluation result.
 // Captures decision source and evidence.
 type PolicyEvaluation struct {
-	// Decision from this specific policy.                                                   
-	Decision                                                                Decision         `json:"decision"`
-	// Evaluation timestamp.                                                                 
-	EvaluatedAt                                                             string           `json:"evaluated_at"`
-	// Evidence supporting this decision (e.g., rule matches, model scores).                 
-	Evidence                                                                *RecordStringAny `json:"evidence,omitempty"`
-	// Policy identifier (e.g., OPA policy name, ONNX model name).                           
-	PolicyID                                                                string           `json:"policy_id"`
-	// Reason for this decision.                                                             
-	Reason                                                                  *string          `json:"reason,omitempty"`
-	// Decision severity for aggregation ordering.                                           
-	// 0=allow, 1=warn, 2=require_approval, 3=deny                                           
-	// REQUIRED for deterministic "most restrictive" aggregation.                            
-	Severity                                                                float64          `json:"severity"`
-	// Policy source type.                                                                   
-	Source                                                                  Source           `json:"source"`
+	// Decision from this specific policy.                                                         
+	Decision                                                                Decision               `json:"decision"`
+	// Evaluation timestamp.                                                                       
+	EvaluatedAt                                                             string                 `json:"evaluated_at"`
+	// Evidence supporting this decision (e.g., rule matches, model scores).                       
+	Evidence                                                                map[string]interface{} `json:"evidence,omitempty"`
+	// Policy identifier (e.g., OPA policy name, ONNX model name).                                 
+	PolicyID                                                                string                 `json:"policy_id"`
+	// Reason for this decision.                                                                   
+	Reason                                                                  *string                `json:"reason,omitempty"`
+	// Decision severity for aggregation ordering.                                                 
+	// 0=allow, 1=warn, 2=require_approval, 3=deny                                                 
+	// REQUIRED for deterministic "most restrictive" aggregation.                                  
+	Severity                                                                float64                `json:"severity"`
+	// Policy source type.                                                                         
+	Source                                                                  Source                 `json:"source"`
 }
 
 type AuditWorkflow struct {
@@ -411,38 +405,38 @@ type GatewayApproval struct {
 }
 
 type LLMGatewayPolicyConfig struct {
-	ModelRouting *RecordStringAny `json:"model_routing,omitempty"`
-	OnnxModels   []string         `json:"onnx_models,omitempty"`
-	OpaPolicies  []string         `json:"opa_policies,omitempty"`
-	Rules        []LLMGatewayRule `json:"rules,omitempty"`
+	ModelRouting map[string]interface{} `json:"model_routing,omitempty"`
+	OnnxModels   []string               `json:"onnx_models,omitempty"`
+	OpaPolicies  []string               `json:"opa_policies,omitempty"`
+	Rules        []LLMGatewayRule       `json:"rules,omitempty"`
 }
 
 type LLMGatewayRule struct {
-	Action   string           `json:"action"`
-	Match    RecordStringAny  `json:"match"`
-	Metadata *RecordStringAny `json:"metadata,omitempty"`
+	Action   string                 `json:"action"`
+	Match    map[string]interface{} `json:"match"`
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
 }
 
 type LLMGatewayRequest struct {
-	Context   *RecordStringAny `json:"context,omitempty"`
-	Input     RecordStringAny  `json:"input"`
-	Model     string           `json:"model"`
-	Provider  *string          `json:"provider,omitempty"`
-	RequestID string           `json:"request_id"`
-	Source    *string          `json:"source,omitempty"`
-	Timestamp string           `json:"timestamp"`
+	Context   map[string]interface{} `json:"context,omitempty"`
+	Input     map[string]interface{} `json:"input"`
+	Model     string                 `json:"model"`
+	Provider  *string                `json:"provider,omitempty"`
+	RequestID string                 `json:"request_id"`
+	Source    *string                `json:"source,omitempty"`
+	Timestamp string                 `json:"timestamp"`
 }
 
 type LLMGatewayResponse struct {
-	Approval       *GatewayApproval `json:"approval,omitempty"`
-	Decision       Decision         `json:"decision"`
-	GatewayPayload *RecordStringAny `json:"gateway_payload,omitempty"`
-	RequestID      string           `json:"request_id"`
-	RewrittenInput *RecordStringAny `json:"rewritten_input,omitempty"`
-	RoutedModel    *string          `json:"routed_model,omitempty"`
-	Timestamp      string           `json:"timestamp"`
-	Violations     []string         `json:"violations,omitempty"`
-	Warnings       []string         `json:"warnings,omitempty"`
+	Approval       *GatewayApproval       `json:"approval,omitempty"`
+	Decision       Decision               `json:"decision"`
+	GatewayPayload map[string]interface{} `json:"gateway_payload,omitempty"`
+	RequestID      string                 `json:"request_id"`
+	RewrittenInput map[string]interface{} `json:"rewritten_input,omitempty"`
+	RoutedModel    *string                `json:"routed_model,omitempty"`
+	Timestamp      string                 `json:"timestamp"`
+	Violations     []string               `json:"violations,omitempty"`
+	Warnings       []string               `json:"warnings,omitempty"`
 }
 
 type MCPGatewayPolicyConfig struct {
@@ -452,29 +446,29 @@ type MCPGatewayPolicyConfig struct {
 }
 
 type MCPGatewayRule struct {
-	Action   string           `json:"action"`
-	Match    RecordStringAny  `json:"match"`
-	Metadata *RecordStringAny `json:"metadata,omitempty"`
+	Action   string                 `json:"action"`
+	Match    map[string]interface{} `json:"match"`
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
 }
 
 type MCPGatewayRequest struct {
-	Context   *RecordStringAny `json:"context,omitempty"`
-	Method    string           `json:"method"`
-	Params    *RecordStringAny `json:"params,omitempty"`
-	RequestID string           `json:"request_id"`
-	ServerID  string           `json:"server_id"`
-	Source    *string          `json:"source,omitempty"`
-	Timestamp string           `json:"timestamp"`
+	Context   map[string]interface{} `json:"context,omitempty"`
+	Method    string                 `json:"method"`
+	Params    map[string]interface{} `json:"params,omitempty"`
+	RequestID string                 `json:"request_id"`
+	ServerID  string                 `json:"server_id"`
+	Source    *string                `json:"source,omitempty"`
+	Timestamp string                 `json:"timestamp"`
 }
 
 type MCPGatewayResponse struct {
-	Approval         *GatewayApproval `json:"approval,omitempty"`
-	Decision         Decision         `json:"decision"`
-	RequestID        string           `json:"request_id"`
-	RewrittenRequest *RecordStringAny `json:"rewritten_request,omitempty"`
-	Timestamp        string           `json:"timestamp"`
-	Violations       []string         `json:"violations,omitempty"`
-	Warnings         []string         `json:"warnings,omitempty"`
+	Approval         *GatewayApproval       `json:"approval,omitempty"`
+	Decision         Decision               `json:"decision"`
+	RequestID        string                 `json:"request_id"`
+	RewrittenRequest map[string]interface{} `json:"rewritten_request,omitempty"`
+	Timestamp        string                 `json:"timestamp"`
+	Violations       []string               `json:"violations,omitempty"`
+	Warnings         []string               `json:"warnings,omitempty"`
 }
 
 type PolicyEvaluatedData struct {
@@ -496,15 +490,15 @@ type PolicyEvaluationRecord struct {
 }
 
 type PreflightInput struct {
-	Context                                                                               *RecordStringAny    `json:"context,omitempty"`
-	EngineOutput                                                                          RecordStringAny     `json:"engine_output"`
-	Evidence                                                                              []PreflightEvidence `json:"evidence,omitempty"`
-	Mode                                                                                  Mode                `json:"mode"`
-	// Plan-token binds artifacts to subsequent take-off.                                                     
-	// Extended with version and governance provenance for safe upgrades and auditability.                    
-	PlanToken                                                                             *PlanToken          `json:"plan_token,omitempty"`
-	StepID                                                                                string              `json:"step_id"`
-	WorkflowID                                                                            string              `json:"workflow_id"`
+	Context                                                                               map[string]interface{} `json:"context,omitempty"`
+	EngineOutput                                                                          map[string]interface{} `json:"engine_output"`
+	Evidence                                                                              []PreflightEvidence    `json:"evidence,omitempty"`
+	Mode                                                                                  Mode                   `json:"mode"`
+	// Plan-token binds artifacts to subsequent take-off.                                                        
+	// Extended with version and governance provenance for safe upgrades and auditability.                       
+	PlanToken                                                                             *PlanToken             `json:"plan_token,omitempty"`
+	StepID                                                                                string                 `json:"step_id"`
+	WorkflowID                                                                            string                 `json:"workflow_id"`
 }
 
 type PreflightOutput struct {
@@ -591,7 +585,7 @@ type WorkflowStateRecord struct {
 	Artifacts         []ArtifactRecord         `json:"artifacts"`
 	CreatedAt         string                   `json:"created_at"`
 	CurrentState      State                    `json:"current_state"`
-	Metadata          *RecordStringAny         `json:"metadata,omitempty"`
+	Metadata          map[string]interface{}   `json:"metadata,omitempty"`
 	PlanTokenHash     string                   `json:"plan_token_hash"`
 	PolicyEvaluations []PolicyEvaluationRecord `json:"policy_evaluations"`
 	StepsCompleted    []string                 `json:"steps_completed"`

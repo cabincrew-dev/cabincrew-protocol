@@ -47,7 +47,7 @@
         },
         "metadata": {
           "description": "Arbitrary metadata. Optional.",
-          "$ref": "#/definitions/Record<string,any>"
+          "$ref": "#/definitions/RecordStringAny"
         }
       },
       "additionalProperties": false,
@@ -178,7 +178,7 @@
           "type": "string"
         },
         "engine_output": {
-          "$ref": "#/definitions/Record<string,any>"
+          "$ref": "#/definitions/RecordStringAny"
         },
         "evidence": {
           "type": "array",
@@ -187,7 +187,7 @@
           }
         },
         "context": {
-          "$ref": "#/definitions/Record<string,any>"
+          "$ref": "#/definitions/RecordStringAny"
         },
         "plan_token": {
           "description": "Plan-token binds artifacts to subsequent take-off.\nExtended with version and governance provenance for safe upgrades and auditability.",
@@ -270,7 +270,7 @@
           "type": "string"
         },
         "engine_output": {
-          "$ref": "#/definitions/Record<string,any>"
+          "$ref": "#/definitions/RecordStringAny"
         },
         "evidence": {
           "type": "array",
@@ -417,7 +417,7 @@
           }
         },
         "metadata": {
-          "$ref": "#/definitions/Record<string,any>"
+          "$ref": "#/definitions/RecordStringAny"
         }
       },
       "additionalProperties": false,
@@ -496,7 +496,7 @@
           "type": "string"
         },
         "metadata": {
-          "$ref": "#/definitions/Record<string,any>"
+          "$ref": "#/definitions/RecordStringAny"
         }
       },
       "additionalProperties": false,
@@ -953,7 +953,7 @@
         },
         "evidence": {
           "description": "Evidence supporting this decision (e.g., rule matches, model scores).",
-          "$ref": "#/definitions/Record<string,any>"
+          "$ref": "#/definitions/RecordStringAny"
         },
         "evaluated_at": {
           "description": "Evaluation timestamp.",
@@ -1350,10 +1350,10 @@
           "type": "string"
         },
         "input": {
-          "$ref": "#/definitions/Record<string,any>"
+          "$ref": "#/definitions/RecordStringAny"
         },
         "context": {
-          "$ref": "#/definitions/Record<string,any>"
+          "$ref": "#/definitions/RecordStringAny"
         }
       },
       "additionalProperties": false,
@@ -1410,10 +1410,10 @@
           "type": "string"
         },
         "rewritten_input": {
-          "$ref": "#/definitions/Record<string,any>"
+          "$ref": "#/definitions/RecordStringAny"
         },
         "gateway_payload": {
-          "$ref": "#/definitions/Record<string,any>"
+          "$ref": "#/definitions/RecordStringAny"
         }
       },
       "additionalProperties": false,
@@ -1427,13 +1427,13 @@
       "type": "object",
       "properties": {
         "match": {
-          "$ref": "#/definitions/Record<string,any>"
+          "$ref": "#/definitions/RecordStringAny"
         },
         "action": {
           "type": "string"
         },
         "metadata": {
-          "$ref": "#/definitions/Record<string,any>"
+          "$ref": "#/definitions/RecordStringAny"
         }
       },
       "additionalProperties": false,
@@ -1458,7 +1458,7 @@
           }
         },
         "model_routing": {
-          "$ref": "#/definitions/Record<string,any>"
+          "$ref": "#/definitions/RecordStringAny"
         },
         "rules": {
           "type": "array",
@@ -1488,10 +1488,10 @@
           "type": "string"
         },
         "params": {
-          "$ref": "#/definitions/Record<string,any>"
+          "$ref": "#/definitions/RecordStringAny"
         },
         "context": {
-          "$ref": "#/definitions/Record<string,any>"
+          "$ref": "#/definitions/RecordStringAny"
         }
       },
       "additionalProperties": false,
@@ -1530,7 +1530,7 @@
           "$ref": "#/definitions/GatewayApproval"
         },
         "rewritten_request": {
-          "$ref": "#/definitions/Record<string,any>"
+          "$ref": "#/definitions/RecordStringAny"
         }
       },
       "additionalProperties": false,
@@ -1544,13 +1544,13 @@
       "type": "object",
       "properties": {
         "match": {
-          "$ref": "#/definitions/Record<string,any>"
+          "$ref": "#/definitions/RecordStringAny"
         },
         "action": {
           "type": "string"
         },
         "metadata": {
-          "$ref": "#/definitions/Record<string,any>"
+          "$ref": "#/definitions/RecordStringAny"
         }
       },
       "additionalProperties": false,
@@ -1581,10 +1581,6 @@
           }
         }
       },
-      "additionalProperties": false
-    },
-    "Record<string,any>": {
-      "type": "object",
       "additionalProperties": false
     },
     "Mode": {
