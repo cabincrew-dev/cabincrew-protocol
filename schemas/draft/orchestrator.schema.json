@@ -59,6 +59,10 @@
                         "$ref": "#/definitions/PlanArtifactHash"
                     }
                 },
+                "model": {
+                    "description": "AI Model identifier used to generate this plan (e.g. 'gpt-4', 'claude-3').\nRequired for provenance.",
+                    "type": "string"
+                },
                 "engine_id": {
                     "description": "Engine identity that produced this plan.",
                     "type": "string"
@@ -81,6 +85,7 @@
                 "artifacts",
                 "created_at",
                 "engine_id",
+                "model",
                 "protocol_version",
                 "token",
                 "workspace_hash"

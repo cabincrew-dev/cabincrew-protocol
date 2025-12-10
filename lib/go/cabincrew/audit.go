@@ -1,24 +1,30 @@
 package cabincrew
 
 type AuditEvent struct {
-	Approval                                                                   *AuditApproval       `json:"approval,omitempty"`
-	Artifacts                                                                  []AuditArtifact      `json:"artifacts,omitempty"`
-	Engine                                                                     *AuditEngine         `json:"engine,omitempty"`
-	// Unique identifier for this audit event.                                                      
-	EventID                                                                    string               `json:"event_id"`
-	// Free-form event category.                                                                    
-	EventType                                                                  string               `json:"event_type"`
-	Gateway                                                                    *AuditGateway        `json:"gateway,omitempty"`
-	IntegrityCheck                                                             *AuditIntegrity      `json:"integrity_check,omitempty"`
-	Message                                                                    *string              `json:"message,omitempty"`
-	// Cryptographic binding between a flight-plan and its subsequent take-off.                     
-	// Defined in schemas/draft/plan-token.schema.json                                              
-	PlanToken                                                                  *AuditEventPlanToken `json:"plan_token,omitempty"`
-	Policy                                                                     *AuditPolicy         `json:"policy,omitempty"`
-	Severity                                                                   *Severity            `json:"severity,omitempty"`
-	// RFC3339 timestamp of when the event occurred.                                                
-	Timestamp                                                                  string               `json:"timestamp"`
-	Workflow                                                                   *AuditWorkflow       `json:"workflow,omitempty"`
+	Approval                                                                                *AuditApproval       `json:"approval,omitempty"`
+	Artifacts                                                                               []AuditArtifact      `json:"artifacts,omitempty"`
+	// Hash of the previous event in the chain. Allows for ledger-style verification.                            
+	ChainHash                                                                               *string              `json:"chain_hash,omitempty"`
+	Engine                                                                                  *AuditEngine         `json:"engine,omitempty"`
+	// Unique identifier for this audit event.                                                                   
+	EventID                                                                                 string               `json:"event_id"`
+	// Free-form event category.                                                                                 
+	EventType                                                                               string               `json:"event_type"`
+	Gateway                                                                                 *AuditGateway        `json:"gateway,omitempty"`
+	IntegrityCheck                                                                          *AuditIntegrity      `json:"integrity_check,omitempty"`
+	Message                                                                                 *string              `json:"message,omitempty"`
+	// Cryptographic binding between a flight-plan and its subsequent take-off.                                  
+	// Defined in schemas/draft/plan-token.schema.json                                                           
+	PlanToken                                                                               *AuditEventPlanToken `json:"plan_token,omitempty"`
+	Policy                                                                                  *AuditPolicy         `json:"policy,omitempty"`
+	Severity                                                                                *Severity            `json:"severity,omitempty"`
+	// Cryptographic signature of this event hash.                                                               
+	Signature                                                                               *string              `json:"signature,omitempty"`
+	// Reference to the key used for signing (e.g. 'engine-key-1', 'orchestrator-key-prod').                     
+	SignatureKeyRef                                                                         *string              `json:"signature_key_ref,omitempty"`
+	// RFC3339 timestamp of when the event occurred.                                                             
+	Timestamp                                                                               string               `json:"timestamp"`
+	Workflow                                                                                *AuditWorkflow       `json:"workflow,omitempty"`
 }
 
 type AuditApproval struct {
@@ -69,6 +75,9 @@ type AuditEventPlanToken struct {
 	CreatedAt                                                                       string                   `json:"created_at"`
 	// Engine identity that produced this plan.                                                              
 	EngineID                                                                        string                   `json:"engine_id"`
+	// AI Model identifier used to generate this plan (e.g. 'gpt-4', 'claude-3').                            
+	// Required for provenance.                                                                              
+	Model                                                                           string                   `json:"model"`
 	// Engine protocol version used when this plan was produced.                                             
 	ProtocolVersion                                                                 string                   `json:"protocol_version"`
 	// Primary plan token identifier, e.g. SHA256 over all plan artifacts + context.                         

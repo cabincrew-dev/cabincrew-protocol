@@ -217,6 +217,10 @@ class AuditEventPlanToken:
     engine_id: str
     """Engine identity that produced this plan."""
 
+    model: str
+    """AI Model identifier used to generate this plan (e.g. 'gpt-4', 'claude-3').
+    Required for provenance.
+    """
     protocol_version: str
     """Engine protocol version used when this plan was produced."""
 
@@ -226,10 +230,11 @@ class AuditEventPlanToken:
     workspace_hash: str
     """Hash of the workspace state when the plan was created."""
 
-    def __init__(self, artifacts: List[PlanArtifactHash], created_at: str, engine_id: str, protocol_version: str, token: str, workspace_hash: str) -> None:
+    def __init__(self, artifacts: List[PlanArtifactHash], created_at: str, engine_id: str, model: str, protocol_version: str, token: str, workspace_hash: str) -> None:
         self.artifacts = artifacts
         self.created_at = created_at
         self.engine_id = engine_id
+        self.model = model
         self.protocol_version = protocol_version
         self.token = token
         self.workspace_hash = workspace_hash
@@ -240,16 +245,18 @@ class AuditEventPlanToken:
         artifacts = from_list(PlanArtifactHash.from_dict, obj.get("artifacts"))
         created_at = from_str(obj.get("created_at"))
         engine_id = from_str(obj.get("engine_id"))
+        model = from_str(obj.get("model"))
         protocol_version = from_str(obj.get("protocol_version"))
         token = from_str(obj.get("token"))
         workspace_hash = from_str(obj.get("workspace_hash"))
-        return AuditEventPlanToken(artifacts, created_at, engine_id, protocol_version, token, workspace_hash)
+        return AuditEventPlanToken(artifacts, created_at, engine_id, model, protocol_version, token, workspace_hash)
 
     def to_dict(self) -> dict:
         result: dict = {}
         result["artifacts"] = from_list(lambda x: to_class(PlanArtifactHash, x), self.artifacts)
         result["created_at"] = from_str(self.created_at)
         result["engine_id"] = from_str(self.engine_id)
+        result["model"] = from_str(self.model)
         result["protocol_version"] = from_str(self.protocol_version)
         result["token"] = from_str(self.token)
         result["workspace_hash"] = from_str(self.workspace_hash)
@@ -337,6 +344,9 @@ class AuditEvent:
     """
     approval: Optional[AuditApproval]
     artifacts: Optional[List[AuditArtifact]]
+    chain_hash: Optional[str]
+    """Hash of the previous event in the chain. Allows for ledger-style verification."""
+
     engine: Optional[AuditEngine]
     event_id: str
     """Unique identifier for this audit event."""
@@ -353,14 +363,21 @@ class AuditEvent:
     """
     policy: Optional[AuditPolicy]
     severity: Optional[Severity]
+    signature: Optional[str]
+    """Cryptographic signature of this event hash."""
+
+    signature_key_ref: Optional[str]
+    """Reference to the key used for signing (e.g. 'engine-key-1', 'orchestrator-key-prod')."""
+
     timestamp: str
     """RFC3339 timestamp of when the event occurred."""
 
     workflow: Optional[AuditWorkflow]
 
-    def __init__(self, approval: Optional[AuditApproval], artifacts: Optional[List[AuditArtifact]], engine: Optional[AuditEngine], event_id: str, event_type: str, gateway: Optional[AuditGateway], integrity_check: Optional[AuditIntegrity], message: Optional[str], plan_token: Optional[AuditEventPlanToken], policy: Optional[AuditPolicy], severity: Optional[Severity], timestamp: str, workflow: Optional[AuditWorkflow]) -> None:
+    def __init__(self, approval: Optional[AuditApproval], artifacts: Optional[List[AuditArtifact]], chain_hash: Optional[str], engine: Optional[AuditEngine], event_id: str, event_type: str, gateway: Optional[AuditGateway], integrity_check: Optional[AuditIntegrity], message: Optional[str], plan_token: Optional[AuditEventPlanToken], policy: Optional[AuditPolicy], severity: Optional[Severity], signature: Optional[str], signature_key_ref: Optional[str], timestamp: str, workflow: Optional[AuditWorkflow]) -> None:
         self.approval = approval
         self.artifacts = artifacts
+        self.chain_hash = chain_hash
         self.engine = engine
         self.event_id = event_id
         self.event_type = event_type
@@ -370,6 +387,8 @@ class AuditEvent:
         self.plan_token = plan_token
         self.policy = policy
         self.severity = severity
+        self.signature = signature
+        self.signature_key_ref = signature_key_ref
         self.timestamp = timestamp
         self.workflow = workflow
 
@@ -378,6 +397,7 @@ class AuditEvent:
         assert isinstance(obj, dict)
         approval = from_union([AuditApproval.from_dict, from_none], obj.get("approval"))
         artifacts = from_union([lambda x: from_list(AuditArtifact.from_dict, x), from_none], obj.get("artifacts"))
+        chain_hash = from_union([from_str, from_none], obj.get("chain_hash"))
         engine = from_union([AuditEngine.from_dict, from_none], obj.get("engine"))
         event_id = from_str(obj.get("event_id"))
         event_type = from_str(obj.get("event_type"))
@@ -387,9 +407,11 @@ class AuditEvent:
         plan_token = from_union([AuditEventPlanToken.from_dict, from_none], obj.get("plan_token"))
         policy = from_union([AuditPolicy.from_dict, from_none], obj.get("policy"))
         severity = from_union([Severity, from_none], obj.get("severity"))
+        signature = from_union([from_str, from_none], obj.get("signature"))
+        signature_key_ref = from_union([from_str, from_none], obj.get("signature_key_ref"))
         timestamp = from_str(obj.get("timestamp"))
         workflow = from_union([AuditWorkflow.from_dict, from_none], obj.get("workflow"))
-        return AuditEvent(approval, artifacts, engine, event_id, event_type, gateway, integrity_check, message, plan_token, policy, severity, timestamp, workflow)
+        return AuditEvent(approval, artifacts, chain_hash, engine, event_id, event_type, gateway, integrity_check, message, plan_token, policy, severity, signature, signature_key_ref, timestamp, workflow)
 
     def to_dict(self) -> dict:
         result: dict = {}
@@ -397,6 +419,8 @@ class AuditEvent:
             result["approval"] = from_union([lambda x: to_class(AuditApproval, x), from_none], self.approval)
         if self.artifacts is not None:
             result["artifacts"] = from_union([lambda x: from_list(lambda x: to_class(AuditArtifact, x), x), from_none], self.artifacts)
+        if self.chain_hash is not None:
+            result["chain_hash"] = from_union([from_str, from_none], self.chain_hash)
         if self.engine is not None:
             result["engine"] = from_union([lambda x: to_class(AuditEngine, x), from_none], self.engine)
         result["event_id"] = from_str(self.event_id)
@@ -413,6 +437,10 @@ class AuditEvent:
             result["policy"] = from_union([lambda x: to_class(AuditPolicy, x), from_none], self.policy)
         if self.severity is not None:
             result["severity"] = from_union([lambda x: to_enum(Severity, x), from_none], self.severity)
+        if self.signature is not None:
+            result["signature"] = from_union([from_str, from_none], self.signature)
+        if self.signature_key_ref is not None:
+            result["signature_key_ref"] = from_union([from_str, from_none], self.signature_key_ref)
         result["timestamp"] = from_str(self.timestamp)
         if self.workflow is not None:
             result["workflow"] = from_union([lambda x: to_class(AuditWorkflow, x), from_none], self.workflow)

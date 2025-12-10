@@ -48,6 +48,10 @@ class PlanToken:
     engine_id: str
     """Engine identity that produced this plan."""
 
+    model: str
+    """AI Model identifier used to generate this plan (e.g. 'gpt-4', 'claude-3').
+    Required for provenance.
+    """
     protocol_version: str
     """Engine protocol version used when this plan was produced."""
 
@@ -57,10 +61,11 @@ class PlanToken:
     workspace_hash: str
     """Hash of the workspace state when the plan was created."""
 
-    def __init__(self, artifacts: List[PlanArtifactHash], created_at: str, engine_id: str, protocol_version: str, token: str, workspace_hash: str) -> None:
+    def __init__(self, artifacts: List[PlanArtifactHash], created_at: str, engine_id: str, model: str, protocol_version: str, token: str, workspace_hash: str) -> None:
         self.artifacts = artifacts
         self.created_at = created_at
         self.engine_id = engine_id
+        self.model = model
         self.protocol_version = protocol_version
         self.token = token
         self.workspace_hash = workspace_hash
@@ -71,16 +76,18 @@ class PlanToken:
         artifacts = from_list(PlanArtifactHash.from_dict, obj.get("artifacts"))
         created_at = from_str(obj.get("created_at"))
         engine_id = from_str(obj.get("engine_id"))
+        model = from_str(obj.get("model"))
         protocol_version = from_str(obj.get("protocol_version"))
         token = from_str(obj.get("token"))
         workspace_hash = from_str(obj.get("workspace_hash"))
-        return PlanToken(artifacts, created_at, engine_id, protocol_version, token, workspace_hash)
+        return PlanToken(artifacts, created_at, engine_id, model, protocol_version, token, workspace_hash)
 
     def to_dict(self) -> dict:
         result: dict = {}
         result["artifacts"] = from_list(lambda x: to_class(PlanArtifactHash, x), self.artifacts)
         result["created_at"] = from_str(self.created_at)
         result["engine_id"] = from_str(self.engine_id)
+        result["model"] = from_str(self.model)
         result["protocol_version"] = from_str(self.protocol_version)
         result["token"] = from_str(self.token)
         result["workspace_hash"] = from_str(self.workspace_hash)

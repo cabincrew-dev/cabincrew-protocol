@@ -75,6 +75,10 @@
                 "context": {
                     "$ref": "#/definitions/AnyMap"
                 },
+                "identity_token": {
+                    "description": "Ephemeral identity token (e.g. OIDC, JWT) for the workload.\nPreferred over static secrets.",
+                    "type": "string"
+                },
                 "orchestrator": {
                     "$ref": "#/definitions/EngineOrchestrator"
                 },

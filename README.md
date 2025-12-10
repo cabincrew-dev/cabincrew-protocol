@@ -2,6 +2,8 @@
 
 This repository defines the core data structures and protocols for the Cabin Crew ecosystem.
 
+> 🛡️ **Manifesto Compliant**: This protocol strictly adheres to the [AI Agent Manifesto](https://aiagentmanifesto.org). See [Compliance Doc](docs/manifesto-compliance.md).
+
 ## 🚀 What Is CabinCrew?
 
 CabinCrew is a protocol for secure automation in both developer and production environments.  

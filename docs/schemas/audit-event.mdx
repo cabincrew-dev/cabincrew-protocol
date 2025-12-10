@@ -20,6 +20,9 @@ Defined in schemas/draft/audit-event.schema.json
 | `approval` | `[AuditApproval]` | No |  |
 | `integrity_check` | `[AuditIntegrity]` | No |  |
 | `gateway` | `[AuditGateway]` | No |  |
+| `signature` | `string` | No | Cryptographic signature of this event hash. |
+| `signature_key_ref` | `string` | No | Reference to the key used for signing (e.g. 'engine-key-1', 'orchestrator-key-prod'). |
+| `chain_hash` | `string` | No | Hash of the previous event in the chain. Allows for ledger-style verification. |
 | `message` | `string` | No |  |
 | `severity` | `string` | No |  |
 
@@ -49,6 +52,7 @@ Defined in schemas/draft/plan-token.schema.json
 |---|---|---|---|
 | `token` | `string` | Yes | Primary plan token identifier, e.g. SHA256 over all plan artifacts + context. |
 | `artifacts` | `array` | Yes | Per-artifact hashes that contributed to this plan token. |
+| `model` | `string` | Yes | AI Model identifier used to generate this plan (e.g. 'gpt-4', 'claude-3'). Required for provenance. |
 | `engine_id` | `string` | Yes | Engine identity that produced this plan. |
 | `protocol_version` | `string` | Yes | Engine protocol version used when this plan was produced. |
 | `workspace_hash` | `string` | Yes | Hash of the workspace state when the plan was created. |

@@ -79,6 +79,19 @@ export interface AuditEvent {
     integrity_check?: AuditIntegrity;
     gateway?: AuditGateway;
 
+    /**
+     * Cryptographic signature of this event hash.
+     */
+    signature?: string;
+    /**
+     * Reference to the key used for signing (e.g. 'engine-key-1', 'orchestrator-key-prod').
+     */
+    signature_key_ref?: string;
+    /**
+     * Hash of the previous event in the chain. Allows for ledger-style verification.
+     */
+    chain_hash?: string;
+
     message?: string;
     severity?: 'debug' | 'info' | 'warning' | 'error' | 'critical';
 }

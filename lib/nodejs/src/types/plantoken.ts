@@ -18,6 +18,11 @@ export interface PlanToken {
      */
     artifacts: PlanArtifactHash[];
     /**
+     * AI Model identifier used to generate this plan (e.g. 'gpt-4', 'claude-3').
+     * Required for provenance.
+     */
+    model: string;
+    /**
      * Engine identity that produced this plan.
      */
     engine_id: string;

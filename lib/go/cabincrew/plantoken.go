@@ -13,6 +13,9 @@ type PlanToken struct {
 	CreatedAt                                                                       string                   `json:"created_at"`
 	// Engine identity that produced this plan.                                                              
 	EngineID                                                                        string                   `json:"engine_id"`
+	// AI Model identifier used to generate this plan (e.g. 'gpt-4', 'claude-3').                            
+	// Required for provenance.                                                                              
+	Model                                                                           string                   `json:"model"`
 	// Engine protocol version used when this plan was produced.                                             
 	ProtocolVersion                                                                 string                   `json:"protocol_version"`
 	// Primary plan token identifier, e.g. SHA256 over all plan artifacts + context.                         

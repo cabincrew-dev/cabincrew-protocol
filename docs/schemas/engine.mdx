@@ -33,6 +33,7 @@ Defined in schemas/draft/engine.schema.json
 | `secrets` | `[AnyMap]` | No |  |
 | `allowed_secrets` | `array` | No |  |
 | `context` | `[AnyMap]` | No |  |
+| `identity_token` | `string` | No | Ephemeral identity token (e.g. OIDC, JWT) for the workload. Preferred over static secrets. |
 | `orchestrator` | `[EngineOrchestrator]` | No |  |
 | `expected_plan_token` | `string` | No |  |
 

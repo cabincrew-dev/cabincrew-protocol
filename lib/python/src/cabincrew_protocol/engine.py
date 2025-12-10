@@ -68,6 +68,10 @@ class EngineInput:
     config: Optional[Dict[str, Any]]
     context: Optional[Dict[str, Any]]
     expected_plan_token: Optional[str]
+    identity_token: Optional[str]
+    """Ephemeral identity token (e.g. OIDC, JWT) for the workload.
+    Preferred over static secrets.
+    """
     meta: EngineMeta
     mode: str
     """Execution mode: 'flight-plan' or 'take-off'."""
@@ -76,11 +80,12 @@ class EngineInput:
     protocol_version: str
     secrets: Optional[Dict[str, Any]]
 
-    def __init__(self, allowed_secrets: Optional[List[str]], config: Optional[Dict[str, Any]], context: Optional[Dict[str, Any]], expected_plan_token: Optional[str], meta: EngineMeta, mode: str, orchestrator: Optional[EngineOrchestrator], protocol_version: str, secrets: Optional[Dict[str, Any]]) -> None:
+    def __init__(self, allowed_secrets: Optional[List[str]], config: Optional[Dict[str, Any]], context: Optional[Dict[str, Any]], expected_plan_token: Optional[str], identity_token: Optional[str], meta: EngineMeta, mode: str, orchestrator: Optional[EngineOrchestrator], protocol_version: str, secrets: Optional[Dict[str, Any]]) -> None:
         self.allowed_secrets = allowed_secrets
         self.config = config
         self.context = context
         self.expected_plan_token = expected_plan_token
+        self.identity_token = identity_token
         self.meta = meta
         self.mode = mode
         self.orchestrator = orchestrator
@@ -94,12 +99,13 @@ class EngineInput:
         config = from_union([lambda x: from_dict(lambda x: x, x), from_none], obj.get("config"))
         context = from_union([lambda x: from_dict(lambda x: x, x), from_none], obj.get("context"))
         expected_plan_token = from_union([from_str, from_none], obj.get("expected_plan_token"))
+        identity_token = from_union([from_str, from_none], obj.get("identity_token"))
         meta = EngineMeta.from_dict(obj.get("meta"))
         mode = from_str(obj.get("mode"))
         orchestrator = from_union([EngineOrchestrator.from_dict, from_none], obj.get("orchestrator"))
         protocol_version = from_str(obj.get("protocol_version"))
         secrets = from_union([lambda x: from_dict(lambda x: x, x), from_none], obj.get("secrets"))
-        return EngineInput(allowed_secrets, config, context, expected_plan_token, meta, mode, orchestrator, protocol_version, secrets)
+        return EngineInput(allowed_secrets, config, context, expected_plan_token, identity_token, meta, mode, orchestrator, protocol_version, secrets)
 
     def to_dict(self) -> dict:
         result: dict = {}
@@ -111,6 +117,8 @@ class EngineInput:
             result["context"] = from_union([lambda x: from_dict(lambda x: x, x), from_none], self.context)
         if self.expected_plan_token is not None:
             result["expected_plan_token"] = from_union([from_str, from_none], self.expected_plan_token)
+        if self.identity_token is not None:
+            result["identity_token"] = from_union([from_str, from_none], self.identity_token)
         result["meta"] = to_class(EngineMeta, self.meta)
         result["mode"] = from_str(self.mode)
         if self.orchestrator is not None:

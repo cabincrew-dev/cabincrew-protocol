@@ -28,6 +28,11 @@ export interface EngineInput {
     secrets?: AnyMap;
     allowed_secrets?: string[];
     context?: AnyMap;
+    /**
+     * Ephemeral identity token (e.g. OIDC, JWT) for the workload.
+     * Preferred over static secrets.
+     */
+    identity_token?: string;
     orchestrator?: EngineOrchestrator;
     expected_plan_token?: string;
 }

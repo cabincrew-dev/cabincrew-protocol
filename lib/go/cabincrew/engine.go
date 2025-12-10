@@ -1,16 +1,19 @@
 package cabincrew
 
 type EngineInput struct {
-	AllowedSecrets                                 []string               `json:"allowed_secrets,omitempty"`
-	Config                                         map[string]interface{} `json:"config,omitempty"`
-	Context                                        map[string]interface{} `json:"context,omitempty"`
-	ExpectedPlanToken                              *string                `json:"expected_plan_token,omitempty"`
-	Meta                                           EngineMeta             `json:"meta"`
-	// Execution mode: 'flight-plan' or 'take-off'.                       
-	Mode                                           string                 `json:"mode"`
-	Orchestrator                                   *EngineOrchestrator    `json:"orchestrator,omitempty"`
-	ProtocolVersion                                string                 `json:"protocol_version"`
-	Secrets                                        map[string]interface{} `json:"secrets,omitempty"`
+	AllowedSecrets                                                []string               `json:"allowed_secrets,omitempty"`
+	Config                                                        map[string]interface{} `json:"config,omitempty"`
+	Context                                                       map[string]interface{} `json:"context,omitempty"`
+	ExpectedPlanToken                                             *string                `json:"expected_plan_token,omitempty"`
+	// Ephemeral identity token (e.g. OIDC, JWT) for the workload.                       
+	// Preferred over static secrets.                                                    
+	IdentityToken                                                 *string                `json:"identity_token,omitempty"`
+	Meta                                                          EngineMeta             `json:"meta"`
+	// Execution mode: 'flight-plan' or 'take-off'.                                      
+	Mode                                                          string                 `json:"mode"`
+	Orchestrator                                                  *EngineOrchestrator    `json:"orchestrator,omitempty"`
+	ProtocolVersion                                               string                 `json:"protocol_version"`
+	Secrets                                                       map[string]interface{} `json:"secrets,omitempty"`
 }
 
 type EngineMeta struct {
