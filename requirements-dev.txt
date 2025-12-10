@@ -1,5 +1,13 @@
-# Development dependencies for CabinCrew Protocol
-# Used for generating Python bindings from JSON Schema
+# CabinCrew Protocol - Python Library Development Dependencies
+#
+# Install with:
+#   python3 -m venv venv
+#   source venv/bin/activate  # On Windows: venv\Scripts\activate
+#   pip install -r requirements-dev.txt
 
 # Code generator - generates Pydantic models from JSON Schema
 datamodel-code-generator[http]>=0.42.0
+
+# Runtime dependencies (also needed for development)
+pydantic>=2.0
+python-dateutil>=2.8.0

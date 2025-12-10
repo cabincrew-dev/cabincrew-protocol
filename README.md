@@ -148,6 +148,58 @@ The contents of the `src/` directory are the **single source of truth** for all 
 
 ---
 
+---
+
+## 🚀 Quick Start
+
+### For Library Users
+
+Install the generated library for your language:
+
+**Python**:
+```bash
+pip install cabincrew-protocol
+```
+
+**Go**:
+```bash
+go get cabincrew.dev/cabincrew-protocol/lib/go
+```
+
+**TypeScript/Node.js**:
+```bash
+npm install @cabincrew/protocol
+```
+
+### For Contributors
+
+```bash
+# 1. Clone and install
+git clone https://github.com/cabincrew-dev/cabincrew-protocol.git
+cd cabincrew-protocol
+npm install
+
+# 2. Install Python generator (for Python library generation)
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements-dev.txt
+
+# 3. Make changes to TypeScript source in src/
+
+# 4. Regenerate all libraries
+npm run generate        # JSON Schema
+npm run generate:go     # Go
+npm run generate:python # Python
+npm run generate:nodejs # TypeScript
+
+# 5. Run smoke tests
+python3 tests/smoke_test_python.py
+npx ts-node tests/smoke_test_nodejs.ts
+GO111MODULE=off go run tests/smoke_test_go.go
+```
+
+---
+
 ## Development
 
 This repository includes tools to generate language-specific libraries and documentation.
