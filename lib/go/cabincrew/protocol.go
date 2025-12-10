@@ -218,8 +218,8 @@ type AuditEvent struct {
 	Gateway                                                                                 *AuditGateway   `json:"gateway,omitempty"`
 	IntegrityCheck                                                                          *AuditIntegrity `json:"integrity_check,omitempty"`
 	Message                                                                                 *string         `json:"message,omitempty"`
-	// Cryptographic binding between a flight-plan and its subsequent take-off.                             
-	// Defined in schemas/draft/plan-token.schema.json                                                      
+	// Plan-token binds artifacts to subsequent take-off.                                                   
+	// Extended with version and governance provenance for safe upgrades and auditability.                  
 	PlanToken                                                                               *PlanToken      `json:"plan_token,omitempty"`
 	// Policy evaluation audit record.                                                                      
 	// Extended to support chain-of-custody reconstruction.                                                 
@@ -253,8 +253,8 @@ type AuditIntegrity struct {
 	PlanTokenMatch    *bool    `json:"plan_token_match,omitempty"`
 }
 
-// Cryptographic binding between a flight-plan and its subsequent take-off.
-// Defined in schemas/draft/plan-token.schema.json
+// Plan-token binds artifacts to subsequent take-off.
+// Extended with version and governance provenance for safe upgrades and auditability.
 type PlanToken struct {
 	// Per-artifact hashes that contributed to this plan token.                                        
 	Artifacts                                                                       []PlanArtifactHash `json:"artifacts"`
@@ -262,9 +262,17 @@ type PlanToken struct {
 	CreatedAt                                                                       string             `json:"created_at"`
 	// Engine identity that produced this plan.                                                        
 	EngineID                                                                        string             `json:"engine_id"`
+	// SHA256 hash of governance context (OPA policies, ONNX models, gateway rules).                   
+	// OPTIONAL but recommended for compliance verification.                                           
+	// Enables auditors to verify governance configuration at plan-time.                               
+	GovernanceHash                                                                  *string            `json:"governance_hash,omitempty"`
 	// AI Model identifier used to generate this plan (e.g. 'gpt-4', 'claude-3').                      
 	// Required for provenance.                                                                        
 	Model                                                                           string             `json:"model"`
+	// SHA256 digest of all policy configurations evaluated during flight-plan.                        
+	// OPTIONAL but recommended for governance provenance.                                             
+	// Proves which policy set was active when plan-token was created.                                 
+	PolicyDigest                                                                    *string            `json:"policy_digest,omitempty"`
 	// Engine protocol version used when this plan was produced.                                       
 	ProtocolVersion                                                                 string             `json:"protocol_version"`
 	// Primary plan token identifier, e.g. SHA256 over all plan artifacts + context.                   
@@ -481,15 +489,15 @@ type PolicyEvaluationRecord struct {
 }
 
 type PreflightInput struct {
-	Context                                                                    *RecordStringAny    `json:"context,omitempty"`
-	EngineOutput                                                               RecordStringAny     `json:"engine_output"`
-	Evidence                                                                   []PreflightEvidence `json:"evidence,omitempty"`
-	Mode                                                                       Mode                `json:"mode"`
-	// Cryptographic binding between a flight-plan and its subsequent take-off.                    
-	// Defined in schemas/draft/plan-token.schema.json                                             
-	PlanToken                                                                  *PlanToken          `json:"plan_token,omitempty"`
-	StepID                                                                     string              `json:"step_id"`
-	WorkflowID                                                                 string              `json:"workflow_id"`
+	Context                                                                               *RecordStringAny    `json:"context,omitempty"`
+	EngineOutput                                                                          RecordStringAny     `json:"engine_output"`
+	Evidence                                                                              []PreflightEvidence `json:"evidence,omitempty"`
+	Mode                                                                                  Mode                `json:"mode"`
+	// Plan-token binds artifacts to subsequent take-off.                                                     
+	// Extended with version and governance provenance for safe upgrades and auditability.                    
+	PlanToken                                                                             *PlanToken          `json:"plan_token,omitempty"`
+	StepID                                                                                string              `json:"step_id"`
+	WorkflowID                                                                            string              `json:"workflow_id"`
 }
 
 type PreflightOutput struct {

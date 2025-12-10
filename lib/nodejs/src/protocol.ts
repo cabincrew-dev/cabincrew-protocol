@@ -270,8 +270,8 @@ export interface AuditEvent {
     integrity_check?: AuditIntegrity;
     message?:         string;
     /**
-     * Cryptographic binding between a flight-plan and its subsequent take-off.
-     * Defined in schemas/draft/plan-token.schema.json
+     * Plan-token binds artifacts to subsequent take-off.
+     * Extended with version and governance provenance for safe upgrades and auditability.
      */
     plan_token?: PlanToken;
     /**
@@ -325,8 +325,8 @@ export interface AuditIntegrity {
 }
 
 /**
- * Cryptographic binding between a flight-plan and its subsequent take-off.
- * Defined in schemas/draft/plan-token.schema.json
+ * Plan-token binds artifacts to subsequent take-off.
+ * Extended with version and governance provenance for safe upgrades and auditability.
  */
 export interface PlanToken {
     /**
@@ -342,10 +342,22 @@ export interface PlanToken {
      */
     engine_id: string;
     /**
+     * SHA256 hash of governance context (OPA policies, ONNX models, gateway rules).
+     * OPTIONAL but recommended for compliance verification.
+     * Enables auditors to verify governance configuration at plan-time.
+     */
+    governance_hash?: string;
+    /**
      * AI Model identifier used to generate this plan (e.g. 'gpt-4', 'claude-3').
      * Required for provenance.
      */
     model: string;
+    /**
+     * SHA256 digest of all policy configurations evaluated during flight-plan.
+     * OPTIONAL but recommended for governance provenance.
+     * Proves which policy set was active when plan-token was created.
+     */
+    policy_digest?: string;
     /**
      * Engine protocol version used when this plan was produced.
      */
@@ -626,8 +638,8 @@ export interface PreflightInput {
     evidence?:     PreflightEvidence[];
     mode:          Mode;
     /**
-     * Cryptographic binding between a flight-plan and its subsequent take-off.
-     * Defined in schemas/draft/plan-token.schema.json
+     * Plan-token binds artifacts to subsequent take-off.
+     * Extended with version and governance provenance for safe upgrades and auditability.
      */
     plan_token?: PlanToken;
     step_id:     string;

@@ -77,7 +77,7 @@
       ]
     },
     "PlanToken": {
-      "description": "Cryptographic binding between a flight-plan and its subsequent take-off.\nDefined in schemas/draft/plan-token.schema.json",
+      "description": "Plan-token binds artifacts to subsequent take-off.\nExtended with version and governance provenance for safe upgrades and auditability.",
       "type": "object",
       "properties": {
         "token": {
@@ -109,6 +109,14 @@
         },
         "created_at": {
           "description": "Timestamp when the plan was created (RFC3339).",
+          "type": "string"
+        },
+        "policy_digest": {
+          "description": "SHA256 digest of all policy configurations evaluated during flight-plan.\nOPTIONAL but recommended for governance provenance.\nProves which policy set was active when plan-token was created.",
+          "type": "string"
+        },
+        "governance_hash": {
+          "description": "SHA256 hash of governance context (OPA policies, ONNX models, gateway rules).\nOPTIONAL but recommended for compliance verification.\nEnables auditors to verify governance configuration at plan-time.",
           "type": "string"
         }
       },
@@ -176,7 +184,7 @@
           "$ref": "#/definitions/Record<string,any>"
         },
         "plan_token": {
-          "description": "Cryptographic binding between a flight-plan and its subsequent take-off.\nDefined in schemas/draft/plan-token.schema.json",
+          "description": "Plan-token binds artifacts to subsequent take-off.\nExtended with version and governance provenance for safe upgrades and auditability.",
           "$ref": "#/definitions/PlanToken"
         }
       },
@@ -1047,7 +1055,7 @@
           "$ref": "#/definitions/AuditEngine"
         },
         "plan_token": {
-          "description": "Cryptographic binding between a flight-plan and its subsequent take-off.\nDefined in schemas/draft/plan-token.schema.json",
+          "description": "Plan-token binds artifacts to subsequent take-off.\nExtended with version and governance provenance for safe upgrades and auditability.",
           "$ref": "#/definitions/PlanToken"
         },
         "artifacts": {

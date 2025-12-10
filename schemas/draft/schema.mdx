@@ -86,7 +86,7 @@ Defined in schemas/draft/engine.schema.json
 | `engine_output` | `[Record<string,any>]` | Yes |  |
 | `evidence` | `array` | No |  |
 | `context` | `[Record<string,any>]` | No |  |
-| `plan_token` | `[PlanToken]` | No | Cryptographic binding between a flight-plan and its subsequent take-off. Defined in schemas/draft/plan-token.schema.json |
+| `plan_token` | `[PlanToken]` | No | Plan-token binds artifacts to subsequent take-off. Extended with version and governance provenance for safe upgrades and auditability. |
 
 ### PreflightOutput
 
@@ -155,8 +155,8 @@ to prevent approval replay attacks against mutated plans.
 
 ### PlanToken
 
-Cryptographic binding between a flight-plan and its subsequent take-off.
-Defined in schemas/draft/plan-token.schema.json
+Plan-token binds artifacts to subsequent take-off.
+Extended with version and governance provenance for safe upgrades and auditability.
 
 | Property | Type | Required | Description |
 |---|---|---|---|
@@ -167,6 +167,8 @@ Defined in schemas/draft/plan-token.schema.json
 | `protocol_version` | `string` | Yes | Engine protocol version used when this plan was produced. |
 | `workspace_hash` | `string` | Yes | Hash of the workspace state when the plan was created. |
 | `created_at` | `string` | Yes | Timestamp when the plan was created (RFC3339). |
+| `policy_digest` | `string` | No | SHA256 digest of all policy configurations evaluated during flight-plan. OPTIONAL but recommended for governance provenance. Proves which policy set was active when plan-token was created. |
+| `governance_hash` | `string` | No | SHA256 hash of governance context (OPA policies, ONNX models, gateway rules). OPTIONAL but recommended for compliance verification. Enables auditors to verify governance configuration at plan-time. |
 
 ### PlanArtifactHash
 
@@ -189,7 +191,7 @@ Defined in schemas/draft/audit-event.schema.json
 | `workflow` | `[AuditWorkflow]` | No |  |
 | `workflow_state` | `string` | Yes | Workflow state when this event was emitted. REQUIRED for temporal chain-of-custody reconstruction. |
 | `engine` | `[AuditEngine]` | No |  |
-| `plan_token` | `[PlanToken]` | No | Cryptographic binding between a flight-plan and its subsequent take-off. Defined in schemas/draft/plan-token.schema.json |
+| `plan_token` | `[PlanToken]` | No | Plan-token binds artifacts to subsequent take-off. Extended with version and governance provenance for safe upgrades and auditability. |
 | `artifacts` | `array` | No |  |
 | `policy` | `[AuditPolicy]` | No | Policy evaluation audit record. Extended to support chain-of-custody reconstruction. |
 | `approval` | `[AuditApproval]` | No | Audit record for approval events. Extended to ensure approval binding is auditable. |

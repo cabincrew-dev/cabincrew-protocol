@@ -217,8 +217,8 @@ class PlanArtifactHash:
 
 @dataclass
 class PlanToken:
-    """Cryptographic binding between a flight-plan and its subsequent take-off.
-    Defined in schemas/draft/plan-token.schema.json
+    """Plan-token binds artifacts to subsequent take-off.
+    Extended with version and governance provenance for safe upgrades and auditability.
     """
     artifacts: List[PlanArtifactHash] = None
     """Per-artifact hashes that contributed to this plan token."""
@@ -241,6 +241,17 @@ class PlanToken:
 
     workspace_hash: str = None
     """Hash of the workspace state when the plan was created."""
+
+    governance_hash: Optional[str] = None
+    """SHA256 hash of governance context (OPA policies, ONNX models, gateway rules).
+    OPTIONAL but recommended for compliance verification.
+    Enables auditors to verify governance configuration at plan-time.
+    """
+    policy_digest: Optional[str] = None
+    """SHA256 digest of all policy configurations evaluated during flight-plan.
+    OPTIONAL but recommended for governance provenance.
+    Proves which policy set was active when plan-token was created.
+    """
 
 
 class Source(Enum):
@@ -354,8 +365,8 @@ class AuditEvent:
     integrity_check: Optional[AuditIntegrity] = None
     message: Optional[str] = None
     plan_token: Optional[PlanToken] = None
-    """Cryptographic binding between a flight-plan and its subsequent take-off.
-    Defined in schemas/draft/plan-token.schema.json
+    """Plan-token binds artifacts to subsequent take-off.
+    Extended with version and governance provenance for safe upgrades and auditability.
     """
     policy: Optional[AuditPolicy] = None
     """Policy evaluation audit record.
@@ -568,8 +579,8 @@ class PreflightInput:
     context: Optional[RecordStringAny] = None
     evidence: Optional[List[PreflightEvidence]] = None
     plan_token: Optional[PlanToken] = None
-    """Cryptographic binding between a flight-plan and its subsequent take-off.
-    Defined in schemas/draft/plan-token.schema.json
+    """Plan-token binds artifacts to subsequent take-off.
+    Extended with version and governance provenance for safe upgrades and auditability.
     """
 
 

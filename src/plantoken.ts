@@ -5,8 +5,8 @@ export interface PlanArtifactHash {
 }
 
 /**
- * Cryptographic binding between a flight-plan and its subsequent take-off.
- * Defined in schemas/draft/plan-token.schema.json
+ * Plan-token binds artifacts to subsequent take-off.
+ * Extended with version and governance provenance for safe upgrades and auditability.
  */
 export interface PlanToken {
     /**
@@ -38,4 +38,18 @@ export interface PlanToken {
      * Timestamp when the plan was created (RFC3339).
      */
     created_at: string;
+
+    /**
+     * SHA256 digest of all policy configurations evaluated during flight-plan.
+     * OPTIONAL but recommended for governance provenance.
+     * Proves which policy set was active when plan-token was created.
+     */
+    policy_digest?: string;
+
+    /**
+     * SHA256 hash of governance context (OPA policies, ONNX models, gateway rules).
+     * OPTIONAL but recommended for compliance verification.
+     * Enables auditors to verify governance configuration at plan-time.
+     */
+    governance_hash?: string;
 }
