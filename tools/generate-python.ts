@@ -58,22 +58,53 @@ async function generate() {
 
     inputData.addInput(schemaInput);
 
-    const { lines: pyCode } = await quicktype({
+    const { lines } = await quicktype({
         inputData,
         lang: "python",
         rendererOptions: {
-            "python-version": "3.7",
-            "just-types": "true"
+            "python-version": "3.7"
         }
     });
 
-    let output = pyCode.join("\n");
+    let pythonCode = lines.join("\n");
 
-    // Make all fields optional to avoid dataclass field ordering issues
-    // Replace field definitions without defaults to have = None
-    output = output.replace(/^(    \w+: (?:Optional\[)?[^=\n]+)$/gm, '$1 = None');
+    // Post-process: Remove = None defaults from required fields
+    // Quicktype generates all fields with = None, but required fields shouldn't have defaults
+    // This makes Python enforce required fields at instantiation time
 
-    fs.writeFileSync(PY_OUT_FILE, output);
+    // Load schema to get required field information
+    // (schemaContent and schema are already loaded above, but re-loading here for clarity as per instruction)
+    const schemaContentForRequired = fs.readFileSync(SCHEMA_FILE, "utf8");
+    const schemaForRequired = JSON.parse(schemaContentForRequired);
+
+    if (schemaForRequired.definitions) {
+        for (const [typeName, typeDef] of Object.entries(schemaForRequired.definitions)) {
+            if (typeof typeDef === 'object' && typeDef !== null && 'required' in typeDef) {
+                const requiredFields = (typeDef as any).required as string[];
+                if (requiredFields && requiredFields.length > 0) {
+                    // For each required field, remove the = None default
+                    for (const fieldName of requiredFields) {
+                        // Convert snake_case to match Python field names
+                        // Quicktype converts camelCase to snake_case for Python fields
+                        // Assuming fieldName from schema is camelCase or similar, and quicktype converts it.
+                        // For simplicity, using fieldName directly as per instruction,
+                        // but a more robust solution might involve a camelCase to snake_case conversion here.
+                        const pythonFieldName = fieldName;
+
+                        // Match pattern: fieldname: Type = None
+                        // But NOT: fieldname: Optional[Type] = None (those should keep defaults)
+                        const pattern = new RegExp(
+                            `(\\s+${pythonFieldName}:\\s+(?!Optional)\\w+(?:\\[.*?\\])?)(\\s*=\\s*None)`,
+                            'g'
+                        );
+                        pythonCode = pythonCode.replace(pattern, '$1');
+                    }
+                }
+            }
+        }
+    }
+
+    fs.writeFileSync(PY_OUT_FILE, pythonCode);
     console.log(`Generated ${PY_OUT_FILE}`);
 
     // Verify no collision types
