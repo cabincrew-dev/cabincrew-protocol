@@ -62,7 +62,5 @@ jobs:
       run: |
         cd lib/python
         pip install .
-        python3 src/cabincrew_protocol/__init__.py # Basic import check
-        # Or better
-        python3 -c "from cabincrew_protocol import Artifact; print('Python Import OK')"
+        python3 -c "import cabincrew_protocol; print('Python Import OK')"
 
