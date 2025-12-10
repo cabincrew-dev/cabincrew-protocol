@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cabincrew-protocol"
+version = "0.1.0"
+description = "CabinCrew Protocol Schemas and Models"
+readme = "README.md"
+authors = [
+  { name = "CabinCrew Contributors", email = "hello@cabincrew.dev" },
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "pydantic>=2.0",
+]
+
+[project.urls]
+"Homepage" = "https://cabincrew.dev"
+"Bug Tracker" = "https://github.com/cabincrew/cabincrew-protocol/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -1,0 +1,22 @@
+{
+    "name": "@cabincrew/protocol",
+    "version": "0.1.0",
+    "description": "CabinCrew Protocol Schemas and TypeScript Interfaces",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "prepublishOnly": "npm run build"
+    },
+    "keywords": [
+        "cabincrew",
+        "protocol",
+        "automation",
+        "agent"
+    ],
+    "author": "CabinCrew Contributors",
+    "license": "Apache-2.0",
+    "devDependencies": {
+        "typescript": "^5.0.0"
+    }
+}
