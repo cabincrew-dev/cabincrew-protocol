@@ -1,0 +1,68 @@
+name: Protocol CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-protocol:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+
+    - name: Setup Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install Node Dependencies
+      run: npm ci
+
+    - name: Regenerate All Protocol Artifacts
+      run: |
+        npm run generate
+        npm run generate:go
+        npm run generate:nodejs
+        npm run generate:python
+
+    - name: Check for Uncommitted Changes (Desync)
+      run: |
+        if [[ -n $(git status --porcelain) ]]; then
+          echo "Error: Protocol artifacts are out of sync with source. Please run generation scripts and commit changes."
+          git status --porcelain
+          git diff
+          exit 1
+        fi
+
+    - name: Verify Go Build
+      run: |
+        cd lib/go
+        go mod tidy
+        go build ./...
+
+    - name: Verify Node Build
+      run: |
+        cd lib/nodejs
+        npm ci
+        npm run build
+
+    - name: Verify Python Imports
+      run: |
+        cd lib/python
+        pip install .
+        python3 src/cabincrew_protocol/__init__.py # Basic import check
+        # Or better
+        python3 -c "from cabincrew_protocol import Artifact; print('Python Import OK')"
+

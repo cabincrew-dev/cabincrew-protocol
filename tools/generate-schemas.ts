@@ -4,7 +4,7 @@ import * as path from "path";
 
 const ARTIFACTS_DIR = path.resolve(__dirname, "../schemas/draft");
 const DOCS_DIR = path.resolve(__dirname, "../docs/schemas");
-const TS_BASE_DIR = __dirname;
+const TS_BASE_DIR = path.resolve(__dirname, "../src");
 
 if (!fs.existsSync(ARTIFACTS_DIR)) fs.mkdirSync(ARTIFACTS_DIR, { recursive: true });
 if (!fs.existsSync(DOCS_DIR)) fs.mkdirSync(DOCS_DIR, { recursive: true });

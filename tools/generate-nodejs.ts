@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
-const SRC_DIR = __dirname;
+const SRC_DIR = path.resolve(__dirname, "../src");
 const LIB_TYPES_DIR = path.resolve(__dirname, "../lib/nodejs/src/types");
 const LIB_INDEX_FILE = path.resolve(__dirname, "../lib/nodejs/src/index.ts");
 
