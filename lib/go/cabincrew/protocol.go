@@ -161,12 +161,29 @@ type ArtifactRecord struct {
 	StepID       string           `json:"step_id"`
 }
 
+// Audit record for approval events.
+// Extended to ensure approval binding is auditable.
 type AuditApproval struct {
-	ApprovalID   *string `json:"approval_id,omitempty"`
-	Approved     *bool   `json:"approved,omitempty"`
-	Approver     *string `json:"approver,omitempty"`
-	Reason       *string `json:"reason,omitempty"`
-	RequiredRole *string `json:"required_role,omitempty"`
+	// Unique approval identifier.                                           
+	// REQUIRED to correlate request and response.                           
+	ApprovalID                                                       string  `json:"approval_id"`
+	// Whether approval was granted.                                         
+	// REQUIRED for audit trail.                                             
+	Approved                                                         bool    `json:"approved"`
+	// Identity of the approver.                                             
+	// REQUIRED for accountability.                                          
+	Approver                                                         string  `json:"approver"`
+	// SHA256 hash of the plan-token this approval is bound to.              
+	// REQUIRED to prove approval binding and prevent replay attacks.        
+	PlanTokenHash                                                    string  `json:"plan_token_hash"`
+	// Optional reason for approval/denial.                                  
+	Reason                                                           *string `json:"reason,omitempty"`
+	// Required role for this approval.                                      
+	// REQUIRED to verify authorization.                                     
+	RequiredRole                                                     string  `json:"required_role"`
+	// ISO 8601 timestamp when approval was granted/denied.                  
+	// REQUIRED for temporal ordering.                                       
+	Timestamp                                                        string  `json:"timestamp"`
 }
 
 type AuditArtifact struct {
@@ -187,6 +204,8 @@ type AuditEngine struct {
 // Canonical schema for all audit log events.
 // Defined in schemas/draft/audit-event.schema.json
 type AuditEvent struct {
+	// Audit record for approval events.                                                                    
+	// Extended to ensure approval binding is auditable.                                                    
 	Approval                                                                                *AuditApproval  `json:"approval,omitempty"`
 	Artifacts                                                                               []AuditArtifact `json:"artifacts,omitempty"`
 	// Hash of the previous event in the chain. Allows for ledger-style verification.                       

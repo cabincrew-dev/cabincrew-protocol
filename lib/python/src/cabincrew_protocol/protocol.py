@@ -130,11 +130,35 @@ class ArtifactRecord:
 
 @dataclass
 class AuditApproval:
-    approval_id: Optional[str] = None
-    approved: Optional[bool] = None
-    approver: Optional[str] = None
+    """Audit record for approval events.
+    Extended to ensure approval binding is auditable.
+    """
+    approval_id: str = None
+    """Unique approval identifier.
+    REQUIRED to correlate request and response.
+    """
+    approved: bool = None
+    """Whether approval was granted.
+    REQUIRED for audit trail.
+    """
+    approver: str = None
+    """Identity of the approver.
+    REQUIRED for accountability.
+    """
+    plan_token_hash: str = None
+    """SHA256 hash of the plan-token this approval is bound to.
+    REQUIRED to prove approval binding and prevent replay attacks.
+    """
+    required_role: str = None
+    """Required role for this approval.
+    REQUIRED to verify authorization.
+    """
+    timestamp: str = None
+    """ISO 8601 timestamp when approval was granted/denied.
+    REQUIRED for temporal ordering.
+    """
     reason: Optional[str] = None
-    required_role: Optional[str] = None
+    """Optional reason for approval/denial."""
 
 
 @dataclass
@@ -318,6 +342,9 @@ class AuditEvent:
     REQUIRED for temporal chain-of-custody reconstruction.
     """
     approval: Optional[AuditApproval] = None
+    """Audit record for approval events.
+    Extended to ensure approval binding is auditable.
+    """
     artifacts: Optional[List[AuditArtifact]] = None
     chain_hash: Optional[str] = None
     """Hash of the previous event in the chain. Allows for ledger-style verification."""

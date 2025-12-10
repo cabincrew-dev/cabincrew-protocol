@@ -927,25 +927,47 @@
       ]
     },
     "AuditApproval": {
+      "description": "Audit record for approval events.\nExtended to ensure approval binding is auditable.",
       "type": "object",
       "properties": {
         "approval_id": {
+          "description": "Unique approval identifier.\nREQUIRED to correlate request and response.",
           "type": "string"
         },
         "required_role": {
+          "description": "Required role for this approval.\nREQUIRED to verify authorization.",
           "type": "string"
         },
         "approved": {
+          "description": "Whether approval was granted.\nREQUIRED for audit trail.",
           "type": "boolean"
         },
         "approver": {
+          "description": "Identity of the approver.\nREQUIRED for accountability.",
+          "type": "string"
+        },
+        "plan_token_hash": {
+          "description": "SHA256 hash of the plan-token this approval is bound to.\nREQUIRED to prove approval binding and prevent replay attacks.",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "ISO 8601 timestamp when approval was granted/denied.\nREQUIRED for temporal ordering.",
           "type": "string"
         },
         "reason": {
+          "description": "Optional reason for approval/denial.",
           "type": "string"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "required": [
+        "approval_id",
+        "approved",
+        "approver",
+        "plan_token_hash",
+        "required_role",
+        "timestamp"
+      ]
     },
     "AuditIntegrity": {
       "type": "object",
@@ -1039,6 +1061,7 @@
           "$ref": "#/definitions/AuditPolicy"
         },
         "approval": {
+          "description": "Audit record for approval events.\nExtended to ensure approval binding is auditable.",
           "$ref": "#/definitions/AuditApproval"
         },
         "integrity_check": {

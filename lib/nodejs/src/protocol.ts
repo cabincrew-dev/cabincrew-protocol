@@ -186,12 +186,45 @@ export interface ArtifactRecord {
     step_id:       string;
 }
 
+/**
+ * Audit record for approval events.
+ * Extended to ensure approval binding is auditable.
+ */
 export interface AuditApproval {
-    approval_id?:   string;
-    approved?:      boolean;
-    approver?:      string;
-    reason?:        string;
-    required_role?: string;
+    /**
+     * Unique approval identifier.
+     * REQUIRED to correlate request and response.
+     */
+    approval_id: string;
+    /**
+     * Whether approval was granted.
+     * REQUIRED for audit trail.
+     */
+    approved: boolean;
+    /**
+     * Identity of the approver.
+     * REQUIRED for accountability.
+     */
+    approver: string;
+    /**
+     * SHA256 hash of the plan-token this approval is bound to.
+     * REQUIRED to prove approval binding and prevent replay attacks.
+     */
+    plan_token_hash: string;
+    /**
+     * Optional reason for approval/denial.
+     */
+    reason?: string;
+    /**
+     * Required role for this approval.
+     * REQUIRED to verify authorization.
+     */
+    required_role: string;
+    /**
+     * ISO 8601 timestamp when approval was granted/denied.
+     * REQUIRED for temporal ordering.
+     */
+    timestamp: string;
 }
 
 export interface AuditArtifact {
@@ -214,6 +247,10 @@ export interface AuditEngine {
  * Defined in schemas/draft/audit-event.schema.json
  */
 export interface AuditEvent {
+    /**
+     * Audit record for approval events.
+     * Extended to ensure approval binding is auditable.
+     */
     approval?:  AuditApproval;
     artifacts?: AuditArtifact[];
     /**

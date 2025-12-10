@@ -104,11 +104,50 @@ export interface PolicyEvaluation {
     evaluated_at: string; // ISO 8601
 }
 
+/**
+ * Audit record for approval events.
+ * Extended to ensure approval binding is auditable.
+ */
 export interface AuditApproval {
-    approval_id?: string;
-    required_role?: string;
-    approved?: boolean;
-    approver?: string;
+    /**
+     * Unique approval identifier.
+     * REQUIRED to correlate request and response.
+     */
+    approval_id: string;
+
+    /**
+     * Required role for this approval.
+     * REQUIRED to verify authorization.
+     */
+    required_role: string;
+
+    /**
+     * Whether approval was granted.
+     * REQUIRED for audit trail.
+     */
+    approved: boolean;
+
+    /**
+     * Identity of the approver.
+     * REQUIRED for accountability.
+     */
+    approver: string;
+
+    /**
+     * SHA256 hash of the plan-token this approval is bound to.
+     * REQUIRED to prove approval binding and prevent replay attacks.
+     */
+    plan_token_hash: string;
+
+    /**
+     * ISO 8601 timestamp when approval was granted/denied.
+     * REQUIRED for temporal ordering.
+     */
+    timestamp: string;
+
+    /**
+     * Optional reason for approval/denial.
+     */
     reason?: string;
 }
 

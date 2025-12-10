@@ -192,7 +192,7 @@ Defined in schemas/draft/audit-event.schema.json
 | `plan_token` | `[PlanToken]` | No | Cryptographic binding between a flight-plan and its subsequent take-off. Defined in schemas/draft/plan-token.schema.json |
 | `artifacts` | `array` | No |  |
 | `policy` | `[AuditPolicy]` | No | Policy evaluation audit record. Extended to support chain-of-custody reconstruction. |
-| `approval` | `[AuditApproval]` | No |  |
+| `approval` | `[AuditApproval]` | No | Audit record for approval events. Extended to ensure approval binding is auditable. |
 | `integrity_check` | `[AuditIntegrity]` | No |  |
 | `gateway` | `[AuditGateway]` | No |  |
 | `signature` | `string` | No | Cryptographic signature of this event hash. |
@@ -245,13 +245,18 @@ Extended to support chain-of-custody reconstruction.
 
 ### AuditApproval
 
+Audit record for approval events.
+Extended to ensure approval binding is auditable.
+
 | Property | Type | Required | Description |
 |---|---|---|---|
-| `approval_id` | `string` | No |  |
-| `required_role` | `string` | No |  |
-| `approved` | `boolean` | No |  |
-| `approver` | `string` | No |  |
-| `reason` | `string` | No |  |
+| `approval_id` | `string` | Yes | Unique approval identifier. REQUIRED to correlate request and response. |
+| `required_role` | `string` | Yes | Required role for this approval. REQUIRED to verify authorization. |
+| `approved` | `boolean` | Yes | Whether approval was granted. REQUIRED for audit trail. |
+| `approver` | `string` | Yes | Identity of the approver. REQUIRED for accountability. |
+| `plan_token_hash` | `string` | Yes | SHA256 hash of the plan-token this approval is bound to. REQUIRED to prove approval binding and prevent replay attacks. |
+| `timestamp` | `string` | Yes | ISO 8601 timestamp when approval was granted/denied. REQUIRED for temporal ordering. |
+| `reason` | `string` | No | Optional reason for approval/denial. |
 
 ### AuditIntegrity
 
