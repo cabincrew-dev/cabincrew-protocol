@@ -1077,7 +1077,8 @@
       "required": [
         "event_id",
         "event_type",
-        "timestamp"
+        "timestamp",
+        "workflow_state"
       ]
     },
     "AnyMap": {

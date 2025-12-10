@@ -313,6 +313,10 @@ class AuditEvent:
     timestamp: str = None
     """RFC3339 timestamp of when the event occurred."""
 
+    workflow_state: str = None
+    """Workflow state when this event was emitted.
+    REQUIRED for temporal chain-of-custody reconstruction.
+    """
     approval: Optional[AuditApproval] = None
     artifacts: Optional[List[AuditArtifact]] = None
     chain_hash: Optional[str] = None
@@ -338,10 +342,6 @@ class AuditEvent:
     """Reference to the key used for signing (e.g. 'engine-key-1', 'orchestrator-key-prod')."""
 
     workflow: Optional[AuditWorkflow] = None
-    workflow_state: Optional[str] = None
-    """Workflow state when this event was emitted.
-    REQUIRED for temporal chain-of-custody reconstruction.
-    """
 
 
 @dataclass

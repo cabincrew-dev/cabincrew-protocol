@@ -152,7 +152,7 @@ export interface AuditEvent {
      * Workflow state when this event was emitted.
      * REQUIRED for temporal chain-of-custody reconstruction.
      */
-    workflow_state?: string;
+    workflow_state: string;
 
     engine?: AuditEngine;
     plan_token?: PlanToken;

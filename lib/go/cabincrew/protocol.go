@@ -215,7 +215,7 @@ type AuditEvent struct {
 	Workflow                                                                                *AuditWorkflow  `json:"workflow,omitempty"`
 	// Workflow state when this event was emitted.                                                          
 	// REQUIRED for temporal chain-of-custody reconstruction.                                               
-	WorkflowState                                                                           *string         `json:"workflow_state,omitempty"`
+	WorkflowState                                                                           string          `json:"workflow_state"`
 }
 
 type AuditGateway struct {
