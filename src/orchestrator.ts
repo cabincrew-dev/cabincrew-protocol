@@ -68,7 +68,7 @@ export interface WorkflowState {
     state: State;
     workflow_id?: string;
     step_id?: string;
-    last_decision?: string;
+    last_decision?: Decision;
     plan_token_hash?: string;
 }
 

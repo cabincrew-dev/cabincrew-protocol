@@ -154,11 +154,23 @@ class AuditEngine:
     status: Optional[str] = None
 
 
+class Decision(Enum):
+    """Final aggregated decision after all policy evaluations.
+    REQUIRED for chain-of-custody.
+    
+    Decision from this specific policy.
+    """
+    ALLOW = "allow"
+    DENY = "deny"
+    REQUIRE_APPROVAL = "require_approval"
+    WARN = "warn"
+
+
 @dataclass
 class AuditGateway:
     gateway_type: Optional[str] = None
     model: Optional[str] = None
-    policy_decision: Optional[str] = None
+    policy_decision: Optional[Decision] = None
     request_id: Optional[str] = None
     tool: Optional[str] = None
 
@@ -205,18 +217,6 @@ class PlanToken:
 
     workspace_hash: str = None
     """Hash of the workspace state when the plan was created."""
-
-
-class Decision(Enum):
-    """Final aggregated decision after all policy evaluations.
-    REQUIRED for chain-of-custody.
-    
-    Decision from this specific policy.
-    """
-    ALLOW = "allow"
-    DENY = "deny"
-    REQUIRE_APPROVAL = "require_approval"
-    WARN = "warn"
 
 
 class Source(Enum):
@@ -657,7 +657,7 @@ class WorkflowStartedData:
 @dataclass
 class WorkflowState:
     state: State = None
-    last_decision: Optional[str] = None
+    last_decision: Optional[Decision] = None
     plan_token_hash: Optional[str] = None
     step_id: Optional[str] = None
     workflow_id: Optional[str] = None

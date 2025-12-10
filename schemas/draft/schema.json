@@ -123,760 +123,6 @@
         "workspace_hash"
       ]
     },
-    "AuditWorkflow": {
-      "type": "object",
-      "properties": {
-        "workflow_id": {
-          "type": "string"
-        },
-        "step_id": {
-          "type": "string"
-        },
-        "mode": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false
-    },
-    "AuditEngine": {
-      "type": "object",
-      "properties": {
-        "engine_id": {
-          "type": "string"
-        },
-        "receipt_id": {
-          "type": "string"
-        },
-        "status": {
-          "type": "string"
-        },
-        "error": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false
-    },
-    "AuditArtifact": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "role": {
-          "type": "string"
-        },
-        "path": {
-          "type": "string"
-        },
-        "hash": {
-          "type": "string"
-        },
-        "size": {
-          "type": "number"
-        }
-      },
-      "additionalProperties": false
-    },
-    "AuditPolicy": {
-      "description": "Policy evaluation audit record.\nExtended to support chain-of-custody reconstruction.",
-      "type": "object",
-      "properties": {
-        "decision": {
-          "description": "Final aggregated decision after all policy evaluations.\nREQUIRED for chain-of-custody.",
-          "enum": [
-            "allow",
-            "deny",
-            "require_approval",
-            "warn"
-          ],
-          "type": "string"
-        },
-        "policy_evaluations": {
-          "description": "Individual policy evaluation results.\nCaptures which specific policies (OPA/ONNX/gateway) produced which decisions.",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/PolicyEvaluation"
-          }
-        },
-        "aggregation_method": {
-          "description": "Aggregation method used to combine individual policy decisions.\nExamples: 'most_restrictive', 'unanimous', 'majority'",
-          "type": "string"
-        },
-        "workflow_state": {
-          "description": "Workflow state when this policy evaluation occurred.\nREQUIRED for temporal chain-of-custody.",
-          "type": "string"
-        },
-        "violations": {
-          "description": "Policy violations detected.",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "warnings": {
-          "description": "Policy warnings (non-blocking).",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "engine": {
-          "description": "Legacy field for backward compatibility.",
-          "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "decision",
-        "workflow_state"
-      ]
-    },
-    "PolicyEvaluation": {
-      "description": "Individual policy evaluation result.\nCaptures decision source and evidence.",
-      "type": "object",
-      "properties": {
-        "source": {
-          "description": "Policy source type.",
-          "enum": [
-            "custom",
-            "llm_gateway",
-            "mcp_gateway",
-            "onnx",
-            "opa"
-          ],
-          "type": "string"
-        },
-        "policy_id": {
-          "description": "Policy identifier (e.g., OPA policy name, ONNX model name).",
-          "type": "string"
-        },
-        "decision": {
-          "description": "Decision from this specific policy.",
-          "enum": [
-            "allow",
-            "deny",
-            "require_approval",
-            "warn"
-          ],
-          "type": "string"
-        },
-        "reason": {
-          "description": "Reason for this decision.",
-          "type": "string"
-        },
-        "evidence": {
-          "description": "Evidence supporting this decision (e.g., rule matches, model scores).",
-          "$ref": "#/definitions/Record<string,any>"
-        },
-        "evaluated_at": {
-          "description": "Evaluation timestamp.",
-          "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "decision",
-        "evaluated_at",
-        "policy_id",
-        "source"
-      ]
-    },
-    "AuditApproval": {
-      "type": "object",
-      "properties": {
-        "approval_id": {
-          "type": "string"
-        },
-        "required_role": {
-          "type": "string"
-        },
-        "approved": {
-          "type": "boolean"
-        },
-        "approver": {
-          "type": "string"
-        },
-        "reason": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false
-    },
-    "AuditIntegrity": {
-      "type": "object",
-      "properties": {
-        "expected_plan_token": {
-          "type": "string"
-        },
-        "actual_plan_token": {
-          "type": "string"
-        },
-        "plan_token_match": {
-          "type": "boolean"
-        },
-        "artifacts_match": {
-          "type": "boolean"
-        },
-        "differences": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "additionalProperties": false
-    },
-    "AuditGateway": {
-      "type": "object",
-      "properties": {
-        "gateway_type": {
-          "type": "string"
-        },
-        "request_id": {
-          "type": "string"
-        },
-        "model": {
-          "type": "string"
-        },
-        "tool": {
-          "type": "string"
-        },
-        "policy_decision": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false
-    },
-    "AuditEvent": {
-      "description": "Canonical schema for all audit log events.\nDefined in schemas/draft/audit-event.schema.json",
-      "type": "object",
-      "properties": {
-        "event_id": {
-          "description": "Unique identifier for this audit event.",
-          "type": "string"
-        },
-        "timestamp": {
-          "description": "RFC3339 timestamp of when the event occurred.",
-          "type": "string"
-        },
-        "event_type": {
-          "description": "Free-form event category.",
-          "type": "string"
-        },
-        "workflow": {
-          "$ref": "#/definitions/AuditWorkflow"
-        },
-        "workflow_state": {
-          "description": "Workflow state when this event was emitted.\nREQUIRED for temporal chain-of-custody reconstruction.",
-          "type": "string"
-        },
-        "engine": {
-          "$ref": "#/definitions/AuditEngine"
-        },
-        "plan_token": {
-          "description": "Cryptographic binding between a flight-plan and its subsequent take-off.\nDefined in schemas/draft/plan-token.schema.json",
-          "$ref": "#/definitions/PlanToken"
-        },
-        "artifacts": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/AuditArtifact"
-          }
-        },
-        "policy": {
-          "description": "Policy evaluation audit record.\nExtended to support chain-of-custody reconstruction.",
-          "$ref": "#/definitions/AuditPolicy"
-        },
-        "approval": {
-          "$ref": "#/definitions/AuditApproval"
-        },
-        "integrity_check": {
-          "$ref": "#/definitions/AuditIntegrity"
-        },
-        "gateway": {
-          "$ref": "#/definitions/AuditGateway"
-        },
-        "signature": {
-          "description": "Cryptographic signature of this event hash.",
-          "type": "string"
-        },
-        "signature_key_ref": {
-          "description": "Reference to the key used for signing (e.g. 'engine-key-1', 'orchestrator-key-prod').",
-          "type": "string"
-        },
-        "chain_hash": {
-          "description": "Hash of the previous event in the chain. Allows for ledger-style verification.",
-          "type": "string"
-        },
-        "message": {
-          "type": "string"
-        },
-        "severity": {
-          "enum": [
-            "critical",
-            "debug",
-            "error",
-            "info",
-            "warning"
-          ],
-          "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "event_id",
-        "event_type",
-        "timestamp"
-      ]
-    },
-    "AnyMap": {
-      "type": "object",
-      "additionalProperties": {}
-    },
-    "EngineMeta": {
-      "type": "object",
-      "properties": {
-        "workflow_id": {
-          "type": "string"
-        },
-        "step_id": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "step_id",
-        "workflow_id"
-      ]
-    },
-    "EngineOrchestrator": {
-      "type": "object",
-      "properties": {
-        "run_index": {
-          "type": "number"
-        },
-        "workspace_hash": {
-          "type": "string"
-        },
-        "artifacts_salt": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false
-    },
-    "EngineInput": {
-      "description": "Input delivered via STDIN or CABINCREW_INPUT_FILE.\nDefined in schemas/draft/engine.schema.json",
-      "type": "object",
-      "properties": {
-        "protocol_version": {
-          "type": "string"
-        },
-        "mode": {
-          "$ref": "#/definitions/Mode",
-          "description": "Execution mode: 'flight-plan' or 'take-off'."
-        },
-        "meta": {
-          "$ref": "#/definitions/EngineMeta"
-        },
-        "config": {
-          "$ref": "#/definitions/AnyMap"
-        },
-        "secrets": {
-          "$ref": "#/definitions/AnyMap"
-        },
-        "allowed_secrets": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "context": {
-          "$ref": "#/definitions/AnyMap"
-        },
-        "identity_token": {
-          "description": "Ephemeral identity token (e.g. OIDC, JWT) for the workload.\nPreferred over static secrets.",
-          "type": "string"
-        },
-        "orchestrator": {
-          "$ref": "#/definitions/EngineOrchestrator"
-        },
-        "expected_plan_token": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "meta",
-        "mode",
-        "protocol_version"
-      ]
-    },
-    "EngineArtifact": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "role": {
-          "type": "string"
-        },
-        "path": {
-          "type": "string"
-        },
-        "hash": {
-          "type": "string"
-        },
-        "size": {
-          "type": "number"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "hash",
-        "name",
-        "path",
-        "role"
-      ]
-    },
-    "EngineMetric": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "value": {
-          "type": "number"
-        },
-        "tags": {
-          "$ref": "#/definitions/AnyMap"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "name",
-        "value"
-      ]
-    },
-    "EngineOutput": {
-      "description": "Output delivered via STDOUT or CABINCREW_OUTPUT_FILE.\nDefined in schemas/draft/engine.schema.json",
-      "type": "object",
-      "properties": {
-        "protocol_version": {
-          "type": "string"
-        },
-        "engine_id": {
-          "type": "string"
-        },
-        "mode": {
-          "$ref": "#/definitions/Mode"
-        },
-        "receipt_id": {
-          "type": "string"
-        },
-        "status": {
-          "description": "Execution status: 'success' or 'failure'.",
-          "type": "string"
-        },
-        "error": {
-          "type": "string"
-        },
-        "warnings": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "diagnostics": {},
-        "artifacts": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/EngineArtifact"
-          }
-        },
-        "metrics": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/EngineMetric"
-          }
-        },
-        "plan_token": {
-          "description": "SHA256 hash referencing a plan-token.json file.",
-          "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "engine_id",
-        "mode",
-        "protocol_version",
-        "receipt_id",
-        "status"
-      ]
-    },
-    "LLMGatewayRequest": {
-      "type": "object",
-      "properties": {
-        "request_id": {
-          "type": "string"
-        },
-        "timestamp": {
-          "type": "string"
-        },
-        "source": {
-          "type": "string"
-        },
-        "model": {
-          "type": "string"
-        },
-        "provider": {
-          "type": "string"
-        },
-        "input": {
-          "$ref": "#/definitions/Record<string,any>"
-        },
-        "context": {
-          "$ref": "#/definitions/Record<string,any>"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "input",
-        "model",
-        "request_id",
-        "timestamp"
-      ]
-    },
-    "GatewayApproval": {
-      "type": "object",
-      "properties": {
-        "approval_id": {
-          "type": "string"
-        },
-        "required_role": {
-          "type": "string"
-        },
-        "reason": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false
-    },
-    "LLMGatewayResponse": {
-      "type": "object",
-      "properties": {
-        "request_id": {
-          "type": "string"
-        },
-        "timestamp": {
-          "type": "string"
-        },
-        "decision": {
-          "enum": [
-            "allow",
-            "deny",
-            "require_approval",
-            "warn"
-          ],
-          "type": "string"
-        },
-        "warnings": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "violations": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "approval": {
-          "$ref": "#/definitions/GatewayApproval"
-        },
-        "routed_model": {
-          "type": "string"
-        },
-        "rewritten_input": {
-          "$ref": "#/definitions/Record<string,any>"
-        },
-        "gateway_payload": {
-          "$ref": "#/definitions/Record<string,any>"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "decision",
-        "request_id",
-        "timestamp"
-      ]
-    },
-    "LLMGatewayRule": {
-      "type": "object",
-      "properties": {
-        "match": {
-          "$ref": "#/definitions/Record<string,any>"
-        },
-        "action": {
-          "type": "string"
-        },
-        "metadata": {
-          "$ref": "#/definitions/Record<string,any>"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "action",
-        "match"
-      ]
-    },
-    "LLMGatewayPolicyConfig": {
-      "type": "object",
-      "properties": {
-        "opa_policies": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "onnx_models": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "model_routing": {
-          "$ref": "#/definitions/Record<string,any>"
-        },
-        "rules": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/LLMGatewayRule"
-          }
-        }
-      },
-      "additionalProperties": false
-    },
-    "MCPGatewayRequest": {
-      "type": "object",
-      "properties": {
-        "request_id": {
-          "type": "string"
-        },
-        "timestamp": {
-          "type": "string"
-        },
-        "source": {
-          "type": "string"
-        },
-        "server_id": {
-          "type": "string"
-        },
-        "method": {
-          "type": "string"
-        },
-        "params": {
-          "$ref": "#/definitions/Record<string,any>"
-        },
-        "context": {
-          "$ref": "#/definitions/Record<string,any>"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "method",
-        "request_id",
-        "server_id",
-        "timestamp"
-      ]
-    },
-    "MCPGatewayResponse": {
-      "type": "object",
-      "properties": {
-        "request_id": {
-          "type": "string"
-        },
-        "timestamp": {
-          "type": "string"
-        },
-        "decision": {
-          "enum": [
-            "allow",
-            "deny",
-            "require_approval",
-            "warn"
-          ],
-          "type": "string"
-        },
-        "warnings": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "violations": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "approval": {
-          "$ref": "#/definitions/GatewayApproval"
-        },
-        "rewritten_request": {
-          "$ref": "#/definitions/Record<string,any>"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "decision",
-        "request_id",
-        "timestamp"
-      ]
-    },
-    "MCPGatewayRule": {
-      "type": "object",
-      "properties": {
-        "match": {
-          "$ref": "#/definitions/Record<string,any>"
-        },
-        "action": {
-          "type": "string"
-        },
-        "metadata": {
-          "$ref": "#/definitions/Record<string,any>"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "action",
-        "match"
-      ]
-    },
-    "MCPGatewayPolicyConfig": {
-      "type": "object",
-      "properties": {
-        "opa_policies": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "onnx_models": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "rules": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/MCPGatewayRule"
-          }
-        }
-      },
-      "additionalProperties": false
-    },
     "RecordStringAny": {
       "type": "object",
       "additionalProperties": false
@@ -1090,6 +336,12 @@
           "type": "string"
         },
         "last_decision": {
+          "enum": [
+            "allow",
+            "deny",
+            "require_approval",
+            "warn"
+          ],
           "type": "string"
         },
         "plan_token_hash": {
@@ -1521,6 +773,748 @@
       "required": [
         "error"
       ]
+    },
+    "AuditWorkflow": {
+      "type": "object",
+      "properties": {
+        "workflow_id": {
+          "type": "string"
+        },
+        "step_id": {
+          "type": "string"
+        },
+        "mode": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "AuditEngine": {
+      "type": "object",
+      "properties": {
+        "engine_id": {
+          "type": "string"
+        },
+        "receipt_id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "AuditArtifact": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "hash": {
+          "type": "string"
+        },
+        "size": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false
+    },
+    "AuditPolicy": {
+      "description": "Policy evaluation audit record.\nExtended to support chain-of-custody reconstruction.",
+      "type": "object",
+      "properties": {
+        "decision": {
+          "$ref": "#/definitions/Decision",
+          "description": "Final aggregated decision after all policy evaluations.\nREQUIRED for chain-of-custody."
+        },
+        "policy_evaluations": {
+          "description": "Individual policy evaluation results.\nCaptures which specific policies (OPA/ONNX/gateway) produced which decisions.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PolicyEvaluation"
+          }
+        },
+        "aggregation_method": {
+          "description": "Aggregation method used to combine individual policy decisions.\nExamples: 'most_restrictive', 'unanimous', 'majority'",
+          "type": "string"
+        },
+        "workflow_state": {
+          "description": "Workflow state when this policy evaluation occurred.\nREQUIRED for temporal chain-of-custody.",
+          "type": "string"
+        },
+        "violations": {
+          "description": "Policy violations detected.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warnings": {
+          "description": "Policy warnings (non-blocking).",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "engine": {
+          "description": "Legacy field for backward compatibility.",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "decision",
+        "workflow_state"
+      ]
+    },
+    "PolicyEvaluation": {
+      "description": "Individual policy evaluation result.\nCaptures decision source and evidence.",
+      "type": "object",
+      "properties": {
+        "source": {
+          "description": "Policy source type.",
+          "enum": [
+            "custom",
+            "llm_gateway",
+            "mcp_gateway",
+            "onnx",
+            "opa"
+          ],
+          "type": "string"
+        },
+        "policy_id": {
+          "description": "Policy identifier (e.g., OPA policy name, ONNX model name).",
+          "type": "string"
+        },
+        "decision": {
+          "description": "Decision from this specific policy.",
+          "enum": [
+            "allow",
+            "deny",
+            "require_approval",
+            "warn"
+          ],
+          "type": "string"
+        },
+        "reason": {
+          "description": "Reason for this decision.",
+          "type": "string"
+        },
+        "evidence": {
+          "description": "Evidence supporting this decision (e.g., rule matches, model scores).",
+          "$ref": "#/definitions/Record<string,any>"
+        },
+        "evaluated_at": {
+          "description": "Evaluation timestamp.",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "decision",
+        "evaluated_at",
+        "policy_id",
+        "source"
+      ]
+    },
+    "AuditApproval": {
+      "type": "object",
+      "properties": {
+        "approval_id": {
+          "type": "string"
+        },
+        "required_role": {
+          "type": "string"
+        },
+        "approved": {
+          "type": "boolean"
+        },
+        "approver": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "AuditIntegrity": {
+      "type": "object",
+      "properties": {
+        "expected_plan_token": {
+          "type": "string"
+        },
+        "actual_plan_token": {
+          "type": "string"
+        },
+        "plan_token_match": {
+          "type": "boolean"
+        },
+        "artifacts_match": {
+          "type": "boolean"
+        },
+        "differences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "AuditGateway": {
+      "type": "object",
+      "properties": {
+        "gateway_type": {
+          "type": "string"
+        },
+        "request_id": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "tool": {
+          "type": "string"
+        },
+        "policy_decision": {
+          "enum": [
+            "allow",
+            "deny",
+            "require_approval",
+            "warn"
+          ],
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "AuditEvent": {
+      "description": "Canonical schema for all audit log events.\nDefined in schemas/draft/audit-event.schema.json",
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "description": "Unique identifier for this audit event.",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "RFC3339 timestamp of when the event occurred.",
+          "type": "string"
+        },
+        "event_type": {
+          "description": "Free-form event category.",
+          "type": "string"
+        },
+        "workflow": {
+          "$ref": "#/definitions/AuditWorkflow"
+        },
+        "workflow_state": {
+          "description": "Workflow state when this event was emitted.\nREQUIRED for temporal chain-of-custody reconstruction.",
+          "type": "string"
+        },
+        "engine": {
+          "$ref": "#/definitions/AuditEngine"
+        },
+        "plan_token": {
+          "description": "Cryptographic binding between a flight-plan and its subsequent take-off.\nDefined in schemas/draft/plan-token.schema.json",
+          "$ref": "#/definitions/PlanToken"
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AuditArtifact"
+          }
+        },
+        "policy": {
+          "description": "Policy evaluation audit record.\nExtended to support chain-of-custody reconstruction.",
+          "$ref": "#/definitions/AuditPolicy"
+        },
+        "approval": {
+          "$ref": "#/definitions/AuditApproval"
+        },
+        "integrity_check": {
+          "$ref": "#/definitions/AuditIntegrity"
+        },
+        "gateway": {
+          "$ref": "#/definitions/AuditGateway"
+        },
+        "signature": {
+          "description": "Cryptographic signature of this event hash.",
+          "type": "string"
+        },
+        "signature_key_ref": {
+          "description": "Reference to the key used for signing (e.g. 'engine-key-1', 'orchestrator-key-prod').",
+          "type": "string"
+        },
+        "chain_hash": {
+          "description": "Hash of the previous event in the chain. Allows for ledger-style verification.",
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "critical",
+            "debug",
+            "error",
+            "info",
+            "warning"
+          ],
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "event_id",
+        "event_type",
+        "timestamp"
+      ]
+    },
+    "AnyMap": {
+      "type": "object",
+      "additionalProperties": {}
+    },
+    "EngineMeta": {
+      "type": "object",
+      "properties": {
+        "workflow_id": {
+          "type": "string"
+        },
+        "step_id": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "step_id",
+        "workflow_id"
+      ]
+    },
+    "EngineOrchestrator": {
+      "type": "object",
+      "properties": {
+        "run_index": {
+          "type": "number"
+        },
+        "workspace_hash": {
+          "type": "string"
+        },
+        "artifacts_salt": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "EngineInput": {
+      "description": "Input delivered via STDIN or CABINCREW_INPUT_FILE.\nDefined in schemas/draft/engine.schema.json",
+      "type": "object",
+      "properties": {
+        "protocol_version": {
+          "type": "string"
+        },
+        "mode": {
+          "$ref": "#/definitions/Mode",
+          "description": "Execution mode: 'flight-plan' or 'take-off'."
+        },
+        "meta": {
+          "$ref": "#/definitions/EngineMeta"
+        },
+        "config": {
+          "$ref": "#/definitions/AnyMap"
+        },
+        "secrets": {
+          "$ref": "#/definitions/AnyMap"
+        },
+        "allowed_secrets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "context": {
+          "$ref": "#/definitions/AnyMap"
+        },
+        "identity_token": {
+          "description": "Ephemeral identity token (e.g. OIDC, JWT) for the workload.\nPreferred over static secrets.",
+          "type": "string"
+        },
+        "orchestrator": {
+          "$ref": "#/definitions/EngineOrchestrator"
+        },
+        "expected_plan_token": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "meta",
+        "mode",
+        "protocol_version"
+      ]
+    },
+    "EngineArtifact": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "hash": {
+          "type": "string"
+        },
+        "size": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "hash",
+        "name",
+        "path",
+        "role"
+      ]
+    },
+    "EngineMetric": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "number"
+        },
+        "tags": {
+          "$ref": "#/definitions/AnyMap"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "value"
+      ]
+    },
+    "EngineOutput": {
+      "description": "Output delivered via STDOUT or CABINCREW_OUTPUT_FILE.\nDefined in schemas/draft/engine.schema.json",
+      "type": "object",
+      "properties": {
+        "protocol_version": {
+          "type": "string"
+        },
+        "engine_id": {
+          "type": "string"
+        },
+        "mode": {
+          "$ref": "#/definitions/Mode"
+        },
+        "receipt_id": {
+          "type": "string"
+        },
+        "status": {
+          "description": "Execution status: 'success' or 'failure'.",
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "diagnostics": {},
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EngineArtifact"
+          }
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EngineMetric"
+          }
+        },
+        "plan_token": {
+          "description": "SHA256 hash referencing a plan-token.json file.",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "engine_id",
+        "mode",
+        "protocol_version",
+        "receipt_id",
+        "status"
+      ]
+    },
+    "LLMGatewayRequest": {
+      "type": "object",
+      "properties": {
+        "request_id": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "input": {
+          "$ref": "#/definitions/Record<string,any>"
+        },
+        "context": {
+          "$ref": "#/definitions/Record<string,any>"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "input",
+        "model",
+        "request_id",
+        "timestamp"
+      ]
+    },
+    "GatewayApproval": {
+      "type": "object",
+      "properties": {
+        "approval_id": {
+          "type": "string"
+        },
+        "required_role": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "LLMGatewayResponse": {
+      "type": "object",
+      "properties": {
+        "request_id": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string"
+        },
+        "decision": {
+          "$ref": "#/definitions/Decision"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "violations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "approval": {
+          "$ref": "#/definitions/GatewayApproval"
+        },
+        "routed_model": {
+          "type": "string"
+        },
+        "rewritten_input": {
+          "$ref": "#/definitions/Record<string,any>"
+        },
+        "gateway_payload": {
+          "$ref": "#/definitions/Record<string,any>"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "decision",
+        "request_id",
+        "timestamp"
+      ]
+    },
+    "LLMGatewayRule": {
+      "type": "object",
+      "properties": {
+        "match": {
+          "$ref": "#/definitions/Record<string,any>"
+        },
+        "action": {
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/Record<string,any>"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "action",
+        "match"
+      ]
+    },
+    "LLMGatewayPolicyConfig": {
+      "type": "object",
+      "properties": {
+        "opa_policies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "onnx_models": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "model_routing": {
+          "$ref": "#/definitions/Record<string,any>"
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LLMGatewayRule"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "MCPGatewayRequest": {
+      "type": "object",
+      "properties": {
+        "request_id": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "server_id": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/Record<string,any>"
+        },
+        "context": {
+          "$ref": "#/definitions/Record<string,any>"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "request_id",
+        "server_id",
+        "timestamp"
+      ]
+    },
+    "MCPGatewayResponse": {
+      "type": "object",
+      "properties": {
+        "request_id": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string"
+        },
+        "decision": {
+          "$ref": "#/definitions/Decision"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "violations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "approval": {
+          "$ref": "#/definitions/GatewayApproval"
+        },
+        "rewritten_request": {
+          "$ref": "#/definitions/Record<string,any>"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "decision",
+        "request_id",
+        "timestamp"
+      ]
+    },
+    "MCPGatewayRule": {
+      "type": "object",
+      "properties": {
+        "match": {
+          "$ref": "#/definitions/Record<string,any>"
+        },
+        "action": {
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/Record<string,any>"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "action",
+        "match"
+      ]
+    },
+    "MCPGatewayPolicyConfig": {
+      "type": "object",
+      "properties": {
+        "opa_policies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "onnx_models": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MCPGatewayRule"
+          }
+        }
+      },
+      "additionalProperties": false
     },
     "Record<string,any>": {
       "type": "object",

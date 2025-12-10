@@ -1,4 +1,5 @@
 import { PlanToken } from './plantoken';
+import { Decision } from './orchestrator';
 
 export interface AuditWorkflow {
     workflow_id?: string;
@@ -30,7 +31,7 @@ export interface AuditPolicy {
      * Final aggregated decision after all policy evaluations.
      * REQUIRED for chain-of-custody.
      */
-    decision: 'allow' | 'warn' | 'require_approval' | 'deny';
+    decision: Decision;
 
     /**
      * Individual policy evaluation results.
@@ -124,7 +125,7 @@ export interface AuditGateway {
     request_id?: string;
     model?: string;
     tool?: string;
-    policy_decision?: string;
+    policy_decision?: Decision;
 }
 
 /**

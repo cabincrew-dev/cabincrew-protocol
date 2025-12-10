@@ -1,4 +1,5 @@
 import { GatewayApproval } from './gateway_llm';
+import { Decision } from './orchestrator';
 
 export interface MCPGatewayRequest {
     request_id: string;
@@ -13,7 +14,7 @@ export interface MCPGatewayRequest {
 export interface MCPGatewayResponse {
     request_id: string;
     timestamp: string;
-    decision: 'allow' | 'warn' | 'deny' | 'require_approval';
+    decision: Decision;
     warnings?: string[];
     violations?: string[];
     approval?: GatewayApproval;

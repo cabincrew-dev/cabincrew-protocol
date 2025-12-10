@@ -219,11 +219,11 @@ type AuditEvent struct {
 }
 
 type AuditGateway struct {
-	GatewayType    *string `json:"gateway_type,omitempty"`
-	Model          *string `json:"model,omitempty"`
-	PolicyDecision *string `json:"policy_decision,omitempty"`
-	RequestID      *string `json:"request_id,omitempty"`
-	Tool           *string `json:"tool,omitempty"`
+	GatewayType    *string   `json:"gateway_type,omitempty"`
+	Model          *string   `json:"model,omitempty"`
+	PolicyDecision *Decision `json:"policy_decision,omitempty"`
+	RequestID      *string   `json:"request_id,omitempty"`
+	Tool           *string   `json:"tool,omitempty"`
 }
 
 type AuditIntegrity struct {
@@ -543,11 +543,11 @@ type WorkflowStartedData struct {
 }
 
 type WorkflowState struct {
-	LastDecision  *string `json:"last_decision,omitempty"`
-	PlanTokenHash *string `json:"plan_token_hash,omitempty"`
-	State         State   `json:"state"`
-	StepID        *string `json:"step_id,omitempty"`
-	WorkflowID    *string `json:"workflow_id,omitempty"`
+	LastDecision  *Decision `json:"last_decision,omitempty"`
+	PlanTokenHash *string   `json:"plan_token_hash,omitempty"`
+	State         State     `json:"state"`
+	StepID        *string   `json:"step_id,omitempty"`
+	WorkflowID    *string   `json:"workflow_id,omitempty"`
 }
 
 // Durable workflow state record for restart-safety.

@@ -1,3 +1,5 @@
+import { Decision } from './orchestrator';
+
 export interface LLMGatewayRequest {
     request_id: string;
     timestamp: string;
@@ -17,7 +19,7 @@ export interface GatewayApproval {
 export interface LLMGatewayResponse {
     request_id: string;
     timestamp: string;
-    decision: 'allow' | 'warn' | 'deny' | 'require_approval';
+    decision: Decision;
     warnings?: string[];
     violations?: string[];
     approval?: GatewayApproval;

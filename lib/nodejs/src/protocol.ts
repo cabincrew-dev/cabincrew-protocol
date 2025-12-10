@@ -266,10 +266,18 @@ export interface AuditEvent {
 export interface AuditGateway {
     gateway_type?:    string;
     model?:           string;
-    policy_decision?: string;
+    policy_decision?: Decision;
     request_id?:      string;
     tool?:            string;
 }
+
+/**
+ * Final aggregated decision after all policy evaluations.
+ * REQUIRED for chain-of-custody.
+ *
+ * Decision from this specific policy.
+ */
+export type Decision = "allow" | "deny" | "require_approval" | "warn";
 
 export interface AuditIntegrity {
     actual_plan_token?:   string;
@@ -359,14 +367,6 @@ export interface AuditPolicy {
      */
     workflow_state: string;
 }
-
-/**
- * Final aggregated decision after all policy evaluations.
- * REQUIRED for chain-of-custody.
- *
- * Decision from this specific policy.
- */
-export type Decision = "allow" | "deny" | "require_approval" | "warn";
 
 /**
  * Individual policy evaluation result.
@@ -676,7 +676,7 @@ export interface WorkflowStartedData {
 }
 
 export interface WorkflowState {
-    last_decision?:   string;
+    last_decision?:   Decision;
     plan_token_hash?: string;
     state:            State;
     step_id?:         string;
