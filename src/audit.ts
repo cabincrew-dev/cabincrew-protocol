@@ -23,6 +23,24 @@ export interface AuditArtifact {
 }
 
 /**
+ * Policy aggregation strategy.
+ * Defines how multiple policy decisions are combined into a final decision.
+ */
+export type AggregationMethod =
+    | 'most_restrictive'  // deny > require_approval > warn > allow
+    | 'unanimous'         // all must agree, otherwise most restrictive
+    | 'majority'          // majority vote, ties go to most restrictive
+    | 'any_deny'          // single deny blocks all
+    | 'all_allow'         // all must allow, otherwise most restrictive
+    | 'custom';           // implementation-defined (must document)
+
+/**
+ * Decision severity for ordering.
+ * Used to determine "most restrictive" in aggregation.
+ */
+export type DecisionSeverity = 0 | 1 | 2 | 3; // allow=0, warn=1, require_approval=2, deny=3
+
+/**
  * Policy evaluation audit record.
  * Extended to support chain-of-custody reconstruction.
  */
@@ -41,9 +59,10 @@ export interface AuditPolicy {
 
     /**
      * Aggregation method used to combine individual policy decisions.
-     * Examples: 'most_restrictive', 'unanimous', 'majority'
+     * REQUIRED if multiple policies were evaluated.
+     * Ensures deterministic aggregation across orchestrators.
      */
-    aggregation_method?: string;
+    aggregation_method?: AggregationMethod;
 
     /**
      * Workflow state when this policy evaluation occurred.
@@ -86,7 +105,14 @@ export interface PolicyEvaluation {
     /**
      * Decision from this specific policy.
      */
-    decision: 'allow' | 'warn' | 'require_approval' | 'deny';
+    decision: Decision;
+
+    /**
+     * Decision severity for aggregation ordering.
+     * 0=allow, 1=warn, 2=require_approval, 3=deny
+     * REQUIRED for deterministic "most restrictive" aggregation.
+     */
+    severity: DecisionSeverity;
 
     /**
      * Reason for this decision.

@@ -1,4 +1,5 @@
 export interface CabinCrewProtocol {
+    AggregationMethod?:      AggregationMethod;
     AnyMap?:                 { [key: string]: any };
     ApprovalReceivedData?:   ApprovalReceivedData;
     ApprovalRecord?:         ApprovalRecord;
@@ -17,6 +18,7 @@ export interface CabinCrewProtocol {
     AuditPolicy?:            AuditPolicy;
     AuditWorkflow?:          AuditWorkflow;
     Decision?:               Decision;
+    DecisionSeverity?:       number;
     EngineArtifact?:         EngineArtifact;
     EngineInput?:            EngineInput;
     EngineMeta?:             EngineMeta;
@@ -57,6 +59,16 @@ export interface CabinCrewProtocol {
     WorkflowStateRecord?:    WorkflowStateRecord;
     [property: string]: any;
 }
+
+/**
+ * Policy aggregation strategy.
+ * Defines how multiple policy decisions are combined into a final decision.
+ *
+ * Aggregation method used to combine individual policy decisions.
+ * REQUIRED if multiple policies were evaluated.
+ * Ensures deterministic aggregation across orchestrators.
+ */
+export type AggregationMethod = "all_allow" | "any_deny" | "custom" | "majority" | "most_restrictive" | "unanimous";
 
 export interface ApprovalReceivedData {
     approval_id: string;
@@ -385,9 +397,10 @@ export interface PlanArtifactHash {
 export interface AuditPolicy {
     /**
      * Aggregation method used to combine individual policy decisions.
-     * Examples: 'most_restrictive', 'unanimous', 'majority'
+     * REQUIRED if multiple policies were evaluated.
+     * Ensures deterministic aggregation across orchestrators.
      */
-    aggregation_method?: string;
+    aggregation_method?: AggregationMethod;
     /**
      * Final aggregated decision after all policy evaluations.
      * REQUIRED for chain-of-custody.
@@ -442,6 +455,12 @@ export interface PolicyEvaluation {
      * Reason for this decision.
      */
     reason?: string;
+    /**
+     * Decision severity for aggregation ordering.
+     * 0=allow, 1=warn, 2=require_approval, 3=deny
+     * REQUIRED for deterministic "most restrictive" aggregation.
+     */
+    severity: number;
     /**
      * Policy source type.
      */

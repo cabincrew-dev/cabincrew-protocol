@@ -1,6 +1,7 @@
 package cabincrew
 
 type CabinCrewProtocol struct {
+	AggregationMethod                *AggregationMethod      `json:"AggregationMethod,omitempty"`
 	AnyMap                           map[string]interface{}  `json:"AnyMap,omitempty"`
 	ApprovalReceivedData             *ApprovalReceivedData   `json:"ApprovalReceivedData,omitempty"`
 	ApprovalRecord                   *ApprovalRecord         `json:"ApprovalRecord,omitempty"`
@@ -19,6 +20,7 @@ type CabinCrewProtocol struct {
 	AuditPolicy                      *AuditPolicy            `json:"AuditPolicy,omitempty"`
 	AuditWorkflow                    *AuditWorkflow          `json:"AuditWorkflow,omitempty"`
 	Decision                         *Decision               `json:"Decision,omitempty"`
+	DecisionSeverity                 *float64                `json:"DecisionSeverity,omitempty"`
 	EngineArtifact                   *EngineArtifact         `json:"EngineArtifact,omitempty"`
 	EngineInput                      *EngineInput            `json:"EngineInput,omitempty"`
 	EngineMeta                       *EngineMeta             `json:"EngineMeta,omitempty"`
@@ -291,8 +293,9 @@ type PlanArtifactHash struct {
 // Extended to support chain-of-custody reconstruction.
 type AuditPolicy struct {
 	// Aggregation method used to combine individual policy decisions.                                 
-	// Examples: 'most_restrictive', 'unanimous', 'majority'                                           
-	AggregationMethod                                                               *string            `json:"aggregation_method,omitempty"`
+	// REQUIRED if multiple policies were evaluated.                                                   
+	// Ensures deterministic aggregation across orchestrators.                                         
+	AggregationMethod                                                               *AggregationMethod `json:"aggregation_method,omitempty"`
 	// Final aggregated decision after all policy evaluations.                                         
 	// REQUIRED for chain-of-custody.                                                                  
 	Decision                                                                        Decision           `json:"decision"`
@@ -323,6 +326,10 @@ type PolicyEvaluation struct {
 	PolicyID                                                                string           `json:"policy_id"`
 	// Reason for this decision.                                                             
 	Reason                                                                  *string          `json:"reason,omitempty"`
+	// Decision severity for aggregation ordering.                                           
+	// 0=allow, 1=warn, 2=require_approval, 3=deny                                           
+	// REQUIRED for deterministic "most restrictive" aggregation.                            
+	Severity                                                                float64          `json:"severity"`
 	// Policy source type.                                                                   
 	Source                                                                  Source           `json:"source"`
 }
@@ -593,6 +600,23 @@ type WorkflowStateRecord struct {
 	WorkflowID        string                   `json:"workflow_id"`
 }
 
+// Policy aggregation strategy.
+// Defines how multiple policy decisions are combined into a final decision.
+//
+// Aggregation method used to combine individual policy decisions.
+// REQUIRED if multiple policies were evaluated.
+// Ensures deterministic aggregation across orchestrators.
+type AggregationMethod string
+
+const (
+	AggregationMethodCustom AggregationMethod = "custom"
+	AllAllow                AggregationMethod = "all_allow"
+	AnyDeny                 AggregationMethod = "any_deny"
+	Majority                AggregationMethod = "majority"
+	MostRestrictive         AggregationMethod = "most_restrictive"
+	Unanimous               AggregationMethod = "unanimous"
+)
+
 // Final aggregated decision after all policy evaluations.
 // REQUIRED for chain-of-custody.
 //
@@ -610,11 +634,11 @@ const (
 type Source string
 
 const (
-	Custom     Source = "custom"
-	LlmGateway Source = "llm_gateway"
-	MCPGateway Source = "mcp_gateway"
-	Onnx       Source = "onnx"
-	Opa        Source = "opa"
+	LlmGateway   Source = "llm_gateway"
+	MCPGateway   Source = "mcp_gateway"
+	Onnx         Source = "onnx"
+	Opa          Source = "opa"
+	SourceCustom Source = "custom"
 )
 
 type Severity string

@@ -1,6 +1,22 @@
+from enum import Enum
 from dataclasses import dataclass
 from typing import List, Optional, Dict, Any, Union
-from enum import Enum
+
+
+class AggregationMethod(Enum):
+    """Policy aggregation strategy.
+    Defines how multiple policy decisions are combined into a final decision.
+    
+    Aggregation method used to combine individual policy decisions.
+    REQUIRED if multiple policies were evaluated.
+    Ensures deterministic aggregation across orchestrators.
+    """
+    ALL_ALLOW = "all_allow"
+    ANY_DENY = "any_deny"
+    CUSTOM = "custom"
+    MAJORITY = "majority"
+    MOST_RESTRICTIVE = "most_restrictive"
+    UNANIMOUS = "unanimous"
 
 
 @dataclass
@@ -278,6 +294,11 @@ class PolicyEvaluation:
     policy_id: str = None
     """Policy identifier (e.g., OPA policy name, ONNX model name)."""
 
+    severity: float = None
+    """Decision severity for aggregation ordering.
+    0=allow, 1=warn, 2=require_approval, 3=deny
+    REQUIRED for deterministic "most restrictive" aggregation.
+    """
     source: Source = None
     """Policy source type."""
 
@@ -301,9 +322,10 @@ class AuditPolicy:
     """Workflow state when this policy evaluation occurred.
     REQUIRED for temporal chain-of-custody.
     """
-    aggregation_method: Optional[str] = None
+    aggregation_method: Optional[AggregationMethod] = None
     """Aggregation method used to combine individual policy decisions.
-    Examples: 'most_restrictive', 'unanimous', 'majority' = None
+    REQUIRED if multiple policies were evaluated.
+    Ensures deterministic aggregation across orchestrators.
     """
     engine: Optional[str] = None
     """Legacy field for backward compatibility."""
@@ -721,6 +743,7 @@ class WorkflowStateRecord:
 
 @dataclass
 class CabinCrewProtocol:
+    aggregation_method: Optional[AggregationMethod] = None
     any_map: Optional[Dict[str, Any]] = None
     approval_received_data: Optional[ApprovalReceivedData] = None
     approval_record: Optional[ApprovalRecord] = None
@@ -739,6 +762,7 @@ class CabinCrewProtocol:
     audit_policy: Optional[AuditPolicy] = None
     audit_workflow: Optional[AuditWorkflow] = None
     decision: Optional[Decision] = None
+    decision_severity: Optional[float] = None
     engine_artifact: Optional[EngineArtifact] = None
     engine_input: Optional[EngineInput] = None
     engine_meta: Optional[EngineMeta] = None

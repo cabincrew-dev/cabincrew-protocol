@@ -239,7 +239,7 @@ Extended to support chain-of-custody reconstruction.
 |---|---|---|---|
 | `decision` | `[Decision]` | Yes | Final aggregated decision after all policy evaluations. REQUIRED for chain-of-custody. |
 | `policy_evaluations` | `array` | No | Individual policy evaluation results. Captures which specific policies (OPA/ONNX/gateway) produced which decisions. |
-| `aggregation_method` | `string` | No | Aggregation method used to combine individual policy decisions. Examples: 'most_restrictive', 'unanimous', 'majority' |
+| `aggregation_method` | `string` | No | Aggregation method used to combine individual policy decisions. REQUIRED if multiple policies were evaluated. Ensures deterministic aggregation across orchestrators. |
 | `workflow_state` | `string` | Yes | Workflow state when this policy evaluation occurred. REQUIRED for temporal chain-of-custody. |
 | `violations` | `array` | No | Policy violations detected. |
 | `warnings` | `array` | No | Policy warnings (non-blocking). |

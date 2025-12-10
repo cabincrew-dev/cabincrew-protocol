@@ -836,6 +836,28 @@
       },
       "additionalProperties": false
     },
+    "AggregationMethod": {
+      "description": "Policy aggregation strategy.\nDefines how multiple policy decisions are combined into a final decision.",
+      "enum": [
+        "all_allow",
+        "any_deny",
+        "custom",
+        "majority",
+        "most_restrictive",
+        "unanimous"
+      ],
+      "type": "string"
+    },
+    "DecisionSeverity": {
+      "description": "Decision severity for ordering.\nUsed to determine \"most restrictive\" in aggregation.",
+      "enum": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "type": "number"
+    },
     "AuditPolicy": {
       "description": "Policy evaluation audit record.\nExtended to support chain-of-custody reconstruction.",
       "type": "object",
@@ -852,7 +874,15 @@
           }
         },
         "aggregation_method": {
-          "description": "Aggregation method used to combine individual policy decisions.\nExamples: 'most_restrictive', 'unanimous', 'majority'",
+          "description": "Aggregation method used to combine individual policy decisions.\nREQUIRED if multiple policies were evaluated.\nEnsures deterministic aggregation across orchestrators.",
+          "enum": [
+            "all_allow",
+            "any_deny",
+            "custom",
+            "majority",
+            "most_restrictive",
+            "unanimous"
+          ],
           "type": "string"
         },
         "workflow_state": {
@@ -904,14 +934,12 @@
           "type": "string"
         },
         "decision": {
-          "description": "Decision from this specific policy.",
-          "enum": [
-            "allow",
-            "deny",
-            "require_approval",
-            "warn"
-          ],
-          "type": "string"
+          "$ref": "#/definitions/Decision",
+          "description": "Decision from this specific policy."
+        },
+        "severity": {
+          "$ref": "#/definitions/DecisionSeverity",
+          "description": "Decision severity for aggregation ordering.\n0=allow, 1=warn, 2=require_approval, 3=deny\nREQUIRED for deterministic \"most restrictive\" aggregation."
         },
         "reason": {
           "description": "Reason for this decision.",
@@ -931,6 +959,7 @@
         "decision",
         "evaluated_at",
         "policy_id",
+        "severity",
         "source"
       ]
     },
