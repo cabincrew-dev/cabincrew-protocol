@@ -30,6 +30,11 @@ jobs:
     - name: Install Node Dependencies
       run: npm ci
 
+    - name: Install Python Dependencies
+      run: |
+        pip install pydantic>=2.0 python-dateutil>=2.8.0
+        pip install -r requirements-dev.txt
+
     - name: Regenerate All Protocol Artifacts
       run: |
         npm run generate
@@ -58,9 +63,20 @@ jobs:
         npm ci
         npm run build
 
-    - name: Verify Python Imports
+    - name: Verify Python Package
       run: |
         cd lib/python
         pip install .
         python3 -c "import cabincrew_protocol; print('Python Import OK')"
+
+    - name: Run Go Smoke Tests
+      run: GO111MODULE=off go run tests/smoke_test_go.go
+
+    - name: Run TypeScript Smoke Tests
+      run: |
+        npx ts-node tests/smoke_test_nodejs.ts
+
+    - name: Run Python Smoke Tests
+      run: |
+        python3 tests/smoke_test_python.py
 

@@ -1,0 +1,5 @@
+# Development dependencies for CabinCrew Protocol
+# Used for generating Python bindings from JSON Schema
+
+# Code generator - generates Pydantic models from JSON Schema
+datamodel-code-generator[http]>=0.42.0

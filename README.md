@@ -170,19 +170,57 @@ npm install
 npm run generate        # Generates JSON Schemas and MDX Docs
 npm run generate:go     # Generates Go Library
 npm run generate:nodejs # Generates Node.js Library
-npm run generate:python # Generates Python Library
+npm run generate:python # Generates Python Library (requires datamodel-code-generator)
 ```
+
+### Python Generation Prerequisites
+
+The Python library uses [datamodel-code-generator](https://github.com/koxudaxi/datamodel-code-generator) to generate Pydantic v2 models:
+
+```bash
+# Install development dependencies
+pip install -r requirements-dev.txt
+```
+
+### Smoke Tests
+
+Smoke tests verify that generated libraries can be imported and used correctly:
+
+```bash
+# Python smoke test
+python3 tests/smoke_test_python.py
+
+# TypeScript/Node.js smoke test
+npx ts-node tests/smoke_test_nodejs.ts
+
+# Go smoke test
+GO111MODULE=off go run tests/smoke_test_go.go
+```
+
+Each smoke test validates:
+- Imports and module loading
+- Type/enum value correctness
+- Object instantiation
+- JSON serialization/deserialization
+- Validation (Python/Pydantic only)
+
+Smoke tests run automatically in CI on every push and pull request.
 
 ### Tools
 
 Generation scripts are located in `tools/`.
-- `tools/generate-schemas.ts`: Uses `typescript-json-schema` to create JSON Schemas and MDX.
-- `tools/generate-*.ts`: Uses `quicktype` to create language bindings.
+- `tools/generate-schema.ts`: Uses `typescript-json-schema` to create JSON Schemas and MDX.
+- `tools/generate-go.ts`: Generates Go bindings with quicktype
+- `tools/generate-nodejs.ts`: Generates TypeScript bindings with quicktype
+- `tools/generate-python.ts`: Generates Python Pydantic models with datamodel-code-generator
 
 ## CI/CD
 
 The `.github/workflows/ci.yml` pipeline ensures that all generated code is up-to-date with `src/`. If you change `src/` but fail to run the generators and commit the results, the build will fail.
-Version: draft
+
+---
+
+## Protocol Version
 
 CabinCrew is an open, deterministic, and governable workflow protocol designed for AI-assisted automation.  
 It provides a safe and auditable framework for orchestrating engines, enforcing policy, routing LLM interactions, and recording chain-of-custody events.
