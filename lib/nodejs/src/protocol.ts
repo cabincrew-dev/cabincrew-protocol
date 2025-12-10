@@ -1,8 +1,13 @@
 export interface CabinCrewProtocol {
     AnyMap?:                 { [key: string]: any };
+    ApprovalReceivedData?:   ApprovalReceivedData;
+    ApprovalRecord?:         ApprovalRecord;
     ApprovalRequest?:        ApprovalRequest;
+    ApprovalRequestedData?:  ApprovalRequestedData;
     ApprovalResponse?:       ApprovalResponse;
     Artifact?:               Artifact;
+    ArtifactCreatedData?:    ArtifactCreatedData;
+    ArtifactRecord?:         ArtifactRecord;
     AuditApproval?:          AuditApproval;
     AuditArtifact?:          AuditArtifact;
     AuditEngine?:            AuditEngine;
@@ -30,6 +35,8 @@ export interface CabinCrewProtocol {
     Mode?:                   Mode;
     PlanArtifactHash?:       PlanArtifactHash;
     PlanToken?:              PlanToken;
+    PolicyEvaluatedData?:    PolicyEvaluatedData;
+    PolicyEvaluationRecord?: PolicyEvaluationRecord;
     PreflightEvidence?:      PreflightEvidence;
     PreflightInput?:         PreflightInput;
     PreflightOutput?:        PreflightOutput;
@@ -37,8 +44,38 @@ export interface CabinCrewProtocol {
     "Record<string,any>"?:   RecordStringAny;
     RecordStringAny?:        RecordStringAnyClass;
     State?:                  State;
+    StepCompletedData?:      StepCompletedData;
+    StepStartedData?:        StepStartedData;
+    WALEntry?:               WALEntry;
+    WALEntryData?:           WALEntryData;
+    WALEntryType?:           WALEntryType;
+    WorkflowCompletedData?:  WorkflowCompletedData;
+    WorkflowFailedData?:     WorkflowFailedData;
+    WorkflowStartedData?:    WorkflowStartedData;
     WorkflowState?:          WorkflowState;
+    WorkflowStateRecord?:    WorkflowStateRecord;
     [property: string]: any;
+}
+
+export interface ApprovalReceivedData {
+    approval_id: string;
+    approved:    boolean;
+    approver:    string;
+}
+
+/**
+ * Durable approval record.
+ * Tracks who approved what, when, bound to specific plan-token hash.
+ */
+export interface ApprovalRecord {
+    approval_id:      string;
+    approved:         boolean;
+    approved_at:      string;
+    approver:         string;
+    evidence_hashes?: string[];
+    plan_token_hash:  string;
+    reason?:          string;
+    step_id:          string;
 }
 
 /**
@@ -74,6 +111,12 @@ export interface PreflightEvidence {
     hash: string;
     name: string;
     path: string;
+}
+
+export interface ApprovalRequestedData {
+    approval_id:   string;
+    required_role: string;
+    step_id:       string;
 }
 
 export interface ApprovalResponse {
@@ -119,6 +162,25 @@ export interface Artifact {
      * Path, resource, or identifier this artifact applies to. Optional.
      */
     target?: string;
+}
+
+export interface ArtifactCreatedData {
+    artifact_hash: string;
+    artifact_id:   string;
+    artifact_type: string;
+}
+
+/**
+ * Durable artifact record.
+ * Tracks artifacts with SHA256 hashes for integrity verification.
+ */
+export interface ArtifactRecord {
+    artifact_hash: string;
+    artifact_id:   string;
+    artifact_type: string;
+    created_at:    string;
+    metadata?:     RecordStringAny;
+    step_id:       string;
 }
 
 export interface AuditApproval {
@@ -415,6 +477,26 @@ export interface MCPGatewayResponse {
     warnings?:          string[];
 }
 
+export interface PolicyEvaluatedData {
+    decision:      Decision;
+    evaluation_id: string;
+    policy_name:   string;
+}
+
+/**
+ * Durable policy evaluation record.
+ * Tracks policy decisions with evidence for audit trail.
+ */
+export interface PolicyEvaluationRecord {
+    decision:         Decision;
+    evaluated_at:     string;
+    evaluation_id:    string;
+    evidence_hashes?: string[];
+    policy_name:      string;
+    reason?:          string;
+    step_id:          string;
+}
+
 export interface PreflightInput {
     context?:      RecordStringAny;
     engine_output: RecordStringAny;
@@ -446,10 +528,89 @@ export interface RecordStringAnyClass {
 
 export type State = "APPROVED" | "ARTIFACTS_VALIDATED" | "AWAITING_APPROVAL" | "COMPLETED" | "EXECUTION_COMPLETE" | "FAILED" | "INIT" | "PLAN_GENERATED" | "PLAN_RUNNING" | "PREFLIGHT_COMPLETE" | "PRE_FLIGHT_RUNNING" | "READY_FOR_TAKEOFF" | "TAKEOFF_RUNNING" | "TOKEN_CREATED";
 
+export interface StepCompletedData {
+    artifacts?: string[];
+    step_id:    string;
+}
+
+export interface StepStartedData {
+    step_id:   string;
+    step_type: string;
+}
+
+/**
+ * Write-Ahead Log entry for deterministic replay.
+ * Enables crash recovery and multi-orchestrator consistency.
+ */
+export interface WALEntry {
+    checksum:    string;
+    data:        WALEntryData;
+    entry_type:  WALEntryType;
+    sequence:    number;
+    timestamp:   string;
+    workflow_id: string;
+}
+
+export interface WALEntryData {
+    initial_state?:   State;
+    plan_token_hash?: string;
+    step_id?:         string;
+    step_type?:       string;
+    artifacts?:       string[];
+    approval_id?:     string;
+    required_role?:   string;
+    approved?:        boolean;
+    approver?:        string;
+    artifact_hash?:   string;
+    artifact_id?:     string;
+    artifact_type?:   string;
+    decision?:        Decision;
+    evaluation_id?:   string;
+    policy_name?:     string;
+    final_state?:     State;
+    error?:           string;
+    failed_step?:     string;
+}
+
+export type WALEntryType = "approval_received" | "approval_requested" | "artifact_created" | "policy_evaluated" | "step_completed" | "step_started" | "workflow_completed" | "workflow_failed" | "workflow_started";
+
+export interface WorkflowCompletedData {
+    artifacts:   string[];
+    final_state: State;
+}
+
+export interface WorkflowFailedData {
+    error:        string;
+    failed_step?: string;
+}
+
+export interface WorkflowStartedData {
+    initial_state:   State;
+    plan_token_hash: string;
+}
+
 export interface WorkflowState {
     last_decision?:   string;
     plan_token_hash?: string;
     state:            State;
     step_id?:         string;
     workflow_id?:     string;
+}
+
+/**
+ * Durable workflow state record for restart-safety.
+ * Contains all information needed to deterministically resume workflow execution.
+ */
+export interface WorkflowStateRecord {
+    approvals:          ApprovalRecord[];
+    artifacts:          ArtifactRecord[];
+    created_at:         string;
+    current_state:      State;
+    metadata?:          RecordStringAny;
+    plan_token_hash:    string;
+    policy_evaluations: PolicyEvaluationRecord[];
+    steps_completed:    string[];
+    steps_pending:      string[];
+    updated_at:         string;
+    workflow_id:        string;
 }

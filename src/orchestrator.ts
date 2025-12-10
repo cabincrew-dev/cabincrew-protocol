@@ -71,3 +71,161 @@ export interface WorkflowState {
     last_decision?: string;
     plan_token_hash?: string;
 }
+
+// ============================================================================
+// Restart-Safe Persistence Schema
+// ============================================================================
+
+/**
+ * Durable workflow state record for restart-safety.
+ * Contains all information needed to deterministically resume workflow execution.
+ */
+export interface WorkflowStateRecord {
+    workflow_id: string;
+    current_state: State;
+    plan_token_hash: string;
+    created_at: string; // ISO 8601
+    updated_at: string; // ISO 8601
+
+    // Execution history
+    steps_completed: string[];
+    steps_pending: string[];
+
+    // Approval tracking
+    approvals: ApprovalRecord[];
+
+    // Artifact tracking
+    artifacts: ArtifactRecord[];
+
+    // Policy results
+    policy_evaluations: PolicyEvaluationRecord[];
+
+    // Metadata
+    metadata?: Record<string, any>;
+}
+
+/**
+ * Durable approval record.
+ * Tracks who approved what, when, bound to specific plan-token hash.
+ */
+export interface ApprovalRecord {
+    approval_id: string;
+    step_id: string;
+    plan_token_hash: string; // Hash at time of approval
+    approved: boolean;
+    approver: string;
+    approved_at: string; // ISO 8601
+    reason?: string;
+    evidence_hashes?: string[]; // SHA256 of evidence artifacts
+}
+
+/**
+ * Durable artifact record.
+ * Tracks artifacts with SHA256 hashes for integrity verification.
+ */
+export interface ArtifactRecord {
+    artifact_id: string;
+    step_id: string;
+    artifact_hash: string; // SHA256 of artifact content
+    artifact_type: string;
+    created_at: string; // ISO 8601
+    metadata?: Record<string, any>;
+}
+
+/**
+ * Durable policy evaluation record.
+ * Tracks policy decisions with evidence for audit trail.
+ */
+export interface PolicyEvaluationRecord {
+    evaluation_id: string;
+    step_id: string;
+    policy_name: string;
+    decision: Decision;
+    evaluated_at: string; // ISO 8601
+    reason?: string;
+    evidence_hashes?: string[];
+}
+
+/**
+ * Write-Ahead Log entry for deterministic replay.
+ * Enables crash recovery and multi-orchestrator consistency.
+ */
+export interface WALEntry {
+    sequence: number; // Monotonic sequence number
+    timestamp: string; // ISO 8601
+    workflow_id: string;
+    entry_type: WALEntryType;
+    data: WALEntryData;
+    checksum: string; // SHA256 of entry content
+}
+
+export type WALEntryType =
+    | 'workflow_started'
+    | 'step_started'
+    | 'step_completed'
+    | 'approval_requested'
+    | 'approval_received'
+    | 'artifact_created'
+    | 'policy_evaluated'
+    | 'workflow_completed'
+    | 'workflow_failed';
+
+export type WALEntryData =
+    | WorkflowStartedData
+    | StepStartedData
+    | StepCompletedData
+    | ApprovalRequestedData
+    | ApprovalReceivedData
+    | ArtifactCreatedData
+    | PolicyEvaluatedData
+    | WorkflowCompletedData
+    | WorkflowFailedData;
+
+export interface WorkflowStartedData {
+    plan_token_hash: string;
+    initial_state: State;
+}
+
+export interface StepStartedData {
+    step_id: string;
+    step_type: string;
+}
+
+export interface StepCompletedData {
+    step_id: string;
+    artifacts?: string[]; // Artifact IDs
+}
+
+export interface ApprovalRequestedData {
+    approval_id: string;
+    step_id: string;
+    required_role: string;
+}
+
+export interface ApprovalReceivedData {
+    approval_id: string;
+    approved: boolean;
+    approver: string;
+}
+
+export interface ArtifactCreatedData {
+    artifact_id: string;
+    artifact_hash: string;
+    artifact_type: string;
+}
+
+export interface PolicyEvaluatedData {
+    evaluation_id: string;
+    policy_name: string;
+    decision: Decision;
+}
+
+export interface WorkflowCompletedData {
+    final_state: State;
+    artifacts: string[];
+}
+
+export interface WorkflowFailedData {
+    error: string;
+    failed_step?: string;
+}

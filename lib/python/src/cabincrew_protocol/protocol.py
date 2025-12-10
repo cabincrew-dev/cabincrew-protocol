@@ -1,6 +1,28 @@
 from dataclasses import dataclass
-from typing import Optional, List, Dict, Any, Union
+from typing import List, Optional, Dict, Any, Union
 from enum import Enum
+
+
+@dataclass
+class ApprovalReceivedData:
+    approval_id: str = None
+    approved: bool = None
+    approver: str = None
+
+
+@dataclass
+class ApprovalRecord:
+    """Durable approval record.
+    Tracks who approved what, when, bound to specific plan-token hash.
+    """
+    approval_id: str = None
+    approved: bool = None
+    approved_at: str = None
+    approver: str = None
+    plan_token_hash: str = None
+    step_id: str = None
+    evidence_hashes: Optional[List[str]] = None
+    reason: Optional[str] = None
 
 
 @dataclass
@@ -40,6 +62,13 @@ class ApprovalRequest:
 
 
 @dataclass
+class ApprovalRequestedData:
+    approval_id: str = None
+    required_role: str = None
+    step_id: str = None
+
+
+@dataclass
 class ApprovalResponse:
     approval_id: str = None
     approved: bool = None
@@ -75,6 +104,26 @@ class Artifact:
 
     target: Optional[str] = None
     """Path, resource, or identifier this artifact applies to. Optional."""
+
+
+@dataclass
+class ArtifactCreatedData:
+    artifact_hash: str = None
+    artifact_id: str = None
+    artifact_type: str = None
+
+
+@dataclass
+class ArtifactRecord:
+    """Durable artifact record.
+    Tracks artifacts with SHA256 hashes for integrity verification.
+    """
+    artifact_hash: str = None
+    artifact_id: str = None
+    artifact_type: str = None
+    created_at: str = None
+    step_id: str = None
+    metadata: Optional[RecordStringAny] = None
 
 
 @dataclass
@@ -392,6 +441,27 @@ class MCPGatewayResponse:
 
 
 @dataclass
+class PolicyEvaluatedData:
+    decision: Decision = None
+    evaluation_id: str = None
+    policy_name: str = None
+
+
+@dataclass
+class PolicyEvaluationRecord:
+    """Durable policy evaluation record.
+    Tracks policy decisions with evidence for audit trail.
+    """
+    decision: Decision = None
+    evaluated_at: str = None
+    evaluation_id: str = None
+    policy_name: str = None
+    step_id: str = None
+    evidence_hashes: Optional[List[str]] = None
+    reason: Optional[str] = None
+
+
+@dataclass
 class PreflightInput:
     engine_output: RecordStringAny = None
     mode: Mode = None
@@ -437,6 +507,83 @@ class State(Enum):
 
 
 @dataclass
+class StepCompletedData:
+    step_id: str = None
+    artifacts: Optional[List[str]] = None
+
+
+@dataclass
+class StepStartedData:
+    step_id: str = None
+    step_type: str = None
+
+
+@dataclass
+class WALEntryData:
+    initial_state: Optional[State] = None
+    plan_token_hash: Optional[str] = None
+    step_id: Optional[str] = None
+    step_type: Optional[str] = None
+    artifacts: Optional[List[str]] = None
+    approval_id: Optional[str] = None
+    required_role: Optional[str] = None
+    approved: Optional[bool] = None
+    approver: Optional[str] = None
+    artifact_hash: Optional[str] = None
+    artifact_id: Optional[str] = None
+    artifact_type: Optional[str] = None
+    decision: Optional[Decision] = None
+    evaluation_id: Optional[str] = None
+    policy_name: Optional[str] = None
+    final_state: Optional[State] = None
+    error: Optional[str] = None
+    failed_step: Optional[str] = None
+
+
+class WALEntryType(Enum):
+    APPROVAL_RECEIVED = "approval_received"
+    APPROVAL_REQUESTED = "approval_requested"
+    ARTIFACT_CREATED = "artifact_created"
+    POLICY_EVALUATED = "policy_evaluated"
+    STEP_COMPLETED = "step_completed"
+    STEP_STARTED = "step_started"
+    WORKFLOW_COMPLETED = "workflow_completed"
+    WORKFLOW_FAILED = "workflow_failed"
+    WORKFLOW_STARTED = "workflow_started"
+
+
+@dataclass
+class WALEntry:
+    """Write-Ahead Log entry for deterministic replay.
+    Enables crash recovery and multi-orchestrator consistency.
+    """
+    checksum: str = None
+    data: WALEntryData = None
+    entry_type: WALEntryType = None
+    sequence: float = None
+    timestamp: str = None
+    workflow_id: str = None
+
+
+@dataclass
+class WorkflowCompletedData:
+    artifacts: List[str] = None
+    final_state: State = None
+
+
+@dataclass
+class WorkflowFailedData:
+    error: str = None
+    failed_step: Optional[str] = None
+
+
+@dataclass
+class WorkflowStartedData:
+    initial_state: State = None
+    plan_token_hash: str = None
+
+
+@dataclass
 class WorkflowState:
     state: State = None
     last_decision: Optional[str] = None
@@ -446,11 +593,34 @@ class WorkflowState:
 
 
 @dataclass
+class WorkflowStateRecord:
+    """Durable workflow state record for restart-safety.
+    Contains all information needed to deterministically resume workflow execution.
+    """
+    approvals: List[ApprovalRecord] = None
+    artifacts: List[ArtifactRecord] = None
+    created_at: str = None
+    current_state: State = None
+    plan_token_hash: str = None
+    policy_evaluations: List[PolicyEvaluationRecord] = None
+    steps_completed: List[str] = None
+    steps_pending: List[str] = None
+    updated_at: str = None
+    workflow_id: str = None
+    metadata: Optional[RecordStringAny] = None
+
+
+@dataclass
 class CabinCrewProtocol:
     any_map: Optional[Dict[str, Any]] = None
+    approval_received_data: Optional[ApprovalReceivedData] = None
+    approval_record: Optional[ApprovalRecord] = None
     approval_request: Optional[ApprovalRequest] = None
+    approval_requested_data: Optional[ApprovalRequestedData] = None
     approval_response: Optional[ApprovalResponse] = None
     artifact: Optional[Artifact] = None
+    artifact_created_data: Optional[ArtifactCreatedData] = None
+    artifact_record: Optional[ArtifactRecord] = None
     audit_approval: Optional[AuditApproval] = None
     audit_artifact: Optional[AuditArtifact] = None
     audit_engine: Optional[AuditEngine] = None
@@ -478,6 +648,8 @@ class CabinCrewProtocol:
     mode: Optional[Mode] = None
     plan_artifact_hash: Optional[PlanArtifactHash] = None
     plan_token: Optional[PlanToken] = None
+    policy_evaluated_data: Optional[PolicyEvaluatedData] = None
+    policy_evaluation_record: Optional[PolicyEvaluationRecord] = None
     preflight_evidence: Optional[PreflightEvidence] = None
     preflight_input: Optional[PreflightInput] = None
     preflight_output: Optional[PreflightOutput] = None
@@ -485,4 +657,13 @@ class CabinCrewProtocol:
     record_string_any: Optional[RecordStringAny] = None
     cabin_crew_protocol_record_string_any: Optional[RecordStringAnyClass] = None
     state: Optional[State] = None
+    step_completed_data: Optional[StepCompletedData] = None
+    step_started_data: Optional[StepStartedData] = None
+    wal_entry: Optional[WALEntry] = None
+    wal_entry_data: Optional[WALEntryData] = None
+    wal_entry_type: Optional[WALEntryType] = None
+    workflow_completed_data: Optional[WorkflowCompletedData] = None
+    workflow_failed_data: Optional[WorkflowFailedData] = None
+    workflow_started_data: Optional[WorkflowStartedData] = None
     workflow_state: Optional[WorkflowState] = None
+    workflow_state_record: Optional[WorkflowStateRecord] = None

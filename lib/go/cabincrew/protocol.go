@@ -2,9 +2,14 @@ package cabincrew
 
 type CabinCrewProtocol struct {
 	AnyMap                           map[string]interface{}  `json:"AnyMap,omitempty"`
+	ApprovalReceivedData             *ApprovalReceivedData   `json:"ApprovalReceivedData,omitempty"`
+	ApprovalRecord                   *ApprovalRecord         `json:"ApprovalRecord,omitempty"`
 	ApprovalRequest                  *ApprovalRequest        `json:"ApprovalRequest,omitempty"`
+	ApprovalRequestedData            *ApprovalRequestedData  `json:"ApprovalRequestedData,omitempty"`
 	ApprovalResponse                 *ApprovalResponse       `json:"ApprovalResponse,omitempty"`
 	Artifact                         *Artifact               `json:"Artifact,omitempty"`
+	ArtifactCreatedData              *ArtifactCreatedData    `json:"ArtifactCreatedData,omitempty"`
+	ArtifactRecord                   *ArtifactRecord         `json:"ArtifactRecord,omitempty"`
 	AuditApproval                    *AuditApproval          `json:"AuditApproval,omitempty"`
 	AuditArtifact                    *AuditArtifact          `json:"AuditArtifact,omitempty"`
 	AuditEngine                      *AuditEngine            `json:"AuditEngine,omitempty"`
@@ -32,6 +37,8 @@ type CabinCrewProtocol struct {
 	Mode                             *Mode                   `json:"Mode,omitempty"`
 	PlanArtifactHash                 *PlanArtifactHash       `json:"PlanArtifactHash,omitempty"`
 	PlanToken                        *PlanToken              `json:"PlanToken,omitempty"`
+	PolicyEvaluatedData              *PolicyEvaluatedData    `json:"PolicyEvaluatedData,omitempty"`
+	PolicyEvaluationRecord           *PolicyEvaluationRecord `json:"PolicyEvaluationRecord,omitempty"`
 	PreflightEvidence                *PreflightEvidence      `json:"PreflightEvidence,omitempty"`
 	PreflightInput                   *PreflightInput         `json:"PreflightInput,omitempty"`
 	PreflightOutput                  *PreflightOutput        `json:"PreflightOutput,omitempty"`
@@ -39,7 +46,35 @@ type CabinCrewProtocol struct {
 	RecordStringAny                  *RecordStringAny        `json:"Record<string,any>,omitempty"`
 	CabinCrewProtocolRecordStringAny *RecordStringAnyClass   `json:"RecordStringAny,omitempty"`
 	State                            *State                  `json:"State,omitempty"`
+	StepCompletedData                *StepCompletedData      `json:"StepCompletedData,omitempty"`
+	StepStartedData                  *StepStartedData        `json:"StepStartedData,omitempty"`
+	WALEntry                         *WALEntry               `json:"WALEntry,omitempty"`
+	WALEntryData                     *WALEntryData           `json:"WALEntryData,omitempty"`
+	WALEntryType                     *WALEntryType           `json:"WALEntryType,omitempty"`
+	WorkflowCompletedData            *WorkflowCompletedData  `json:"WorkflowCompletedData,omitempty"`
+	WorkflowFailedData               *WorkflowFailedData     `json:"WorkflowFailedData,omitempty"`
+	WorkflowStartedData              *WorkflowStartedData    `json:"WorkflowStartedData,omitempty"`
 	WorkflowState                    *WorkflowState          `json:"WorkflowState,omitempty"`
+	WorkflowStateRecord              *WorkflowStateRecord    `json:"WorkflowStateRecord,omitempty"`
+}
+
+type ApprovalReceivedData struct {
+	ApprovalID string `json:"approval_id"`
+	Approved   bool   `json:"approved"`
+	Approver   string `json:"approver"`
+}
+
+// Durable approval record.
+// Tracks who approved what, when, bound to specific plan-token hash.
+type ApprovalRecord struct {
+	ApprovalID     string   `json:"approval_id"`
+	Approved       bool     `json:"approved"`
+	ApprovedAt     string   `json:"approved_at"`
+	Approver       string   `json:"approver"`
+	EvidenceHashes []string `json:"evidence_hashes,omitempty"`
+	PlanTokenHash  string   `json:"plan_token_hash"`
+	Reason         *string  `json:"reason,omitempty"`
+	StepID         string   `json:"step_id"`
 }
 
 // Request for human approval before proceeding with execution.
@@ -71,6 +106,12 @@ type PreflightEvidence struct {
 	Path string `json:"path"`
 }
 
+type ApprovalRequestedData struct {
+	ApprovalID   string `json:"approval_id"`
+	RequiredRole string `json:"required_role"`
+	StepID       string `json:"step_id"`
+}
+
 type ApprovalResponse struct {
 	ApprovalID string  `json:"approval_id"`
 	Approved   bool    `json:"approved"`
@@ -98,6 +139,23 @@ type Artifact struct {
 	MIME                                                                                        string           `json:"mime"`
 	// Path, resource, or identifier this artifact applies to. Optional.                                         
 	Target                                                                                      *string          `json:"target,omitempty"`
+}
+
+type ArtifactCreatedData struct {
+	ArtifactHash string `json:"artifact_hash"`
+	ArtifactID   string `json:"artifact_id"`
+	ArtifactType string `json:"artifact_type"`
+}
+
+// Durable artifact record.
+// Tracks artifacts with SHA256 hashes for integrity verification.
+type ArtifactRecord struct {
+	ArtifactHash string           `json:"artifact_hash"`
+	ArtifactID   string           `json:"artifact_id"`
+	ArtifactType string           `json:"artifact_type"`
+	CreatedAt    string           `json:"created_at"`
+	Metadata     *RecordStringAny `json:"metadata,omitempty"`
+	StepID       string           `json:"step_id"`
 }
 
 type AuditApproval struct {
@@ -344,6 +402,24 @@ type MCPGatewayResponse struct {
 	Warnings         []string         `json:"warnings,omitempty"`
 }
 
+type PolicyEvaluatedData struct {
+	Decision     Decision `json:"decision"`
+	EvaluationID string   `json:"evaluation_id"`
+	PolicyName   string   `json:"policy_name"`
+}
+
+// Durable policy evaluation record.
+// Tracks policy decisions with evidence for audit trail.
+type PolicyEvaluationRecord struct {
+	Decision       Decision `json:"decision"`
+	EvaluatedAt    string   `json:"evaluated_at"`
+	EvaluationID   string   `json:"evaluation_id"`
+	EvidenceHashes []string `json:"evidence_hashes,omitempty"`
+	PolicyName     string   `json:"policy_name"`
+	Reason         *string  `json:"reason,omitempty"`
+	StepID         string   `json:"step_id"`
+}
+
 type PreflightInput struct {
 	Context                                                                    *RecordStringAny    `json:"context,omitempty"`
 	EngineOutput                                                               RecordStringAny     `json:"engine_output"`
@@ -368,12 +444,85 @@ type PreflightRequires struct {
 	Role   *string `json:"role,omitempty"`
 }
 
+type StepCompletedData struct {
+	Artifacts []string `json:"artifacts,omitempty"`
+	StepID    string   `json:"step_id"`
+}
+
+type StepStartedData struct {
+	StepID   string `json:"step_id"`
+	StepType string `json:"step_type"`
+}
+
+// Write-Ahead Log entry for deterministic replay.
+// Enables crash recovery and multi-orchestrator consistency.
+type WALEntry struct {
+	Checksum   string       `json:"checksum"`
+	Data       WALEntryData `json:"data"`
+	EntryType  WALEntryType `json:"entry_type"`
+	Sequence   float64      `json:"sequence"`
+	Timestamp  string       `json:"timestamp"`
+	WorkflowID string       `json:"workflow_id"`
+}
+
+type WALEntryData struct {
+	InitialState  *State    `json:"initial_state,omitempty"`
+	PlanTokenHash *string   `json:"plan_token_hash,omitempty"`
+	StepID        *string   `json:"step_id,omitempty"`
+	StepType      *string   `json:"step_type,omitempty"`
+	Artifacts     []string  `json:"artifacts,omitempty"`
+	ApprovalID    *string   `json:"approval_id,omitempty"`
+	RequiredRole  *string   `json:"required_role,omitempty"`
+	Approved      *bool     `json:"approved,omitempty"`
+	Approver      *string   `json:"approver,omitempty"`
+	ArtifactHash  *string   `json:"artifact_hash,omitempty"`
+	ArtifactID    *string   `json:"artifact_id,omitempty"`
+	ArtifactType  *string   `json:"artifact_type,omitempty"`
+	Decision      *Decision `json:"decision,omitempty"`
+	EvaluationID  *string   `json:"evaluation_id,omitempty"`
+	PolicyName    *string   `json:"policy_name,omitempty"`
+	FinalState    *State    `json:"final_state,omitempty"`
+	Error         *string   `json:"error,omitempty"`
+	FailedStep    *string   `json:"failed_step,omitempty"`
+}
+
+type WorkflowCompletedData struct {
+	Artifacts  []string `json:"artifacts"`
+	FinalState State    `json:"final_state"`
+}
+
+type WorkflowFailedData struct {
+	Error      string  `json:"error"`
+	FailedStep *string `json:"failed_step,omitempty"`
+}
+
+type WorkflowStartedData struct {
+	InitialState  State  `json:"initial_state"`
+	PlanTokenHash string `json:"plan_token_hash"`
+}
+
 type WorkflowState struct {
 	LastDecision  *string `json:"last_decision,omitempty"`
 	PlanTokenHash *string `json:"plan_token_hash,omitempty"`
 	State         State   `json:"state"`
 	StepID        *string `json:"step_id,omitempty"`
 	WorkflowID    *string `json:"workflow_id,omitempty"`
+}
+
+// Durable workflow state record for restart-safety.
+// Contains all information needed to deterministically resume workflow execution.
+type WorkflowStateRecord struct {
+	Approvals         []ApprovalRecord         `json:"approvals"`
+	Artifacts         []ArtifactRecord         `json:"artifacts"`
+	CreatedAt         string                   `json:"created_at"`
+	CurrentState      State                    `json:"current_state"`
+	Metadata          *RecordStringAny         `json:"metadata,omitempty"`
+	PlanTokenHash     string                   `json:"plan_token_hash"`
+	PolicyEvaluations []PolicyEvaluationRecord `json:"policy_evaluations"`
+	StepsCompleted    []string                 `json:"steps_completed"`
+	StepsPending      []string                 `json:"steps_pending"`
+	UpdatedAt         string                   `json:"updated_at"`
+	WorkflowID        string                   `json:"workflow_id"`
 }
 
 type Severity string
@@ -420,6 +569,20 @@ const (
 	ReadyForTakeoff    State = "READY_FOR_TAKEOFF"
 	TakeoffRunning     State = "TAKEOFF_RUNNING"
 	TokenCreated       State = "TOKEN_CREATED"
+)
+
+type WALEntryType string
+
+const (
+	ApprovalReceived  WALEntryType = "approval_received"
+	ApprovalRequested WALEntryType = "approval_requested"
+	ArtifactCreated   WALEntryType = "artifact_created"
+	PolicyEvaluated   WALEntryType = "policy_evaluated"
+	StepCompleted     WALEntryType = "step_completed"
+	StepStarted       WALEntryType = "step_started"
+	WorkflowCompleted WALEntryType = "workflow_completed"
+	WorkflowFailed    WALEntryType = "workflow_failed"
+	WorkflowStarted   WALEntryType = "workflow_started"
 )
 
 // Inline content for small artifacts.

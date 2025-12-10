@@ -1016,6 +1016,427 @@
         "state"
       ]
     },
+    "WorkflowStateRecord": {
+      "description": "Durable workflow state record for restart-safety.\nContains all information needed to deterministically resume workflow execution.",
+      "type": "object",
+      "properties": {
+        "workflow_id": {
+          "type": "string"
+        },
+        "current_state": {
+          "$ref": "#/definitions/State"
+        },
+        "plan_token_hash": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "updated_at": {
+          "type": "string"
+        },
+        "steps_completed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "steps_pending": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "approvals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ApprovalRecord"
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ArtifactRecord"
+          }
+        },
+        "policy_evaluations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PolicyEvaluationRecord"
+          }
+        },
+        "metadata": {
+          "$ref": "#/definitions/Record<string,any>"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "approvals",
+        "artifacts",
+        "created_at",
+        "current_state",
+        "plan_token_hash",
+        "policy_evaluations",
+        "steps_completed",
+        "steps_pending",
+        "updated_at",
+        "workflow_id"
+      ]
+    },
+    "ApprovalRecord": {
+      "description": "Durable approval record.\nTracks who approved what, when, bound to specific plan-token hash.",
+      "type": "object",
+      "properties": {
+        "approval_id": {
+          "type": "string"
+        },
+        "step_id": {
+          "type": "string"
+        },
+        "plan_token_hash": {
+          "type": "string"
+        },
+        "approved": {
+          "type": "boolean"
+        },
+        "approver": {
+          "type": "string"
+        },
+        "approved_at": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "evidence_hashes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "approval_id",
+        "approved",
+        "approved_at",
+        "approver",
+        "plan_token_hash",
+        "step_id"
+      ]
+    },
+    "ArtifactRecord": {
+      "description": "Durable artifact record.\nTracks artifacts with SHA256 hashes for integrity verification.",
+      "type": "object",
+      "properties": {
+        "artifact_id": {
+          "type": "string"
+        },
+        "step_id": {
+          "type": "string"
+        },
+        "artifact_hash": {
+          "type": "string"
+        },
+        "artifact_type": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/Record<string,any>"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "artifact_hash",
+        "artifact_id",
+        "artifact_type",
+        "created_at",
+        "step_id"
+      ]
+    },
+    "PolicyEvaluationRecord": {
+      "description": "Durable policy evaluation record.\nTracks policy decisions with evidence for audit trail.",
+      "type": "object",
+      "properties": {
+        "evaluation_id": {
+          "type": "string"
+        },
+        "step_id": {
+          "type": "string"
+        },
+        "policy_name": {
+          "type": "string"
+        },
+        "decision": {
+          "$ref": "#/definitions/Decision"
+        },
+        "evaluated_at": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "evidence_hashes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "decision",
+        "evaluated_at",
+        "evaluation_id",
+        "policy_name",
+        "step_id"
+      ]
+    },
+    "WALEntry": {
+      "description": "Write-Ahead Log entry for deterministic replay.\nEnables crash recovery and multi-orchestrator consistency.",
+      "type": "object",
+      "properties": {
+        "sequence": {
+          "type": "number"
+        },
+        "timestamp": {
+          "type": "string"
+        },
+        "workflow_id": {
+          "type": "string"
+        },
+        "entry_type": {
+          "$ref": "#/definitions/WALEntryType"
+        },
+        "data": {
+          "$ref": "#/definitions/WALEntryData"
+        },
+        "checksum": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "checksum",
+        "data",
+        "entry_type",
+        "sequence",
+        "timestamp",
+        "workflow_id"
+      ]
+    },
+    "WALEntryType": {
+      "enum": [
+        "approval_received",
+        "approval_requested",
+        "artifact_created",
+        "policy_evaluated",
+        "step_completed",
+        "step_started",
+        "workflow_completed",
+        "workflow_failed",
+        "workflow_started"
+      ],
+      "type": "string"
+    },
+    "WALEntryData": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/WorkflowStartedData"
+        },
+        {
+          "$ref": "#/definitions/StepStartedData"
+        },
+        {
+          "$ref": "#/definitions/StepCompletedData"
+        },
+        {
+          "$ref": "#/definitions/ApprovalRequestedData"
+        },
+        {
+          "$ref": "#/definitions/ApprovalReceivedData"
+        },
+        {
+          "$ref": "#/definitions/ArtifactCreatedData"
+        },
+        {
+          "$ref": "#/definitions/PolicyEvaluatedData"
+        },
+        {
+          "$ref": "#/definitions/WorkflowCompletedData"
+        },
+        {
+          "$ref": "#/definitions/WorkflowFailedData"
+        }
+      ]
+    },
+    "WorkflowStartedData": {
+      "type": "object",
+      "properties": {
+        "plan_token_hash": {
+          "type": "string"
+        },
+        "initial_state": {
+          "$ref": "#/definitions/State"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "initial_state",
+        "plan_token_hash"
+      ]
+    },
+    "StepStartedData": {
+      "type": "object",
+      "properties": {
+        "step_id": {
+          "type": "string"
+        },
+        "step_type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "step_id",
+        "step_type"
+      ]
+    },
+    "StepCompletedData": {
+      "type": "object",
+      "properties": {
+        "step_id": {
+          "type": "string"
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "step_id"
+      ]
+    },
+    "ApprovalRequestedData": {
+      "type": "object",
+      "properties": {
+        "approval_id": {
+          "type": "string"
+        },
+        "step_id": {
+          "type": "string"
+        },
+        "required_role": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "approval_id",
+        "required_role",
+        "step_id"
+      ]
+    },
+    "ApprovalReceivedData": {
+      "type": "object",
+      "properties": {
+        "approval_id": {
+          "type": "string"
+        },
+        "approved": {
+          "type": "boolean"
+        },
+        "approver": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "approval_id",
+        "approved",
+        "approver"
+      ]
+    },
+    "ArtifactCreatedData": {
+      "type": "object",
+      "properties": {
+        "artifact_id": {
+          "type": "string"
+        },
+        "artifact_hash": {
+          "type": "string"
+        },
+        "artifact_type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "artifact_hash",
+        "artifact_id",
+        "artifact_type"
+      ]
+    },
+    "PolicyEvaluatedData": {
+      "type": "object",
+      "properties": {
+        "evaluation_id": {
+          "type": "string"
+        },
+        "policy_name": {
+          "type": "string"
+        },
+        "decision": {
+          "$ref": "#/definitions/Decision"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "decision",
+        "evaluation_id",
+        "policy_name"
+      ]
+    },
+    "WorkflowCompletedData": {
+      "type": "object",
+      "properties": {
+        "final_state": {
+          "$ref": "#/definitions/State"
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "artifacts",
+        "final_state"
+      ]
+    },
+    "WorkflowFailedData": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "failed_step": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "error"
+      ]
+    },
     "Record<string,any>": {
       "type": "object",
       "additionalProperties": false
