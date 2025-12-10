@@ -41,15 +41,27 @@ export interface CabinCrewProtocol {
     [property: string]: any;
 }
 
+/**
+ * Request for human approval before proceeding with execution.
+ *
+ * Security: The plan_token_hash MUST be verified to match the current plan-token
+ * to prevent approval replay attacks against mutated plans.
+ */
 export interface ApprovalRequest {
-    approval_id:      string;
-    engine_output?:   RecordStringAny;
-    evidence?:        PreflightEvidence[];
-    plan_token_hash?: string;
-    reason:           string;
-    required_role:    string;
-    step_id:          string;
-    workflow_id:      string;
+    approval_id:    string;
+    engine_output?: RecordStringAny;
+    evidence?:      PreflightEvidence[];
+    /**
+     * SHA256 hash of the plan-token that this approval is bound to.
+     * REQUIRED to prevent approval replay attacks.
+     * The orchestrator MUST verify this matches the current plan-token before accepting
+     * approval.
+     */
+    plan_token_hash: string;
+    reason:          string;
+    required_role:   string;
+    step_id:         string;
+    workflow_id:     string;
 }
 
 /**

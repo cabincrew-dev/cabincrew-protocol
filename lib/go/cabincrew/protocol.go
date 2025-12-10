@@ -42,15 +42,23 @@ type CabinCrewProtocol struct {
 	WorkflowState                    *WorkflowState          `json:"WorkflowState,omitempty"`
 }
 
+// Request for human approval before proceeding with execution.
+//
+// Security: The plan_token_hash MUST be verified to match the current plan-token
+// to prevent approval replay attacks against mutated plans.
 type ApprovalRequest struct {
-	ApprovalID    string              `json:"approval_id"`
-	EngineOutput  *RecordStringAny    `json:"engine_output,omitempty"`
-	Evidence      []PreflightEvidence `json:"evidence,omitempty"`
-	PlanTokenHash *string             `json:"plan_token_hash,omitempty"`
-	Reason        string              `json:"reason"`
-	RequiredRole  string              `json:"required_role"`
-	StepID        string              `json:"step_id"`
-	WorkflowID    string              `json:"workflow_id"`
+	ApprovalID                                                                          string              `json:"approval_id"`
+	EngineOutput                                                                        *RecordStringAny    `json:"engine_output,omitempty"`
+	Evidence                                                                            []PreflightEvidence `json:"evidence,omitempty"`
+	// SHA256 hash of the plan-token that this approval is bound to.                                        
+	// REQUIRED to prevent approval replay attacks.                                                         
+	// The orchestrator MUST verify this matches the current plan-token before accepting                    
+	// approval.                                                                                            
+	PlanTokenHash                                                                       string              `json:"plan_token_hash"`
+	Reason                                                                              string              `json:"reason"`
+	RequiredRole                                                                        string              `json:"required_role"`
+	StepID                                                                              string              `json:"step_id"`
+	WorkflowID                                                                          string              `json:"workflow_id"`
 }
 
 // Arbitrary metadata. Optional.

@@ -19,14 +19,24 @@ class PreflightEvidence:
 
 @dataclass
 class ApprovalRequest:
+    """Request for human approval before proceeding with execution.
+    
+    Security: The plan_token_hash MUST be verified to match the current plan-token = None
+    to prevent approval replay attacks against mutated plans.
+    """
     approval_id: str = None
+    plan_token_hash: str = None
+    """SHA256 hash of the plan-token that this approval is bound to.
+    REQUIRED to prevent approval replay attacks.
+    The orchestrator MUST verify this matches the current plan-token before accepting
+    approval.
+    """
     reason: str = None
     required_role: str = None
     step_id: str = None
     workflow_id: str = None
     engine_output: Optional[RecordStringAny] = None
     evidence: Optional[List[PreflightEvidence]] = None
-    plan_token_hash: Optional[str] = None
 
 
 @dataclass

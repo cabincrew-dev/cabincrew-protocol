@@ -32,6 +32,12 @@ export interface PreflightOutput {
     requires?: PreflightRequires;
 }
 
+/**
+ * Request for human approval before proceeding with execution.
+ * 
+ * Security: The plan_token_hash MUST be verified to match the current plan-token
+ * to prevent approval replay attacks against mutated plans.
+ */
 export interface ApprovalRequest {
     approval_id: string;
     workflow_id: string;
@@ -40,7 +46,12 @@ export interface ApprovalRequest {
     required_role: string;
     engine_output?: Record<string, any>;
     evidence?: PreflightEvidence[];
-    plan_token_hash?: string;
+    /**
+     * SHA256 hash of the plan-token that this approval is bound to.
+     * REQUIRED to prevent approval replay attacks.
+     * The orchestrator MUST verify this matches the current plan-token before accepting approval.
+     */
+    plan_token_hash: string;
 }
 
 export interface ApprovalResponse {

@@ -906,6 +906,7 @@
       ]
     },
     "ApprovalRequest": {
+      "description": "Request for human approval before proceeding with execution.\n\nSecurity: The plan_token_hash MUST be verified to match the current plan-token\nto prevent approval replay attacks against mutated plans.",
       "type": "object",
       "properties": {
         "approval_id": {
@@ -933,12 +934,14 @@
           }
         },
         "plan_token_hash": {
+          "description": "SHA256 hash of the plan-token that this approval is bound to.\nREQUIRED to prevent approval replay attacks.\nThe orchestrator MUST verify this matches the current plan-token before accepting approval.",
           "type": "string"
         }
       },
       "additionalProperties": false,
       "required": [
         "approval_id",
+        "plan_token_hash",
         "reason",
         "required_role",
         "step_id",

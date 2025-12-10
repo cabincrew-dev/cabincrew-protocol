@@ -99,6 +99,11 @@ Defined in schemas/draft/engine.schema.json
 
 ### ApprovalRequest
 
+Request for human approval before proceeding with execution.
+
+Security: The plan_token_hash MUST be verified to match the current plan-token
+to prevent approval replay attacks against mutated plans.
+
 | Property | Type | Required | Description |
 |---|---|---|---|
 | `approval_id` | `string` | Yes |  |
@@ -108,7 +113,7 @@ Defined in schemas/draft/engine.schema.json
 | `required_role` | `string` | Yes |  |
 | `engine_output` | `[Record<string,any>]` | No |  |
 | `evidence` | `array` | No |  |
-| `plan_token_hash` | `string` | No |  |
+| `plan_token_hash` | `string` | Yes | SHA256 hash of the plan-token that this approval is bound to. REQUIRED to prevent approval replay attacks. The orchestrator MUST verify this matches the current plan-token before accepting approval. |
 
 ### ApprovalResponse
 
