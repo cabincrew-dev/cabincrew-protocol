@@ -410,11 +410,6 @@ class AuditEvent:
 
 
 @dataclass
-class RecordStringAnyClass:
-    pass
-
-
-@dataclass
 class EngineArtifact:
     hash: str = None
     name: str = None
@@ -794,7 +789,7 @@ class CabinCrewProtocol:
     preflight_output: Optional[PreflightOutput] = None
     preflight_requires: Optional[PreflightRequires] = None
     record_string_any: Optional[RecordStringAny] = None
-    cabin_crew_protocol_record_string_any: Optional[RecordStringAnyClass] = None
+    cabin_crew_protocol_record_string_any: Optional[Dict[str, Any]] = None
     state: Optional[State] = None
     step_completed_data: Optional[StepCompletedData] = None
     step_started_data: Optional[StepStartedData] = None

@@ -1,6 +1,13 @@
 import { PlanToken } from './plantoken';
 
-export type RecordStringAny = Record<string, any>;
+/**
+ * Generic record type for arbitrary key-value pairs.
+ * Used for config, context, metadata, evidence, etc.
+ * @additionalProperties true
+ */
+export interface RecordStringAny {
+    [key: string]: any;
+}
 
 export interface PreflightEvidence {
     name: string;

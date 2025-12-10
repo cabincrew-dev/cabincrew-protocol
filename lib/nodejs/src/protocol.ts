@@ -45,7 +45,7 @@ export interface CabinCrewProtocol {
     PreflightOutput?:        PreflightOutput;
     PreflightRequires?:      PreflightRequires;
     "Record<string,any>"?:   RecordStringAny;
-    RecordStringAny?:        RecordStringAnyClass;
+    RecordStringAny?:        { [key: string]: any };
     State?:                  State;
     StepCompletedData?:      StepCompletedData;
     StepStartedData?:        StepStartedData;
@@ -681,9 +681,6 @@ export interface PreflightOutput {
 export interface PreflightRequires {
     reason?: string;
     role?:   string;
-}
-
-export interface RecordStringAnyClass {
 }
 
 export type State = "APPROVED" | "ARTIFACTS_VALIDATED" | "AWAITING_APPROVAL" | "COMPLETED" | "EXECUTION_COMPLETE" | "FAILED" | "INIT" | "PLAN_GENERATED" | "PLAN_RUNNING" | "PREFLIGHT_COMPLETE" | "PRE_FLIGHT_RUNNING" | "READY_FOR_TAKEOFF" | "TAKEOFF_RUNNING" | "TOKEN_CREATED";

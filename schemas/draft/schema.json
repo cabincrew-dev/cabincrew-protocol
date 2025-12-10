@@ -137,8 +137,9 @@
       ]
     },
     "RecordStringAny": {
-      "type": "object",
-      "additionalProperties": false
+      "description": "Generic record type for arbitrary key-value pairs.\nUsed for config, context, metadata, evidence, etc.",
+      "additionalProperties": true,
+      "type": "object"
     },
     "PreflightEvidence": {
       "type": "object",

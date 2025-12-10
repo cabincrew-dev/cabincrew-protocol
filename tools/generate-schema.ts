@@ -42,6 +42,16 @@ function generate() {
         throw new Error("Failed to generate schema");
     }
 
+    // Post-process schema to fix RecordStringAny
+    // RecordStringAny should allow arbitrary properties, but typescript-json-schema
+    // generates it with additionalProperties: {} (empty object) due to index signature
+    if (schema.definitions?.RecordStringAny && typeof schema.definitions.RecordStringAny === 'object') {
+        const recordDef = schema.definitions.RecordStringAny as any;
+        recordDef.additionalProperties = true;
+        // Remove the empty properties object if it exists
+        delete recordDef.properties;
+    }
+
     // Write schema file
     fs.writeFileSync(SCHEMA_FILE, JSON.stringify(schema, null, 2));
     console.log(`Generated ${SCHEMA_FILE}`);

@@ -58,7 +58,7 @@ async function generate() {
 
     inputData.addInput(schemaInput);
 
-    const { lines: goCode } = await quicktype({
+    const { lines } = await quicktype({
         inputData,
         lang: "go",
         rendererOptions: {
@@ -67,12 +67,20 @@ async function generate() {
         }
     });
 
-    fs.writeFileSync(GO_OUT_FILE, goCode.join("\n"));
+    let goCode = lines.join("\n");
+
+    // Post-process: Replace empty RecordStringAny struct with map[string]interface{}
+    // Quicktype can't generate proper map types from additionalProperties: true
+    goCode = goCode.replace(
+        /type RecordStringAny struct\s*\{\s*\}/g,
+        'type RecordStringAny map[string]interface{}'
+    );
+
+    fs.writeFileSync(GO_OUT_FILE, goCode);
     console.log(`Generated ${GO_OUT_FILE}`);
 
     // Verify no collision types
-    const content = fs.readFileSync(GO_OUT_FILE, "utf8");
-    const collisionTypes = content.match(/(Purple|Fluffy|Tentacled|Sticky|Indigo|Hilarious)\w+/g);
+    const collisionTypes = goCode.match(/(Purple|Fluffy|Tentacled|Sticky|Indigo|Hilarious)\w+/g);
     if (collisionTypes) {
         console.warn(`⚠️  Warning: Found collision types: ${[...new Set(collisionTypes)].join(", ")}`);
     } else {

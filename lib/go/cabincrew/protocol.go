@@ -47,7 +47,7 @@ type CabinCrewProtocol struct {
 	PreflightOutput                  *PreflightOutput        `json:"PreflightOutput,omitempty"`
 	PreflightRequires                *PreflightRequires      `json:"PreflightRequires,omitempty"`
 	RecordStringAny                  *RecordStringAny        `json:"Record<string,any>,omitempty"`
-	CabinCrewProtocolRecordStringAny *RecordStringAnyClass   `json:"RecordStringAny,omitempty"`
+	CabinCrewProtocolRecordStringAny map[string]interface{}  `json:"RecordStringAny,omitempty"`
 	State                            *State                  `json:"State,omitempty"`
 	StepCompletedData                *StepCompletedData      `json:"StepCompletedData,omitempty"`
 	StepStartedData                  *StepStartedData        `json:"StepStartedData,omitempty"`
@@ -102,8 +102,7 @@ type ApprovalRequest struct {
 // Arbitrary metadata. Optional.
 //
 // Evidence supporting this decision (e.g., rule matches, model scores).
-type RecordStringAny struct {
-}
+type RecordStringAny map[string]interface{}
 
 type PreflightEvidence struct {
 	Hash string `json:"hash"`
@@ -342,9 +341,6 @@ type AuditWorkflow struct {
 	Mode       *string `json:"mode,omitempty"`
 	StepID     *string `json:"step_id,omitempty"`
 	WorkflowID *string `json:"workflow_id,omitempty"`
-}
-
-type RecordStringAnyClass struct {
 }
 
 type EngineArtifact struct {
